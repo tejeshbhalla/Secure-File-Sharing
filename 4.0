@@ -1,0 +1,6 @@
+Collecting django
+  Using cached Django-4.0.6-py3-none-any.whl (8.0 MB)
+Requirement already satisfied: sqlparse>=0.2.2 in c:\users\tejes\anaconda3\envs\mywebsite\lib\site-packages (from django) (0.4.1)
+Requirement already satisfied: asgiref<4,>=3.4.1 in c:\users\tejes\anaconda3\envs\mywebsite\lib\site-packages (from django) (3.4.1)
+Requirement already satisfied: tzdata in c:\users\tejes\anaconda3\envs\mywebsite\lib\site-packages (from django) (2022.1)
+Installing collected packages: django

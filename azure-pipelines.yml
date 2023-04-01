@@ -1,0 +1,25 @@
+steps:
+    - task: UsePythonVersion@0
+       inputs:
+         versionSpec: '$(pythonVersion)'
+         displayName: 'Use Python $(pythonVersion)'
+    - script: |
+         python -m venv antenv
+         source antenv/bin/activate
+         python -m pip install --upgrade pip
+         pip install setup
+         pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+       workingDirectory: $(projectRoot)
+       displayName: "Install requirements"
+
+    - task: ArchiveFiles@2
+   inputs:
+     rootFolderOrFile: '$(Build.SourcesDirectory)'
+     includeRootFolder: false
+     archiveType: 'zip'
+     archiveFile: '$(Build.ArtifactStagingDirectory)/Application$(Build.BuildId).zip'
+     replaceExistingArchive: true
+     verbose: # (no value); this input is optional
+- publish: $(Build.ArtifactStagingDirectory)/Application$(Build.BuildId).zip
+   displayName: 'Upload package'
+   artifact: drop

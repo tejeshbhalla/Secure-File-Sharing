@@ -1,0 +1,56 @@
+from django.urls import re_path as url
+from django.urls import include,path
+from .views import Query_Subuser_Email,Add_Favourite, Add_Files_Folder_Group, CheckFileInfo, CheckFileInfo_Link, CheckFileInfoGroup,Clear_Notifications, Admin_Delete_User, Admin_Edit_User_Details, AdminCreateUsers, Create_Tenant, Detail_User_Groups, Forgot_Subdomain, Get_All_Logs, Get_User_Logs, GetFile, GetFileGroup, GetFileLink, Group_Folder_Detail, Notification_System, Notification_System_Old, RegisterView,LoginView, Resend_otp, TokenVerifyView, Update_User_Permissions, Update_Users_In_Group,UserView,ForgotPassword,ResetPassword,LogoutView,ResendActivation,Otp_verify_view,People_Group_Create,Change_Password, View_Users,AdminCreateUser,Admin_Delete_All_Users,User_to_Group,Leave_Group,VerifyTenant,Forgot_Subdomain
+app_name='files_app'
+urlpatterns = [
+    path("register",RegisterView.as_view()),
+    path('tenant/create_tenant',Create_Tenant.as_view()),
+    path('tenant/verify_tenant',VerifyTenant.as_view()),
+    path("login",LoginView.as_view()),
+    path("user",UserView.as_view()),
+    path("reset",ForgotPassword.as_view()),
+    path("reset_password/<str:token>",ResetPassword.as_view()),
+    path("logout",LogoutView.as_view()),
+    path("resend_email/<str:email>",ResendActivation.as_view()),
+    path("token/verify/<str:token>",TokenVerifyView.as_view(),name="token verify"),
+    path("verify/otp",Otp_verify_view.as_view(),name='verify_otp'),
+    path("resend/otp",Resend_otp.as_view(),name='resend_otp'),
+    path("create_group",People_Group_Create.as_view(),name="create_group"),
+    path("group_details",Detail_User_Groups.as_view(),name="group_details"),
+    path("group_delete",People_Group_Create.as_view(),name='delete_user_groups'),
+    path("group/add_users",User_to_Group.as_view(),name='add users to groups'),
+    path("group/leave_group/<str:urlhash>",Leave_Group.as_view(),name='leave group'),
+    path("change_password",Change_Password.as_view(),name="change_password"),
+    path("change_permissions",Update_User_Permissions.as_view(),name="change_permissions"),
+    path("admin/view_users",View_Users.as_view(),name='view_users'),
+    path("admin/edit/user/<str:username>",Admin_Edit_User_Details.as_view(),name='admin_edit_user_details'),
+    path("admin/create/bulk/users",AdminCreateUsers.as_view(),name='admin create users'),
+    path("admin/user/get_all_logs",Get_All_Logs.as_view(),name='all user logs'),
+    path("admin/user/<str:username>",Get_User_Logs.as_view(),name='user logs specific'),
+    path("admin/create/user",AdminCreateUser.as_view(),name='create user'),
+    path("admin/delete/<str:username>",Admin_Delete_User.as_view(),name='delete user'),
+    path("admin/delete/all_users",Admin_Delete_All_Users.as_view(),name='delete all users'),
+    path("user/notifications",Notification_System.as_view(),name='notification'),
+    path("user/old_notifications",Notification_System_Old.as_view(),name='old notifications'),
+    path('user/notifications/delete_all',Clear_Notifications.as_view(),name='delete all notifications'),
+    path("group/delete/<str:urlhash>",Add_Files_Folder_Group.as_view(),name='delete content from group'),
+    path("group/add/<str:urlhash>",Add_Files_Folder_Group.as_view(),name='add content to group'),
+    path("group/folder_detail/<str:group_hash>/<str:folder_hash>",Group_Folder_Detail.as_view(),name='group folder detail'),
+    path("group/add/file_folder",Add_Files_Folder_Group.as_view(),name='add file folder to group'),
+    path('group/add/user/<str:urlhash>',User_to_Group.as_view(),name='add user'),
+    path('group/edit/user/<str:urlhash>',Update_Users_In_Group.as_view(),name='edit user permissions'),
+    path('group/edit/details/<str:link_hash>',People_Group_Create.as_view(),name='edit details'),
+    path('group/update_fav/<str:link_hash>',Add_Favourite.as_view(),name='add fav'),
+    path('forgot/subdomain',Forgot_Subdomain.as_view(),name='forgot subdomain'),
+    path('wopi/files/<str:file_id>',CheckFileInfo.as_view(),name='check file info'),
+    path('group/wopi/files/<str:group_hash_fileid>',CheckFileInfoGroup.as_view(),name='check file info group'),
+    path('wopi/files/<str:file_id>/contents',GetFile.as_view(),name='get file content normal'),
+    path('group/wopi/files/<str:file_id>/contents',GetFileGroup.as_view(),name='get file content group'),
+    path('group/wopi/files/<str:file_id>/contents',GetFileGroup.as_view(),name='get file content group'),
+    path('link/wopi/files/<str:file_id>/contents',GetFileLink.as_view(),name='get file content link'),
+    path('link/wopi/files/<str:file_id>',CheckFileInfo_Link.as_view(),name='check file info link'),
+    path("user/query_email/<str:query>",Query_Subuser_Email.as_view(),name='get_user_email')
+
+]
+
+
