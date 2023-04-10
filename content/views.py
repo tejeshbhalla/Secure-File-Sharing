@@ -620,7 +620,7 @@ class Visit_File_Link_Client(APIView):
                                                  'can_download_content':obj.is_downloadable})
                     for files in obj.file_hash.all():
                         data['files'].append({'name':files.file_name,'urlhash':files.urlhash,"url":f'{BACKEND_URL}content/media/{create_media_jwt(files,get_client_ip(request))}','can_download_content':obj.is_downloadable,'is_proctored':obj.is_proctored,
-                                              'download_link':download_url_generate_sas(i,get_client_ip(request)) if obj.is_downloadable else None})
+                                              'download_link':download_url_generate_sas(files,get_client_ip(request)) if obj.is_downloadable else None})
                     if obj.access_limit:
                         obj.access_limit-=1
                         obj.save()
