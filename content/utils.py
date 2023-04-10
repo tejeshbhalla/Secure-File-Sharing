@@ -370,17 +370,21 @@ def convert_file_to_mp4(obj_link,obj_file):
 def set_poster(videoid):
     url = f"https://dev.vdocipher.com/api/videos/{videoid}/files"
 
-    payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"file\"; filename=\"thumbnail.png\"\r\nContent-Type: image/png\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+    with open('thumbnail.png', 'rb') as f:
+        file_contents = f.read()
+
+    payload = {
+        'file': ('thumbnail.png', file_contents, 'image/png')
+    }
+
     headers = {
-        'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
         'Authorization': f"Apisecret {API_SECRET_KEY}",
-        'Content-Type': "multipart/form-data",
         'Accept': "application/json"
-        }
+    }
 
-    response = requests.request("POST", url, data=payload, headers=headers)
+    response = requests.post(url, files=payload, headers=headers)
 
-    return
+    return response
 
         
 
