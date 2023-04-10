@@ -295,8 +295,8 @@ class Start_Sync(APIView):
                     folder_to_id=j.folder_to_id.urlhash
                     folder_id=j.folder_from_id
                     token_detail=json.loads(obj.user_token)
-                    print(token_detail)
-                    if type=='onedrive':
+                    type_=obj.type
+                    if type_=='onedrive':
                         token_changed,changed=check_and_refresh_token_onedrive('str',token_detail['access_token'],token_detail['refresh_token'])
                         if not changed:
                             access_token=token_detail['access_token']
@@ -311,8 +311,8 @@ class Start_Sync(APIView):
                             token_detail=token
                         if type(token_detail)==str:
                             token_detail=json.loads(token_detail)
-                    type=obj.type
-                    command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type]
+                    
+                    command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type_]
                     process = subprocess.Popen(command, stdout=subprocess.PIPE)
                     cache.set(name, process.pid)
 
