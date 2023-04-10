@@ -56,7 +56,7 @@ class RegisterView(APIView):
 
             return Response(data=serializers.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response(data="error server",status=status.HTTP_400_BAD_REQUEST)
 
 class Create_Tenant(APIView):
@@ -120,7 +120,7 @@ class LoginView(APIView):
         except NewUser.DoesNotExist:
             return Response(data={'message':"User not Found"},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":f'check credentials {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -166,7 +166,7 @@ class ForgotPassword(APIView):
                 send_email(email,token,request,'reset',message=tenant.subdomain)
                 return Response(data={'message':'reset email sent'}, status=status.HTTP_200_OK)
         except Exception as e:
-                print(e)
+                
                 return Response(data={'message':f"{e} failed"},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -246,7 +246,7 @@ class LogoutView(APIView):
             return Response(data={'message':'success'},status=status.HTTP_200_OK)
                 
         except Exception as e:
-            print(e)
+            
             return Response(data={f'{e}'},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -290,7 +290,7 @@ class Otp_verify_view(APIView):
             else:
                 return Response(data={"message":"otp incorrect"},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -325,13 +325,15 @@ class People_Group_Create(APIView):
             request.data['owner']=owner
             sz=CreateGroupSerializer(data=request.data)
             if sz.is_valid():
-                obj=sz.create(sz.validated_data)
                 if 'user_list' not in request.data:
                     return Response("user_list not in data",status=status.HTTP_400_BAD_REQUEST)
                 for i in request.data['user_list']:
                     user=NewUser.objects.filter(tenant=tenant).filter(email=i).first()
+                    if not user:
+                        return Response(data={'message':f'User not found'},status=status.HTTP_400_BAD_REQUEST)
                     if user==owner:
-                        return Response(data={"message":f"Group created but can't add yourself"},status=status.HTTP_400_BAD_REQUEST)
+                        return Response(data={"message":f"Can't add yourself"},status=status.HTTP_400_BAD_REQUEST)
+                    obj=sz.create(sz.validated_data)
                     per=Group_Permissions(group=obj,user=user,is_admin=False,has_read=True,can_add_delete_content=True)
                     per.save()
 
@@ -341,7 +343,7 @@ class People_Group_Create(APIView):
             obj.delete()
             return Response(data={'message':{'user email does not exist'}},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -439,15 +441,23 @@ class Add_Files_Folder_Group(APIView):
                 if permissions.can_add_delete_content or permissions.is_admin:
                     files=Files_Model.objects.filter(urlhash__in=request.data['file_hash'],owner=user)
                     folders=Folder.objects.filter(urlhash__in=request.data['folder_hash'],owner=user)
+                    sub_files=[]
+                    sub_folders=[]
+                    for i in folders:
+                        sub_sub_folders,sub_sub_files=i.get_subfolders_and_files()
+                        sub_folders.extend(sub_sub_folders)
+                        sub_sub_files.extend(sub_sub_files)
                     grp.files.add(*files)
                     grp.folders.add(*folders)
+                    grp.files.add(*sub_files)
+                    grp.folders.add(*sub_folders)
                     grp.save()
                 else:
                     return Response(data={"message":"Don't have privelages"},status=status.HTTP_400_BAD_REQUEST)
             return Response(data={"message":"successfully added content"},status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(e)
+            
             return Response(data={'message':f"{e}"},status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,urlhash):
@@ -555,9 +565,10 @@ class Group_Folder_Detail(APIView):
                 folders=grp.folders.all()
                 data={'files':[],'children':[],'permissions':{'can_add_delete':per.can_add_delete_content,'has_read':per.has_read}}
                 for j in folders:
-                    data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete':per.can_add_delete_content,'has_read':per.has_read})
+                    data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,
+                'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if per.can_download_content else None,'can_download':per.can_download_content})
                 for i in files:
-                    data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i)}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download':per.can_download_content,
+                    data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download':per.can_download_content,
                                           'download_link':download_url_generate_sas(i,get_client_ip(request)) if per.can_download_content else None})
                 return Response(data,status=status.HTTP_200_OK)
             data={'files':[],'children':[],'permissions':{'can_add_delete':per.can_add_delete_content,'has_read':per.has_read}}
@@ -565,13 +576,14 @@ class Group_Folder_Detail(APIView):
             children=folder.children.all()
             files=folder.files.all()
             for j in children:
-                data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete':per.can_add_delete_content,'has_read':per.has_read})
+                data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,
+                                         'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if per.can_download_content else None,'can_download':per.can_download_content})
             for i in files:
-                data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i)}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download':per.can_download_content,
+                data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download':per.can_download_content,
                                       'download_link':download_url_generate_sas(i,get_client_ip(request)) if per.can_download_content else None})
             return Response(data,status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+            
             return Response({"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -590,7 +602,7 @@ class Update_User_Permissions(APIView):
             user.save()
             return Response({"message":"updated successfully"},status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+            
             return Response({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -662,7 +674,7 @@ class Admin_Delete_User(APIView):
                     return Response({"message":f"{username} does not exixt"},status=status.HTTP_400_BAD_REQUEST)
             return Response({"message":"You don't have privelages to access this page"},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -691,7 +703,7 @@ class AdminCreateUsers(APIView):
             else:
                 return Response({"message":"You don't have privelages to perform this action"},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response({"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -763,7 +775,7 @@ class AdminCreateUser(APIView):
             send_bulk_email.delay([user.email],[password])
             return Response(data={"message":"user account created"},status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -814,7 +826,7 @@ class Notification_System(APIView):
             
             return Response([])
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 class Verify_Token(APIView):
@@ -857,7 +869,7 @@ class Notification_System_Old(APIView):
                 
     
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -973,7 +985,7 @@ class CheckFileInfo_Link(APIView):
                 return Response(data=f'error not authorized ',status=status.HTTP_400_BAD_REQUEST)
             
         except Exception as e:
-            print(e)
+            
             return Response(data=f'{e}',status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -1081,7 +1093,7 @@ class CheckFileInfoGroup(APIView):
             return Response(data=res,status=status.HTTP_200_OK)
 
         except Exception as e:
-            print(e)
+            
             return Response(data=f'{e}',status=status.HTTP_400_BAD_REQUEST)
 
 

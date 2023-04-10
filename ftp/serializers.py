@@ -21,7 +21,7 @@ class ServerSerializer(serializers.ModelSerializer):
     syncs=serializers.SerializerMethodField()
     class Meta:
         model=Server_Connection
-        fields=['id','server_name','syncs']
+        fields=['id','server_name','syncs','type']
         read_only_fields=['id']
     def get_syncs(self,obj):
         all_conn=obj.connection_syncs.all()
@@ -29,12 +29,13 @@ class ServerSerializer(serializers.ModelSerializer):
         return sz.data
 
 
-    def save(self,validated_data,user):
+    def save(self,validated_data,user,type):
         server_name=validated_data['server_name']
-        obj=Server_Connection(server_name=server_name,user=user)
+        type=type
+        obj=Server_Connection(server_name=server_name,user=user,type=type)
         obj.save()
         return obj 
-
+    
 
 class SyncDirectionSerializer2(serializers.ModelSerializer):
 
@@ -45,6 +46,8 @@ class SyncDirectionSerializer2(serializers.ModelSerializer):
     def to_internal_value(self,data):
         if 'connection' in data:
             data['connection']=Server_Connection.objects.get(server_name=data['connection']).id
+        if 'type' in data and data['type']=='gdrive':
+            data['type']='gdrive'
         if 'folder_to_id' in data:
             if 'folder_to_id'=='root':
                 data['folder_to_id']=None

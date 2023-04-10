@@ -9,7 +9,8 @@ from ftp.utils import check_and_refresh_token_onedrive
 import json
 import subprocess
 from django.utils import timezone
-
+import os
+from Varency.settings import LOCAL_STORAGE_PATH
 def clean_db():
     try:
         tokens=BlacklistedToken.objects.all()
@@ -128,6 +129,22 @@ def trash_cleaner():
        pass
 
 
+def content_cleaner():
+    try:
+        dir_path = LOCAL_STORAGE_PATH
+
+        # Get a list of all files in the directory
+        files = os.listdir(dir_path)
+
+        # Loop over the files and delete each one
+        for file in files:
+            file_path = os.path.join(dir_path, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+    except Exception as e:
+        pass
+
+
 
     
 def start():
@@ -139,4 +156,5 @@ def start():
     schedulers.add_job(clean_db_4,'interval',hours=24,id='cleaner_004',replace_existing=True)
     schedulers.add_job(clean_db_5,'interval',hours=24,id='cleaner_004 link delete',replace_existing=True)
     schedulers.add_job(trash_cleaner,'interval',hours=2,id='delete run',replace_existing=True)
+    schedulers.add_job(content_cleaner,'interval',hours=20,id='delete run',replace_existing=True)
     schedulers.start()

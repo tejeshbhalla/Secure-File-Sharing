@@ -12,7 +12,7 @@ from rest_framework_swagger.views import get_swagger_view
 schema_view = get_swagger_view(title='Pastebin API')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('api/cghjklop/', admin.site.urls),
     path("api/auth/",include('files.urls',namespace='files_app')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

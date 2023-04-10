@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-+)0aq35x-7qx!-7d%0cb*z227f+%yd3df4-8l*$i4h02t8(9^2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["api.varency.com",'localhost']
+ALLOWED_HOSTS = ["api.varency.com",'localhost','tewg7.localtonet.com']
 
 USE_X_FORWARDED_HOST = True
 
@@ -112,6 +112,8 @@ DATABASES = {
 
 
 
+
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -165,10 +167,10 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-#CORS_ALLOWED_ORIGINS = [
- #   'http://*.varency.com',
-  #  'https://*.varency.com',
-#]
+
+
+#CORS_ALLOWED_ORIGINS = ['*']
+
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https://\w+\.varency\.com$",
@@ -176,6 +178,8 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
      r"^https://mail.google\.com$",
      r"^https://outlook.office\.com$",
       r"^https://outlook.office365\.com$",
+      r"^https://ba26-223-190-82-174.ngrok\.io$",
+      r"^http://tejesh\.localhost:3000$",
     
     
 
@@ -193,6 +197,8 @@ EMAIL_HOST_PASSWORD='LLdsEPl4'
 
 EXPIRY_SAS_TIME=15
 
+
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 
 #azure settings 
@@ -216,7 +222,7 @@ POST_URL='https://api.Varency.com/api/api/content/upload/file/'
 SECRET_KEY_FUNC='AZURE_SYNC_Varency_8130173515'
 #celery
 CELERY_ENABLED=True
-CELERY_BROKER_URL="amqps://movdsyoq:DcSnI6V3KBOKlOWidTgbt0yJrwW1m0gu@puffin.rmq2.cloudamqp.com/movdsyoq "
+CELERY_BROKER_URL="amqps://wuouwjuy:aonSVk3-GtIOqSVvLL2pVISXj93TegWX@puffin.rmq2.cloudamqp.com/wuouwjuy"
 CELERY_ACCEPT_CONTENT=['json']
 CELERY_TASK_SERIALIZER='json'
 
@@ -226,10 +232,11 @@ client_id = "986322288750-9cbcmheaaj78eqsbprt7qd7tim5m3c00.apps.googleuserconten
 client_secret = "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"
 
 #google drive 
-CLIENT_ID = '830070826237-goi1mkbb0vgg6836686th4qehrln2hp2.apps.googleusercontent.com'
-CLIENT_SECRET = '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'
+CLIENT_ID = '439305909942-2u20aq9v6jsn2okfpjd3tu5rhmdt991u.apps.googleusercontent.com'
+CLIENT_SECRET_GOOGLE_DRIVE = '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'
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
-REDIRECT_URI = 'https://Varency.netlify.app/integrations/server/googledrive'
+REDIRECT_URI = 'https://api.varency.com/api/sync/google_drive/get_token'
+TOKEN_URL_GOOGLE_DRIVE='https://accounts.google.com/o/oauth2/token'
 
 #onedrive
 CLIENT_ID_ONEDRIVE="c440bdf8-ff79-483e-be61-e653fbdb511b"
@@ -256,3 +263,11 @@ AWS_HEADERS = {
     'x-amz-server-side-encryption': 'aws:kms',
     'x-amz-server-side-encryption-aws-kms-key-id': '341e4021-6344-42d7-adbf-54f05b71c1ab'
 }
+
+
+#drm info
+API_SECRET_KEY = "9WZ5eJyoIW0oHVvTIs8h0VPrm8eVsuU5lck77l47dHnV3AnaPwyK8EEDc41t8VoC"
+UPLOAD_URL_VDOCIPHER='https://dev.vdocipher.com/api/videos'
+VIDEO_STATUS_URL_VDOCIPHER='https://dev.vdocipher.com/api/videos/'
+CONVERTER_URL='http://127.0.0.1:5000/convert'
+LOCAL_STORAGE_PATH='content/videos'

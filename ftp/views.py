@@ -13,7 +13,7 @@ from files.jwt_utils import JWTauthentication
 from content.models import Folder
 from .serializers import ServerSerializer,SyncDirectionSerializer,SyncDirectionSerializer2
 from files.models import NewUser
-from .utils import check_and_refresh_token_onedrive,create_config,get_authorize_url, refreshToken, verify_token,get_authorize_url_onedrive,get_access_token_from_code
+from .utils import check_and_refresh_googledrive,get_access_token_from_code_googledrive,check_and_refresh_token_onedrive,get_authorize_url,get_authorize_url_onedrive,get_access_token_from_code
 from oauth2client.client import  OAuth2WebServerFlow
 import requests
 import json
@@ -24,6 +24,9 @@ import subprocess
 from django.core.cache import cache
 import os 
 import signal
+from django.core.cache import cache
+
+
 
 
 
@@ -33,11 +36,12 @@ class Create_Remote_Server(APIView):
     throttle_classes = [UserRateThrottle]
     def post(self,request, *args, **kwargs):
         try:
-            sz=ServerSerializer(data=request.data)
+            data=request.data
+            sz=ServerSerializer(data=data)
             user=get_user_from_tenant(request)
             if sz.is_valid():
-                obj=sz.save(sz.validated_data,user)
-                return Response(data={"message":'server created','url':get_authorize_url()},status=status.HTTP_200_OK)
+                obj=sz.save(sz.validated_data,user,'googledrive')
+                return Response(data={"message":'server created','url':get_authorize_url(request,obj.server_name,user.username)},status=status.HTTP_200_OK)
             else:
                 return Response(data={'message':sz.errors},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -52,7 +56,7 @@ class Create_Remote_Server_OneDrive(APIView):
             sz=ServerSerializer(data=request.data)
             user=get_user_from_tenant(request)
             if sz.is_valid():
-                obj=sz.save(sz.validated_data,user)
+                obj=sz.save(sz.validated_data,user,'onedrive')
                 return Response(data={"message":'server created','url':get_authorize_url_onedrive(request,obj.server_name,user.username)},status=status.HTTP_200_OK)
             else:
                 return Response(data={'message':sz.errors},status=status.HTTP_400_BAD_REQUEST)
@@ -98,49 +102,28 @@ class Create_Sync_Direction(APIView):
             return Response(data={'message':"\n".join([f"{key}: {value}" for key, value in sz.errors.items()])},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
-
-
-
+        
 
 
 
 class Post_Code(APIView):
-    authentication_classes = [JWTauthentication]
-    permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
 
-    def post(self,request,server_name):
+    def get(self,request):
         try:
-            if 'code' not in request.data:
-                return Response({"message":"code not in data"},status=status.HTTP_400_BAD_REQUEST)
-            user=get_user_from_tenant(request)
+            arr=request.GET['state'].split('_')
+            server_name=arr[0]
+            username=arr[1]
+            user=NewUser.objects.get(username=username)
+            code=request.GET['code']
+            token=get_access_token_from_code_googledrive(request,code)
             obj=Server_Connection.objects.filter(server_name=server_name).first()
-            all_servers=Server_Connection.objects.filter(user=user).order_by('id').all()
-            for i in all_servers:
-                if i.user_token:
-                    obj.user_token=i.user_token
-                    obj.save()
-                    create_config(obj.user_token,obj.server_name)
-                    return Response(obj.user_token,status=status.HTTP_200_OK)
-
-            code=unquote(request.data['code'])
-            grant_type="authorization_code"
-            client_id=CLIENT_ID
-            client_secret=CLIENT_SECRET
-            redirect_uri=REDIRECT_URI
-            payload={'grant_type':grant_type,'client_id':client_id,'client_secret':client_secret,'redirect_uri':redirect_uri,
-            'Content-Type':'application/json','code':code,'access_type':'offline'}
-            r=requests.post('https://accounts.google.com/o/oauth2/token',data=json.dumps(payload))
-            obj.user_token=r.json()
+            obj.user_token=token
             obj.save()
+            return Response(status=302, headers={'location': f'http://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/googledrive'})
 
-            if r.status_code==200:
-                create_config(obj.user_token,obj.server_name)
-                return Response(r.json(),status=status.HTTP_200_OK)
-            else:
-                return Response({"message":'failed'},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -166,7 +149,7 @@ class Get_Code_Access_From_Server(APIView):
                 token_detail=json.loads(token)
             return Response(data={'token':token_detail['access_token']},status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -214,7 +197,7 @@ class Post_Code_OneDrive(APIView):
             username=arr[1]
             user=NewUser.objects.get(username=username)
             code=request.GET['code']
-            token=get_access_token_from_code(request,code)
+            token=get_access_token_from_code_googledrive(request,code)
             obj=Server_Connection.objects.filter(server_name=server_name).first()
             obj.user_token=token
             obj.save()
@@ -252,18 +235,20 @@ class List_One_Drive(APIView):
                 "Content-Type": "application/json"
             }
             response = requests.get(url, headers=headers)
+            count=0
             if response.status_code == 200:
                 data = response.json()
                 children = []
                 for item in data["value"]:
                     
                         if len(item['name'].split('.')) > 1:
+                            count+=1
                             continue
                         child={}
                         child['urlhash']=item['id']
                         child['name']=item['name']
                         children.append(child)
-                return children
+                return children,count
             else:
                 raise Exception(f"Error: {response.text}")
 
@@ -280,10 +265,10 @@ class List_One_Drive(APIView):
                 server.save()
             if type(token_detail)==str:
                 token_detail=json.loads(token_detail)
-            children=self.get_folder_children(id,token_detail['access_token'])
+            children,count=self.get_folder_children(id,token_detail['access_token'])
             
 
-            return Response(data={'children':children,'parent':id,'name':self.get_folder_name(id,token_detail['access_token'])},status=status.HTTP_200_OK)
+            return Response(data={'children':children,'parent':id,'name':self.get_folder_name(id,token_detail['access_token']),'file_count':count},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={'message':{str(e)}},status=status.HTTP_400_BAD_REQUEST)
         
@@ -310,15 +295,24 @@ class Start_Sync(APIView):
                     folder_to_id=j.folder_to_id.urlhash
                     folder_id=j.folder_from_id
                     token_detail=json.loads(obj.user_token)
-                    token_changed,changed=check_and_refresh_token_onedrive('str',token_detail['access_token'],token_detail['refresh_token'])
-                    if not changed:
-                        access_token=token_detail['access_token']
-                    if changed:
-                        token_changed_=json.loads(token_changed)
-                        access_token=token_changed_['access_token']
-                        obj.user_token=token_changed
-                        obj.save()
-                    command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER]
+                    print(token_detail)
+                    if type=='onedrive':
+                        token_changed,changed=check_and_refresh_token_onedrive('str',token_detail['access_token'],token_detail['refresh_token'])
+                        if not changed:
+                            access_token=token_detail['access_token']
+                        if changed:
+                            token_changed_=json.loads(token_changed)
+                            access_token=token_changed_['access_token']
+                            obj.user_token=token_changed
+                            obj.save()
+                    else:
+                        token,changed=check_and_refresh_googledrive(request,token_detail['access_token'],token_detail['refreshToken'])
+                        if changed:
+                            token_detail=token
+                        if type(token_detail)==str:
+                            token_detail=json.loads(token_detail)
+                    type=obj.type
+                    command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type]
                     process = subprocess.Popen(command, stdout=subprocess.PIPE)
                     cache.set(name, process.pid)
 
@@ -326,3 +320,76 @@ class Start_Sync(APIView):
             return Response(data={'message':'Sync started'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={'message':{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+class List_Google_Drive_Folders(APIView):
+    authentication_classes = [JWTauthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_folder_name(self, folder_id, access_token):
+        if folder_id=='my-drive':
+            url='https://www.googleapis.com/drive/v3/files'
+        else:
+            url = f"https://www.googleapis.com/drive/v3/files?q='{folder_id}' in parents"
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-Type": "application/json"
+        }
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data = response.json()
+            return data["name"]
+        else:
+            raise Exception(f"Error: {response.text}")
+
+    def get_folder_children(self, folder_id, access_token):
+        if folder_id=='my-drive':
+            url='https://www.googleapis.com/drive/v3/files'
+        else:
+            url = f"https://www.googleapis.com/drive/v3/files?q='{folder_id}' in parents"
+        headers = {
+            "Authorization": "Bearer " + access_token,
+            "Content-Type": "application/json"
+        }
+        params = {
+                 "fields": "name",
+            }
+
+        response = requests.get(url, headers=headers,params=params)
+        if response.status_code == 200:
+            data = response.json()
+            children = []
+            count=0
+            for item in data["files"]:
+                if item["mimeType"] == "application/vnd.google-apps.folder":
+                    child = {}
+                    child['urlhash'] = item['id']
+                    child['name'] = item['name']
+                    children.append(child)
+                else:
+                    count+=1
+            return children,count
+        else:
+            raise Exception(f"Error: {response.text}")
+
+    def get(self, request, server_name,id):
+        try:
+            server=Server_Connection.objects.get(server_name=server_name)
+            if type(server.user_token)==str:
+                token_detail=json.loads(server.user_token)
+            else:
+                token_detail=server.user_token
+            access_token=token_detail['access_token']
+            refreshToken=token_detail['refresh_token']
+            token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
+            if changed:
+                token_detail['access_token']=token
+                server.user_token=token_detail
+                server.save()
+            print(token_detail)
+            children,count = self.get_folder_children(id, token_detail['access_token'])
+            return Response(data={'children': children, 'parent': id,'file_count':count}, status=200)
+        except Exception as e:
+            return Response(data={'message': str(e)}, status=400)

@@ -15,11 +15,15 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions
 from Varency.settings import SECRET_KEY
-
 from datetime import datetime, timedelta
-
-from Varency.settings import FRONT_END_URL,EXPIRY_SAS_TIME,BACKEND_URL,EMAIL_HOST_USER,AZURE_CONNECTION_STRING,AZURE_CONTAINER
+from Varency.settings import CONVERTER_URL,LOCAL_STORAGE_PATH,FRONT_END_URL,EXPIRY_SAS_TIME,BACKEND_URL,EMAIL_HOST_USER,AZURE_CONNECTION_STRING,AZURE_CONTAINER,API_SECRET_KEY,UPLOAD_URL_VDOCIPHER
 import base64
+import json
+import requests
+from requests_toolbelt import MultipartEncoder
+from django.core.cache import cache
+
+
 
 
 
@@ -271,7 +275,179 @@ class RangeFileWrapper(object):
         
 
 
-def create_media_jwt(obj):
+def create_media_jwt(obj,ip):
     delta=timedelta(minutes=EXPIRY_SAS_TIME)
-    token=jwt.encode({'hash':obj.urlhash,'exp':datetime.utcnow()+delta},SECRET_KEY,algorithm='HS256')
+    token=jwt.encode({'hash':obj.urlhash,'exp':datetime.utcnow()+delta,'ip':ip},SECRET_KEY,algorithm='HS256')
     return token
+
+
+
+
+
+def get_upload_info(obj):
+    filename=obj.file_name.split('.')[-1]+'.avi'
+    querystring = {"title":filename}
+
+    url = UPLOAD_URL_VDOCIPHER
+    headers = {
+  'Authorization': "Apisecret " + API_SECRET_KEY
+        }
+    response = requests.request("PUT", url, headers=headers, params=querystring)
+    if response.status_code==200:
+        obj.uploadinfo=response.json()
+        obj.save()
+        return True
+    return 
+
+
+
+
+def validate_link_drm(obj):
+    all_files=obj.file_hash.all()
+    files_content = [obj.uploadinfo for obj in all_files if obj.uploadinfo]
+    return len(files_content)
+
+def delete_all_drm(obj):
+    all_files=obj.file_hash.all()
+    files_content = [obj for obj in all_files if obj.uploadinfo]
+    video_ids=[obj.uploadinfo['videoId'] for obj in files_content]
+    all_ids=','.join(video_ids)
+    headers = {
+    'Authorization': f"Apisecret {API_SECRET_KEY}",
+    'Content-Type': "application/json",
+    'Accept': "application/json"
+    }
+    querystring = {"videos":all_ids}
+    response = requests.request("DELETE", UPLOAD_URL_VDOCIPHER, headers=headers, params=querystring)
+    if response.status_code==200:
+        all_files.update(uploadinfo=None)
+        return True
+    return False
+
+
+def cache_file_path(key,file_path):
+    cache.set(key, file_path, timeout=7200) # cache for 2 hours
+    return key
+
+def get_cached_file_path(key):
+    file_path = cache.get(key)
+    if file_path:
+        os.remove(file_path) # delete the file from local storage
+        cache.delete(key) # delete the cache key
+    return file_path
+
+
+
+def convert_to_mp4_helper(binary,path):
+    url = CONVERTER_URL
+    files = {'file': binary}
+    response = requests.post(url, files=files)
+
+    with open(path,'wb') as file:
+        file.write(response.content)
+    return response.content
+
+
+def convert_file_to_mp4(obj_link,obj_file):
+    key=f'{obj_link.link_hash}_{obj_file.urlhash}'
+    value=cache.get(key)
+    if value:
+        with open(value,'rb') as file:
+            #print(file.read())
+            return value
+    else:
+        url=obj_file.content.url
+        r=requests.get(url)
+        file_name=obj_file.file_name.split('.')
+        file_name=file_name[0]+'.avi'
+        path=LOCAL_STORAGE_PATH+'/'+file_name
+        data=convert_to_mp4_helper(r.content,path)
+        cache_file_path(key,path)
+        return cache.get(key)
+    return None
+
+
+def set_poster(videoid):
+    url = f"https://dev.vdocipher.com/api/videos/{videoid}/files"
+
+    payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"file\"; filename=\"thumbnail.png\"\r\nContent-Type: image/png\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+    headers = {
+        'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        'Authorization': f"Apisecret {API_SECRET_KEY}",
+        'Content-Type': "multipart/form-data",
+        'Accept': "application/json"
+        }
+
+    response = requests.request("POST", url, data=payload, headers=headers)
+
+    return
+
+        
+
+
+def upload_video(obj_link,obj_file):
+    path=convert_file_to_mp4(obj_link,obj_file)
+    uploadInfo = obj_file.uploadinfo
+    clientPayload = uploadInfo['clientPayload']
+    uploadLink = clientPayload['uploadLink']
+    filename = obj_file.file_name.split('.')[0]+'.avi'  # use file name here
+
+    m = MultipartEncoder(fields=[
+        ('x-amz-credential', clientPayload['x-amz-credential']),
+        ('x-amz-algorithm', clientPayload['x-amz-algorithm']),
+        ('x-amz-date', clientPayload['x-amz-date']),
+        ('x-amz-signature', clientPayload['x-amz-signature']),
+        ('key', clientPayload['key']),
+        ('policy', clientPayload['policy']),
+        ('success_action_status', '201'),
+        ('success_action_redirect', ''),
+        ('file', (filename, open(path,'rb'), 'text/plain'))
+        ])
+    response = requests.post(
+    uploadLink,
+    data=m,
+    headers={'Content-Type': m.content_type}
+    )
+    if response.ok:
+        set_poster(uploadInfo['videoId'])
+        return True
+    else:
+        return False
+
+
+def get_video_status(obj):
+    url=UPLOAD_URL_VDOCIPHER
+    video_id=obj.uploadinfo['videoId']
+    url+='/'+video_id
+    headers = {
+    'Authorization': f"Apisecret {API_SECRET_KEY}",
+    'Content-Type': "application/json",
+    'Accept': "application/json"
+    }
+
+    response = requests.request("GET", url, headers=headers)
+    data=response.json()
+    if 'status' in data and data['status']=='ready':
+        return True
+    else:
+        return False
+    
+
+def get_video_otp(obj):
+    if obj.uploadinfo:
+        id=obj.uploadinfo['videoId']
+        url=UPLOAD_URL_VDOCIPHER+'/'+id+'/'+'otp'
+        payload = json.dumps({'ttl': 300})
+        headers = {
+            'Authorization': f"Apisecret {API_SECRET_KEY}",
+            'Content-Type': "application/json",
+            'Accept': "application/json"
+            }
+        response = requests.request("POST", url, data=payload, headers=headers)
+        data=response.json()
+        otp=data['otp']
+        playbackinfo=data['playbackInfo']
+        return f'https://player.vdocipher.com/v2/?otp={otp}&playbackInfo={playbackinfo}&controls=off'
+    return None
+
+

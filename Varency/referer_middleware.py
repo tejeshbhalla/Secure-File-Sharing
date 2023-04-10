@@ -9,7 +9,7 @@ class RefererMiddleware:
         self.allowed_referers = ALLOWED_REFERERS
 
     def __call__(self, request):
-        if 'auth' in request.path and 'wopi' in request.path:
+        if 'wopi' in request.path or 'cghjklop' in request.path:
              response = self.get_response(request)
              return response
 

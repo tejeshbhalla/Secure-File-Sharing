@@ -1,5 +1,5 @@
 from re import S
-from .views import MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
+from .views import Download_Folder_View,Get_File_Link_Detail,Get_File_Detail,MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
 from django.urls import re_path as url
 from django.urls import include,path
 
@@ -45,5 +45,8 @@ urlpatterns = [
     path('remove/shared',Remove_Shared.as_view(),name='remove shared'),
     path('dashboard/search/<str:type>/<str:query>',SearchBar.as_view(),name='searchbarcontent'),
     path('link/add_favourite/<str:link_hash>',Add_Link_Favourite.as_view(),name='add link favourite'),
-    path("media/<str:token>",MediaStreamView.as_view(),name='media stream')
+    path("media/<str:token>",MediaStreamView.as_view(),name='media stream'),
+    path('file_detail/<str:obj_hash>/<str:file_hash>/<str:type>',Get_File_Detail.as_view(),name='file_detail'),
+    path('file_detail/link/<str:obj_hash>/<str:file_hash>/<str:type>',Get_File_Link_Detail.as_view(),name='file_detail'),
+    path('folder_download/<str:token>',Download_Folder_View.as_view(),name='download folder'),
     ]

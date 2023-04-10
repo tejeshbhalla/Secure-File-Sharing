@@ -23,10 +23,10 @@ class  Plan(models.Model):
         abstract=True
 
 class Basic_Plan(Plan):
-    no_of_users=models.IntegerField(default=0,validators=[MaxValueValidator(0)])
+    no_of_users=models.IntegerField(default=2,validators=[MaxValueValidator(2)])
     max_storage=models.IntegerField(default=5,validators=[MaxValueValidator(5)])
     max_upload_file_size=models.IntegerField(default=2,validators=[MaxValueValidator(2)])
-    max_recovery_days=models.IntegerField(default=3,validators=[MaxValueValidator(0)])
+    max_recovery_days=models.IntegerField(default=3,validators=[MaxValueValidator(3)])
     can_link_log=models.BooleanField(default=True)
     can_add_date_to_link=models.BooleanField(default=True)
     can_access_limit=models.BooleanField(default=True)
@@ -39,6 +39,7 @@ class Basic_Plan(Plan):
     hot_linking_prevention=models.BooleanField(default=True)
     has_groups=models.BooleanField(default=False)
     has_link_password=models.BooleanField(default=True)
+    drm_limit_per_user=models.IntegerField(default=1,validators=[MaxValueValidator(1)])
 
 
 class Premium_Plan(Plan):
@@ -58,6 +59,7 @@ class Premium_Plan(Plan):
     hot_linking_prevention=models.BooleanField(default=True)
     has_groups=models.BooleanField(default=True)
     has_link_password=models.BooleanField(default=True)
+    drm_limit_per_user=models.IntegerField(default=3,validators=[MaxValueValidator(3)])
 
     
 

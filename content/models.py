@@ -78,6 +78,20 @@ class Folder(models.Model):
                  self.urlhash = id_generator()
         super(Folder, self).save()
 
+    def get_subfolders_and_files(self):
+        subfolders = []
+        files = []
+        
+        subfolders.extend(self.children.all())
+        files.extend(self.files.all())
+
+        for subfolder in self.children.all():
+            subfolders_recursive, files_recursive = subfolder.get_subfolders_and_files()
+            subfolders.extend(subfolders_recursive)
+            files.extend(files_recursive)
+
+        return subfolders, files
+
 
 
 
@@ -95,6 +109,7 @@ class Files_Model(models.Model):
     deleted=models.BooleanField(default=False)
     last_deleted=models.DateTimeField(null=True,blank=True)
     file_size=models.FloatField(default=0)
+    uploadinfo=models.JSONField(null=True,blank=True)
     def save(self,*args, **kwargs):
         if not self.urlhash:
             self.urlhash = id_generator()
@@ -195,6 +210,7 @@ class Link_Model(models.Model):
     prevent_forwarding=models.BooleanField(default=False)
     deleted=models.BooleanField(default=False)
     is_favourite=models.BooleanField(default=True)
+    is_drm=models.BooleanField(default=False)
 
     def validate_permissions(self):
         permissions=check_permissions(self)
@@ -242,7 +258,7 @@ class Internal_Share(models.Model):
     owner=models.ForeignKey(NewUser,related_name='internal_group',on_delete=models.CASCADE,null=True,blank=True)
     shared_with=models.ForeignKey(NewUser,related_name='files_shared_with_you',on_delete=models.CASCADE,null=True,blank=True)
     link_hash=models.CharField(max_length=6,unique=True)
-    file_hash=models.ForeignKey(Files_Model,related_name='internal_link_files',on_delete=models.DO_NOTHING,null=True,blank=True)
+    file_hash=models.ForeignKey(Files_Model,related_name='internal_link_files',on_delete=models.CASCADE,null=True,blank=True)
     is_downloadable=models.BooleanField(default=False)
     has_read=models.BooleanField(default=True)
     can_add_delete_content=models.BooleanField(default=False)
@@ -258,12 +274,14 @@ class Internal_Share(models.Model):
 
     def __str__(self):
         return f'{self.link_hash}_{self.owner}'
+    
+
 
 class Internal_Share_Folders(models.Model):
     owner=models.ForeignKey(NewUser,related_name='internal_group_2',on_delete=models.CASCADE,null=True,blank=True)
     shared_with=models.ForeignKey(NewUser,related_name='folders_shared_with_you',on_delete=models.CASCADE,null=True,blank=True)
     link_hash=models.CharField(max_length=6,unique=True)
-    folder_hash=models.ForeignKey(Folder,related_name='internal_link_folders',on_delete=models.DO_NOTHING,null=True,blank=True)
+    folder_hash=models.ForeignKey(Folder,related_name='internal_link_folders',on_delete=models.CASCADE,null=True,blank=True)
     is_downloadable=models.BooleanField(default=False)
     has_read=models.BooleanField(default=True)
     can_add_delete_content=models.BooleanField(default=False)
@@ -279,6 +297,17 @@ class Internal_Share_Folders(models.Model):
 
     def __str__(self):
         return f'{self.link_hash}_{self.owner}'
+    def delete(self, *args, **kwargs):
+        sub_files,sub_folders=self.folder_hash.get_subfolders_and_files()
+        for i in sub_files:
+            sub_share=Internal_Share.objects.filter(owner=self.owner,file_hash=i,shared_with=self.shared_with)
+            if sub_share:
+                sub_share.delete()
+        for i in sub_folders:
+            sub_share=Internal_Share_Folders.objects.filter(owner=self.owner,folder_hash=i,shared_with=self.shared_with)
+            if sub_share:
+                sub_share.delete()
+        super(Internal_Share_Folders, self).delete(args, kwargs)
 
 
 

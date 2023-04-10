@@ -24,14 +24,15 @@ class FolderSerializer(serializers.ModelSerializer):
         fields = ['name','parent','shared_with']
 
     def create(self, validated_data,tenant):
+        is_internal=False
         if 'parent' in validated_data:
             if len(validated_data['parent'])==6:
                 validated_data['parent'] = get_object_or_None(Folder,urlhash=validated_data['parent'])
                 if validated_data['parent'].owner!=validated_data['owner']:
                     per=Internal_Share_Folders.objects.get(shared_with=validated_data['owner'],folder_hash=validated_data['parent'])
-                    print(per)
                     if  per.can_add_delete_content:
                         validated_data['owner']=per.owner
+                        is_internal=True
                     else:
                         raise ValidationError(f'Dont have privelages')
             else:
@@ -50,6 +51,27 @@ class FolderSerializer(serializers.ModelSerializer):
         obj.shared_with.add(*shared_with)
 
         obj.save()
+        if is_internal:
+            folder_hashes=[obj]
+            sub_files,sub_folders=obj.get_subfolders_and_files()
+            folder_hashes.extend(sub_folders)
+            for folder in sub_folders:
+                per2=Internal_Share_Folders(owner=per.owner,shared_with=per.shared_with,folder_hash=folder,is_downloadable=per.is_downloadable
+                                            ,has_read=per.has_read,can_add_delete_content=per.can_add_delete_content,can_share_content=per.can_share_content,
+                                            can_download_content=per.can_download_content,is_proctored=per.is_proctored
+                                            )
+                
+                per2.save()
+            for files in sub_files:
+                per_files=per2=Internal_Share_Folders(owner=per.owner,shared_with=per.shared_with,file_hash=files,is_downloadable=per.is_downloadable
+                                            ,has_read=per.has_read,can_add_delete_content=per.can_add_delete_content,can_share_content=per.can_share_content,
+                                            can_download_content=per.can_download_content,is_proctored=per.is_proctored
+                                            )
+                per_files.save()
+            per.save()
+
+
+
         return obj
 
     def update(self,validated_data,urlhash,tenant):
@@ -135,7 +157,7 @@ class Link_Serializer(serializers.ModelSerializer):
     class Meta:
         model=Link_Model
         fields=['name','shared_with','owner','access_type','expiry_date','is_downloadable','file_hash','is_password','folder_hash','access_limit','is_proctored',
-        'prevent_forwarding','is_favourite']
+        'prevent_forwarding','is_favourite','is_drm']
 
     def validate_file_hash(self, file_hash):
         for i in file_hash:
@@ -180,7 +202,15 @@ class Link_Serializer(serializers.ModelSerializer):
                     else:
                         create_notifications(internal_share_folder.owner,f'{user.email} created a link of your folder {obj.name}')
                         folder_hash.append(obj.id)
+                        sub_folder,sub_files=obj.get_subfolders_and_files()
+                        sub_folder=[i.id for i in sub_folder]
+                        sub_files=[i.id for i in sub_files]
+                        file_hash.extend(sub_files)
+                        folder_hash.extend(sub_folder)
                 folder_hash.append(obj.id)
+                sub_folder,sub_files=obj.get_subfolders_and_files()
+                file_hash.extend(sub_files)
+                folder_hash.extend(sub_folder)
         shared_with=[]
         if 'shared_with' in validated_data:
             if access_type!='client':

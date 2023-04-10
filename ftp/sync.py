@@ -2,7 +2,7 @@ import sys
 import requests
 import os
 import io
-from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient,ContentSettings
 import django
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -15,7 +15,6 @@ from content.models import Folder,Files_Model
 
 def create_content(filename,username,path,urlhash):
     #print(path)
-    print(path,filename,username,urlhash)
     owner=NewUser.objects.get(username=username)
     parent_folder=Folder.objects.get(urlhash=urlhash)
     all_paths=path.split('\\')[3:-1]
@@ -43,7 +42,7 @@ def create_content(filename,username,path,urlhash):
 
 
 
-def download_and_upload_folder(azure_connection_string,container_name,access_token,folder_path,parent_id=None,sub_path=None):
+def download_and_upload_folder_onedrive(azure_connection_string,container_name,access_token,folder_path,parent_id=None,sub_path=None):
     onedrive_api = "https://graph.microsoft.com/v1.0/me/drive/items/{folder}/{action}"
     headers = {
     "Authorization": f"Bearer {access_token}",
@@ -60,7 +59,7 @@ def download_and_upload_folder(azure_connection_string,container_name,access_tok
         item_path = os.path.join(folder_path, item_name)
         # If the item is a folder, recursively call this function
         if not (len(item_name.split('.'))>1):
-            download_and_upload_folder(azure_connection_string,container_name,access_token,item_id, parent_id=item,sub_path=sub_path+'\\'+item_name)
+            download_and_upload_folder_onedrive(azure_connection_string,container_name,access_token,item_id, parent_id=item,sub_path=sub_path+'\\'+item_name)
         # If the item is a file, download and upload it to Blob storage
         else:
             # Download and upload the file content in chunks
@@ -95,6 +94,55 @@ def download_and_upload_folder(azure_connection_string,container_name,access_tok
             arr=item_path.split('\\')
             create_content(item_name,arr[0],item_path,arr[2])
 
+def download_and_upload_folder_google(azure_connection_string, container_name, access_token, folder_path, parent_id=None, sub_path=None):
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Content-Type": "application/json"
+    }
+
+    # Get the list of items in the folder
+    url = f"https://www.googleapis.com/drive/v3/files?q='{folder_path}'+in+parents&fields=files(id,name,mimeType)"
+    response = requests.get(url, headers=headers)
+    # Iterate over the items in the folder
+    for item in response.json()["files"]:
+        item_id = item["id"]
+        item_name = item["name"]
+        item_path = os.path.join(folder_path, item_name)
+        # If the item is a folder, recursively call this function
+        if item["mimeType"] == "application/vnd.google-apps.folder":
+            download_and_upload_folder_google(azure_connection_string, container_name, access_token, item_id, parent_id=item, sub_path=sub_path + '\\' + item_name)
+        # If the item is a file, download and upload it to Blob storage
+        else:
+            # Download and upload the file content in chunks
+            chunk_size = 4 * 1024 * 1024  # 4 MB
+            download_url = f"https://www.googleapis.com/drive/v3/files/{item_id}?alt=media"
+            blob_service_client = BlobServiceClient.from_connection_string(azure_connection_string)
+            if sub_path:
+                item_path = sub_path + '\\' + item_path
+            blob_client = blob_service_client.get_blob_client(container=container_name, blob=item_path)
+
+            try:
+                blob_client.get_blob_properties()
+                blob_client.delete_blob()
+            except Exception as e:
+                if e.status_code == 404:
+                    blob_client.create_append_blob()
+            byte_range_start = 0
+            byte_range_end = chunk_size - 1
+            while True:
+                headers_with_range = headers.copy()
+                headers_with_range["Range"] = f"bytes={byte_range_start}-{byte_range_end}"
+                response = requests.get(download_url, headers=headers_with_range, stream=True)
+                chunk = response.content
+                if not chunk:
+                    break
+                blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=response.headers["content-type"]))
+                byte_range_start += chunk_size
+                byte_range_end += chunk_size
+            blob_client.upload_blob(b'', blob_type="AppendBlob")
+            arr = item_path.split('\\')
+            create_content(item_name, arr[0], item_path, arr[2])
+
 
 
 def call():
@@ -105,7 +153,11 @@ def call():
     access_token=arg1[4]
     connection_string=arg1[5]
     container_name=arg1[6]
-    download_and_upload_folder(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
+    type=arg1[7]
+    if type=='googledrive':
+        download_and_upload_folder_google(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
+    else:
+        download_and_upload_folder_onedrive(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
 
 
 call()

@@ -18,7 +18,7 @@ class RegisterUser(serializers.ModelSerializer):
         password = validated_data['password']
         name=validated_data['name']
         phone_number=validated_data['phone_number']
-        if validated_data.get('is_admin'):
+        if validated_data.get('is_admin') or len(tenant.members.all())==0:
             
             user=Admin(email=email,username=username,name=name,phone_number=phone_number,tenant=tenant,is_tenant_owner=True)
             user.set_password(password)
