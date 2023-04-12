@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-+)0aq35x-7qx!-7d%0cb*z227f+%yd3df4-8l*$i4h02t8(9^2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["api.varency.com",'localhost','tewg7.localtonet.com']
+ALLOWED_HOSTS = ["*"]
 
 USE_X_FORWARDED_HOST = True
 
@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'Varency.rate_limit.RateLimitMiddleware',
-    'Varency.referer_middleware.RefererMiddleware',
+    #'Varency.referer_middleware.RefererMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -169,21 +169,10 @@ STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#CORS_ALLOWED_ORIGINS = ['*']
+CORS_ALLOWED_ORIGINS = ['*']
 
 
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https://\w+\.varency\.com$",
-     r"^https://varency\.com$",
-     r"^https://mail.google\.com$",
-     r"^https://outlook.office\.com$",
-      r"^https://outlook.office365\.com$",
-      r"^https://ba26-223-190-82-174.ngrok\.io$",
-      r"^http://tejesh\.localhost:3000$",
-    
-    
 
-]
 
 #email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -257,7 +246,7 @@ CLAMAV_ENABLED = False
 BACKEND_URL='https://api.varency.com/'
 
 
-ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
+#ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
 
 AWS_HEADERS = {
     'x-amz-server-side-encryption': 'aws:kms',
