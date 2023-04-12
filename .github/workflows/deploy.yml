@@ -7,21 +7,22 @@ on:
 
 jobs:
   deploy:
-    runs-on:ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
-    -name Checkout repo
-     uses: actions/checkout@v2
+    - name: Checkout repo
+      uses: actions/checkout@v2
 
-    -name Checkout repo
-     uses: actions/setup-python@v2
-     with:
-      python-version: 3.7.8
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7.8
     
-    -name: Install dependencies
-     run: |
+    - name: Install dependencies
+      run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
     - name: Deploy to server
       env:
         PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
@@ -34,4 +35,3 @@ jobs:
         rsync -e "ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --archive --compress --delete . "$USER"@"$HOST":"$APP_DIR"
         ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER"@"$HOST" "cd $APP_DIR && source venv/bin/activate && pip install -r requirements.txt && gunicorn your_project_name.wsgi -b 0.0.0.0:8000 --daemon"
         rm -f private_key.pem
-
