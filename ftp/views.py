@@ -197,13 +197,14 @@ class Post_Code_OneDrive(APIView):
             username=arr[1]
             user=NewUser.objects.get(username=username)
             code=request.GET['code']
-            token=get_access_token_from_code_googledrive(request,code)
+            token=get_access_token_from_code(request,code)
             obj=Server_Connection.objects.filter(server_name=server_name).first()
             obj.user_token=token
             obj.save()
             return Response(status=302, headers={'location': f'http://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/onedrive'})
         except Exception as e:
             return Response(data={'message':{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
