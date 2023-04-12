@@ -203,7 +203,7 @@ AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=filesmodelap
 
 
 #url
-FRONT_END_URL="varency.com/"
+FRONT_END_URL="dev.varency.com/"
 
 
 #function url
