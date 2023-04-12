@@ -134,7 +134,7 @@ class Link_Serializer(serializers.ModelSerializer):
     class Meta:
         model=Link_Model
         fields=['name','shared_with','owner','access_type','expiry_date','is_downloadable','file_hash','is_password','folder_hash','access_limit','is_proctored',
-        'prevent_forwarding']
+        'prevent_forwarding','is_favourite','is_drm']
 
     def validate_file_hash(self, file_hash):
         for i in file_hash:
