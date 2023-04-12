@@ -29,7 +29,6 @@ coreschema==0.0.4
 cryptography==39.0.0
 Django==3.2.2
 django-annoying==0.10.6
-git+https://github.com/QueraTeam/django-clamav.git
 django-cors-headers==3.13.0
 django-rest-swagger==2.2.0
 django-storages==1.13.2

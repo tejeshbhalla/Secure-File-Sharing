@@ -32,6 +32,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        
+    - name: Kill current process on port 8000
+      run: |
+        lsof -ti :8000 | xargs kill -9 || true
 
     - name: Deploy to server
       env:
