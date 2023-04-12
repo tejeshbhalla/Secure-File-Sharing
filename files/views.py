@@ -441,23 +441,15 @@ class Add_Files_Folder_Group(APIView):
                 if permissions.can_add_delete_content or permissions.is_admin:
                     files=Files_Model.objects.filter(urlhash__in=request.data['file_hash'],owner=user)
                     folders=Folder.objects.filter(urlhash__in=request.data['folder_hash'],owner=user)
-                    sub_files=[]
-                    sub_folders=[]
-                    for i in folders:
-                        sub_sub_folders,sub_sub_files=i.get_subfolders_and_files()
-                        sub_folders.extend(sub_sub_folders)
-                        sub_sub_files.extend(sub_sub_files)
                     grp.files.add(*files)
                     grp.folders.add(*folders)
-                    grp.files.add(*sub_files)
-                    grp.folders.add(*sub_folders)
                     grp.save()
                 else:
                     return Response(data={"message":"Don't have privelages"},status=status.HTTP_400_BAD_REQUEST)
             return Response(data={"message":"successfully added content"},status=status.HTTP_200_OK)
 
         except Exception as e:
-            
+            print(e)
             return Response(data={'message':f"{e}"},status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self,request,urlhash):
@@ -483,6 +475,7 @@ class Add_Files_Folder_Group(APIView):
 
         except Exception as e:
             return Response(data={'message':f"{e}"},status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class Update_Users_In_Group(APIView):
