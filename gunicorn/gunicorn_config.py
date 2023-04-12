@@ -1,8 +1,5 @@
 import multiprocessing
 
-
-worker_class='gevent'
-
 # Set the server bind address
 bind = "127.0.0.1:8000"
 
@@ -29,3 +26,5 @@ errorlog = "/var/log/gunicorn/error.log"
 # Set the log level
 loglevel = "info"
 
+# Use the GeventWebSocketWorker worker class for long-polling support
+worker_class = 'geventwebsocket.gunicorn.workers.GeventWebSocketWorker'
