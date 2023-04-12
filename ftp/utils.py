@@ -1,7 +1,6 @@
 import os 
 from  Varency.settings import client_id,client_secret
 import json
-import ftp.rclone as rclone
 from oauth2client.client import  OAuth2WebServerFlow
 import requests
 from urllib.parse import urlencode
