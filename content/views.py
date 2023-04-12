@@ -872,7 +872,7 @@ class Upload_Folder(APIView):
                 parent_folder = get_object_or_None(Folder, urlhash=folders_dict[folder_list[-2]])
                 if parent_hash==None:
                     parent_hash='root'
-                item_path=owner.username+'/'+parent_hash+'/'+i
+                item_path=owner.username+'/'+parent_hash.urlhash+'/'+i
 
                 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=item_path)
