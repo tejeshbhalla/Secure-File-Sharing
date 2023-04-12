@@ -15,7 +15,7 @@ urlpatterns = [
     path('api/cghjklop/', admin.site.urls),
     path("api/auth/",include('files.urls',namespace='files_app')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/<str:token>',Verify_Token.as_view(), name='token_verify'),
     path('api/content/',include('content.urls',namespace='content_app'),),
     path('api/sync/',include('ftp.urls',namespace='sync_app'),),
