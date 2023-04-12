@@ -224,18 +224,19 @@ client_secret = "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"
 CLIENT_ID = '439305909942-2u20aq9v6jsn2okfpjd3tu5rhmdt991u.apps.googleusercontent.com'
 CLIENT_SECRET_GOOGLE_DRIVE = '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'
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
-REDIRECT_URI = 'https://api.varency.com/api/sync/google_drive/get_token'
+REDIRECT_URI = 'https://api.dev.varency.com/api/sync/google_drive/get_token'
 TOKEN_URL_GOOGLE_DRIVE='https://accounts.google.com/o/oauth2/token'
 
 #onedrive
 CLIENT_ID_ONEDRIVE="c440bdf8-ff79-483e-be61-e653fbdb511b"
 SCOPES_ONEDRIVE='files.read.all offline_access  files.readwrite.all sites.read.all sites.readwrite.all'
-REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
+#REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
+REDIRECT_URI_ONEDRIVE="https://api.dev.varency.com/api/sync/get_token"
 TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 CLIENT_SECRET='eBA8Q~qUzW5kPTiMHUCowR1LG2zM1MYZcjZgXdya'
 
 
-CSRF_TRUSTED_ORIGINS=["https://api.varency.com"]
+CSRF_TRUSTED_ORIGINS=["https://api.dev.varency.com"]
 #clam av
 CLAMAV_UNIX_SOCKET = '/var/run/clamav/clamd.ctl'
 CLAMAV_USE_TCP = False
@@ -243,7 +244,7 @@ CLAMAV_TCP_PORT = 3310
 CLAMAV_TCP_ADDR = '127.0.0.1'
 CLAMAV_ENABLED = False
 
-BACKEND_URL='https://api.varency.com/'
+BACKEND_URL='https://api.dev.varency.com'
 
 
 #ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
