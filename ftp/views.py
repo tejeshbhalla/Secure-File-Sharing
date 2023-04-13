@@ -314,6 +314,7 @@ class Start_Sync(APIView):
                             token_detail=json.loads(token_detail)
                     
                     command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type_]
+                    #hi
                     process = subprocess.Popen(command, stdout=subprocess.PIPE)
                     cache.set(name, process.pid)
 
