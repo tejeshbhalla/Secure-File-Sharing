@@ -46,5 +46,5 @@ jobs:
         rsync -e "ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" --archive --compress --delete . "$USER@$HOST":"$APP_DIR"
         ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" "lsof -i :8000 | grep LISTEN | awk '{print \$2}' | xargs -r kill -9"
         ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" "cd $APP_DIR/.. && source venv/bin/activate && cd $APP_DIR && pip install -r requirements.txt && python manage.py migrate && gunicorn your_project_name.wsgi -b 0.0.0.0:8000 --daemon"
-        ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" "cd $APP_DIR && source ../venv/bin/activate && pip install -r requirements.txt && gunicorn Varency.wsgi -b 0.0.0.0:8000 -w 4 -k gevent --daemon"
+        ssh -i private_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "$USER@$HOST" "cd $APP_DIR && source ../venv/bin/activate && pip install -r requirements.txt && python manage.py runserver 0.0.0.0:8000"
         rm -f private_key.pem
