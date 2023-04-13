@@ -804,7 +804,7 @@ class Notification_System(APIView):
     def get(self, request):
         try:
             request_received_time = timezone.now()
-            ten_seconds_later = request_received_time + datetime.timedelta(seconds=100)
+            ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
             user=get_user_from_tenant(request)
             while(timezone.now() < ten_seconds_later):
                 changed_items=[]

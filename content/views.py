@@ -936,7 +936,7 @@ class Check_Link_Exist(APIView):
         try:
             tenant=get_tenant(request)
             request_received_time = timezone.now()
-            ten_seconds_later = request_received_time + datetime.timedelta(seconds=3600)
+            ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
             while(timezone.now() < ten_seconds_later):
                 obj=get_object_or_None(Link_Model,link_hash=link_hash)
                 if not obj or obj.deleted:
