@@ -245,7 +245,7 @@ CLAMAV_TCP_PORT = 3310
 CLAMAV_TCP_ADDR = '127.0.0.1'
 CLAMAV_ENABLED = False
 
-BACKEND_URL='https://api.dev.varency.com'
+BACKEND_URL='https://api.dev.varency.com/'
 
 
 #ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
