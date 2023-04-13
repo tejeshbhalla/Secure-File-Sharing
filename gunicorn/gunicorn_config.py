@@ -26,6 +26,8 @@ errorlog = "/var/log/gunicorn/error.log"
 # Set the log level
 loglevel = "info"
 
+
+#added
 # Use the GeventWebSocketWorker worker class for long-polling support
 worker_class = 'geventwebsocket.gunicorn.workers.GeventWebSocketWorker'
 #change
