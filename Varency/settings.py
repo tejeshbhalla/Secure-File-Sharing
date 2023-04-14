@@ -178,11 +178,11 @@ CORS_ORIGIN_ALLOW_ALL=True
 #email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST_USER='noreply@varency.com'
-EMAIL_HOST='us2.smtp.mailhostbox.com'
+EMAIL_HOST='smtp.office365.com'
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
-EMAIL_HOST_PASSWORD='LLdsEPl4'
+EMAIL_HOST_PASSWORD='Tejesh@121006'
 
 
 EXPIRY_SAS_TIME=15
