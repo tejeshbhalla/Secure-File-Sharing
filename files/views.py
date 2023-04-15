@@ -20,7 +20,7 @@ import mimetypes
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
 from django.utils import timezone
-
+import gevent
 
 # Create your views here.
 class UserView(APIView):
@@ -800,27 +800,24 @@ class Notification_System(APIView):
     authentication_classes = [JWTauthentication]
     permissions = [IsAuthenticated]
 
-
     def get(self, request):
         try:
             request_received_time = timezone.now()
             ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
-            user=get_user_from_tenant(request)
-            while(timezone.now() < ten_seconds_later):
-                changed_items=[]
-                for i in Notifications.objects.filter(user=user).all().filter(read=False):
-                        changed_items.append(i)
-                        i.read=True
-                        i.save()
-                if(changed_items):
-                    tmpJson = Notification_Serializer(changed_items,many=True)
-                    return Response(data=tmpJson.data,status=status.HTTP_200_OK)
-                
-            
+            user = get_user_from_tenant(request)
+            while timezone.now() < ten_seconds_later:
+                changed_items = []
+                for i in Notifications.objects.filter(user=user, read=False):
+                    changed_items.append(i)
+                    i.read = True
+                    i.save()
+                if changed_items:
+                    tmpJson = Notification_Serializer(changed_items, many=True)
+                    return Response(data=tmpJson.data, status=status.HTTP_200_OK)
+                gevent.sleep(0.1) # sleep for 100ms before checking again
             return Response([])
         except Exception as e:
-            
-            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class Verify_Token(APIView):
 
