@@ -4,7 +4,7 @@ bind = "127.0.0.1:8000"
 # Set the number of worker processes
 workers = 3
 
-worker_class = 'geventwebsocket.gunicorn.workers.GeventWebSocketWorker'
+worker_class = 'gthread'
 
 # Set worker timeout
 timeout = 600
