@@ -1547,7 +1547,7 @@ class Download_Multi_File_Folder(APIView):
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.content.name)
                 for j in folders_hash:
-                    obj=Folder.objects.get(urlhash=i)
+                    obj=Folder.objects.get(urlhash=j)
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.get_subfolders_and_files()
@@ -1561,7 +1561,7 @@ class Download_Multi_File_Folder(APIView):
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.file_hash.content.name)
                 for j in folders_hash:
-                    obj=Internal_Share_Folders.objects.get(link_hash=i)
+                    obj=Internal_Share_Folders.objects.get(link_hash=j)
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.folder_hash.get_subfolders_and_files()
