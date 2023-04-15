@@ -1597,3 +1597,65 @@ class Download_Multi_File_Folder(APIView):
         except Exception as e:
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+class Download_Multi_File_Folder_Link(APIView):
+    authentication_classes = [JWTauthentication]
+
+    def member_files(self,blob_names,blob_service_client):
+        modified_at = datetime.datetime.now()
+        perms = 0o600
+        for blob_name in blob_names:
+                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name)
+                yield (blob_client.blob_name.split('/')[-1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
+
+    def blob_chunk_generator(self,blob_client):
+        blob_size = blob_client.get_blob_properties().size
+        offset = 0
+        chunk_size = 1024*1024*10
+        while True:
+            if offset >= blob_size:
+                break
+            data = blob_client.download_blob(offset=offset, length=chunk_size)
+            chunk = data.readall()
+            if not chunk:
+                break
+            offset += len(chunk)
+            try:
+                yield chunk
+            except UnicodeDecodeError:
+                yield chunk
+
+    def post(self,request):
+        try:
+            blob_names=[]
+            link_hash=request.data['link_hash']
+            files_hash=request.data['files_hash']
+            folders_hash=request.data['folders_hash']
+            files=Files_Model.objects.filter(urlhash__in=files_hash)
+            folders=Folder.objects.filter(urlhash__in=folders_hash)
+            link = Link_Model.objects.filter(
+                    Q(files__in=files) | Q(folders__in=folders),
+                    link_hash=link_hash
+                ).first()
+
+            if not link.is_downloadable:
+                return Response(data={'message':'Not downloadable'},status=status.HTTP_400_BAD_REQUEST)
+            for i in files_hash:
+                obj=Files_Model.objects.get(urlhash=i)
+                blob_names.append(obj.content.name)
+            for j in folders_hash:
+                obj=Folder.objects.get(urlhash=j)
+                _,files=obj.get_subfolders_and_files()
+                blob_names.extend([i.content.name for i in files])
+
+            blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
+            blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
+            name=f'{timezone.now()}'
+            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
+            return response
+        except Exception as e:
+            print(e)            
+            return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
