@@ -1467,7 +1467,7 @@ class Download_Folder_View(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*10
+        chunk_size = 1024*1024*4
         while True:
             if offset >= blob_size:
                 break
@@ -1518,7 +1518,7 @@ class Download_Multi_File_Folder(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*10
+        chunk_size = 1024*1024*4
         while True:
             if offset >= blob_size:
                 break
@@ -1613,7 +1613,7 @@ class Download_Multi_File_Folder_Link(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*10
+        chunk_size = 1024*1024*4
         while True:
             if offset >= blob_size:
                 break
