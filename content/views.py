@@ -1534,7 +1534,7 @@ class Download_Multi_File_Folder(APIView):
             except UnicodeDecodeError:
                 yield chunk
 
-    def get(self,request,type):
+    def post(self,request,type):
         try:
             user=get_user_from_tenant(request)
             blob_names=[]
