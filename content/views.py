@@ -1557,13 +1557,13 @@ class Download_Multi_File_Folder(APIView):
                 for i in files_hash:
                     file=Files_Model.objects.get(urlhash=i)
                     obj=Internal_Share.objects.get(file_hash=file,shared_with=user)
-                    if  not obj.is_downloadable :
+                    if  not obj.can_download_content :
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.file_hash.content.name)
                 for j in folders_hash:
                     folder=Folder.objects.get(urlhash=j)
                     obj=Internal_Share_Folders.objects.get(folder_hash=folder,shared_with=user)
-                    if  not obj.is_downloadable:
+                    if  not obj.can_download_content:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.folder_hash.get_subfolders_and_files()
                     blob_names.extend([i.content.name for i in files])
