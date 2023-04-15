@@ -34,8 +34,7 @@ from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
 from django.db.models import Q
 from asgiref.sync import sync_to_async
-
-
+import asyncio
 
 
 
@@ -938,10 +937,12 @@ class Check_Link_Exist(APIView):
             tenant = await sync_to_async(get_tenant)(request)
             request_received_time = timezone.now()
             ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
-            while(timezone.now() < ten_seconds_later):
+            while timezone.now() < ten_seconds_later:
                 obj = await sync_to_async(get_object_or_None)(Link_Model, link_hash=link_hash)
                 if not obj or obj.deleted:
                     return Response(data={"message": "false"}, status=status.HTTP_400_BAD_REQUEST)
+
+                await asyncio.sleep(1) # wait for 1 second before checking again
 
             return Response(data={"message": "true"}, status=status.HTTP_200_OK)
         except Exception as e:
