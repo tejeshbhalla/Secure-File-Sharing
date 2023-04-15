@@ -2,9 +2,9 @@
 bind = "127.0.0.1:8000"
 
 # Set the number of worker processes
-workers = 3
+workers = 4
 
-worker_class = 'gthread'
+worker_class = 'gevent'
 
 # Set worker timeout
 timeout = 600

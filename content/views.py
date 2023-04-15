@@ -33,8 +33,7 @@ from azure.core.exceptions import ResourceNotFoundError
 from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
 from django.db.models import Q
-
-
+import gevent
 
 
 
@@ -933,22 +932,19 @@ class Get_Link_Logs(APIView):
 class Check_Link_Exist(APIView):
     throttle_classes = [UserRateThrottle]
   
-    def get(self, request,link_hash):
-
+    def get(self, request, link_hash):
         try:
-            tenant=get_tenant(request)
+            tenant = get_tenant(request)
             request_received_time = timezone.now()
             ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
-            while(timezone.now() < ten_seconds_later):
-                obj=get_object_or_None(Link_Model,link_hash=link_hash)
+            while timezone.now() < ten_seconds_later:
+                obj = get_object_or_None(Link_Model, link_hash=link_hash)
                 if not obj or obj.deleted:
-                    return Response(data={"message":"false"},status=status.HTTP_400_BAD_REQUEST)
-            
-                
-            return Response(data={"message":"true"},status=status.HTTP_200_OK)
+                    return Response(data={"message": "false"}, status=status.HTTP_400_BAD_REQUEST)
+                gevent.sleep(0.1) # sleep for 100ms before checking again
+            return Response(data={"message": "true"}, status=status.HTTP_200_OK)
         except Exception as e:
-            
-            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class Deleted_Folder_Details_All(APIView):
