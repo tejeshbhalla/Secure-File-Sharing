@@ -1537,8 +1537,8 @@ class Download_Multi_File_Folder(APIView):
             user=get_user_from_tenant(request)
             blob_names=[]
             if type=='home':
-                files_hash=request.data['files_hash']
-                folders_hash=request.data['folders_hash']
+                files_hash=request.data['file_hash']
+                folders_hash=request.data['folder_hash']
                 #added
                 for i in files_hash:
                     obj=Files_Model.objects.get(urlhash=i)
@@ -1552,8 +1552,8 @@ class Download_Multi_File_Folder(APIView):
                     _,files=obj.get_subfolders_and_files()
                     blob_names.extend([i.content.name for i in files])
             if type=='internal':
-                files_hash=request.data['files_hash']
-                folders_hash=request.data['folders_hash']
+                files_hash=request.data['file_hash']
+                folders_hash=request.data['folder_hash']
                 for i in files_hash:
                     file=Files_Model.objects.get(urlhash=i)
                     obj=Internal_Share.objects.get(file_hash=file,shared_with=user)
@@ -1569,8 +1569,8 @@ class Download_Multi_File_Folder(APIView):
                     blob_names.extend([i.content.name for i in files])
             if type=='group':
                 group_hash=request.data['urlhash']
-                files_hash=request.data['files_hash']
-                folders_hash=request.data['folders_hash']
+                files_hash=request.data['file_hash']
+                folders_hash=request.data['folder_hash']
                 files=Files_Model.objects.filter(urlhash__in=files_hash)
                 folders=Folder.objects.filter(urlhash__in=folders_hash)
                 grp = People_Groups.objects.filter(
@@ -1631,8 +1631,8 @@ class Download_Multi_File_Folder_Link(APIView):
         try:
             blob_names=[]
             link_hash=request.data['link_hash']
-            files_hash=request.data['files_hash']
-            folders_hash=request.data['folders_hash']
+            files_hash=request.data['file_hash']
+            folders_hash=request.data['folder_hash']
             files=Files_Model.objects.filter(urlhash__in=files_hash)
             folders=Folder.objects.filter(urlhash__in=folders_hash)
             link = Link_Model.objects.filter(
