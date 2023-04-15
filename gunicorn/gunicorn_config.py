@@ -1,15 +1,15 @@
-import multiprocessing
-
 # Set the server bind address
 bind = "127.0.0.1:8000"
 
 # Set the number of worker processes
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 3
+
+worker_class = 'gthread'
 
 # Set worker timeout
 timeout = 600
 
-keepalive=2
+keepalive=60
 
 # Set the maximum number of requests a worker will process before restarting
 max_requests = 1000
