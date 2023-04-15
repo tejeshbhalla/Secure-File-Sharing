@@ -1585,7 +1585,6 @@ class Download_Multi_File_Folder(APIView):
 
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-            blob_names = [i.content.name for i in files]
             name=f'{user.username}_{timezone.now()}'
             response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
