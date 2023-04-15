@@ -1572,7 +1572,7 @@ class Download_Multi_File_Folder(APIView):
                 group_hash=request.data['urlhash']
                 files_hash=request.data['files_hash']
                 folders_hash=request.data['folders_hash']
-                files=list(Files_Model.objects.filter(urlhash__in=files_hash))
+                files=Files_Model.objects.filter(urlhash__in=files_hash)
                 folders=Folder.objects.filter(urlhash__in=folders_hash)
                 grp = People_Groups.objects.filter(
                     Q(files__in=files) | Q(folders__in=folders),
