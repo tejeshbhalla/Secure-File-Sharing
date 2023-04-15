@@ -32,6 +32,8 @@ import uuid
 from azure.core.exceptions import ResourceNotFoundError
 from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
+from django.db.models import Q
+
 
 
 
@@ -1573,7 +1575,11 @@ class Download_Multi_File_Folder(APIView):
                 folders_hash=request.data['folders_hash']
                 files=Files_Model.objects.filter(urlhash__in=files_hash)
                 folders=Folder.objects.filter(urlhash__in=folders_hash)
-                grp=People_Groups.objects.filter(files__in=files,folders__in=folders,group_hash=group_hash).first()
+                grp = People_Groups.objects.filter(
+                    Q(files__in=files) | Q(folders__in=folders),
+                    group_hash=group_hash
+                ).first()
+
                 if grp:
                     sub_files=[]
                     for i in folders:
