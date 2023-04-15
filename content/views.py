@@ -933,20 +933,17 @@ class Get_Link_Logs(APIView):
 class Check_Link_Exist(APIView):
     throttle_classes = [UserRateThrottle]
 
-    async def check_link(self, link_hash):
-        request_received_time = timezone.now()
-        ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
-        while timezone.now() < ten_seconds_later:
-            obj = await sync_to_async(get_object_or_None)(Link_Model, link_hash=link_hash)
-            if not obj or obj.deleted:
-                return Response(data={"message": "false"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(data={"message": "true"}, status=status.HTTP_200_OK)
-
     async def get(self, request, link_hash):
         try:
             tenant = await sync_to_async(get_tenant)(request)
-            response = await self.check_link(link_hash)
-            return response
+            request_received_time = timezone.now()
+            ten_seconds_later = request_received_time + datetime.timedelta(seconds=30)
+            while(timezone.now() < ten_seconds_later):
+                obj = await sync_to_async(get_object_or_None)(Link_Model, link_hash=link_hash)
+                if not obj or obj.deleted:
+                    return Response(data={"message": "false"}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(data={"message": "true"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
