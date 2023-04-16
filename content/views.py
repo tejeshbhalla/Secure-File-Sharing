@@ -1567,7 +1567,7 @@ class Download_Multi_File_Folder(APIView):
                 folders_hash=request.data['folder_hash']
                 for i in files_hash:
                     file=Files_Model.objects.filter(urlhash=i).first()
-                    obj=Internal_Share.objects.get(file_hash=file,shared_with=user)
+                    obj=Internal_Share.objects.filter(file_hash=file,shared_with=user).first()
                     if not obj:
                         continue
                     if  not obj.can_download_content :
@@ -1575,7 +1575,7 @@ class Download_Multi_File_Folder(APIView):
                     blob_names.append(obj.file_hash.content.name,obj.file_hash.order_path())
                 for j in folders_hash:
                     folder=Folder.objects.filter(urlhash=j).first()
-                    obj=Internal_Share_Folders.objects.get(folder_hash=folder,shared_with=user)
+                    obj=Internal_Share_Folders.objects.filter(folder_hash=folder,shared_with=user).first()
                     if not obj:
                         continue
                     if  not obj.can_download_content:
