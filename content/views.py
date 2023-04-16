@@ -1513,8 +1513,6 @@ class Download_Multi_File_Folder(APIView):
         perms = 0o600
         for blob_name in blob_names:
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name[0])
-                print('hi')
-                print(blob_name)
                 yield (blob_name[1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
     def blob_chunk_generator(self,blob_client):
@@ -1562,10 +1560,8 @@ class Download_Multi_File_Folder(APIView):
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.get_subfolders_and_files()
-                    print('printing path sir')
-                    print(files[0].order_path())
+                    
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
-                    print(blob_names)
             if type=='internal':
                 files_hash=request.data['file_hash']
                 folders_hash=request.data['folder_hash']
@@ -1628,8 +1624,8 @@ class Download_Multi_File_Folder_Link(APIView):
         modified_at = datetime.datetime.now()
         perms = 0o600
         for blob_name in blob_names:
-                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name)
-                yield (blob_client.blob_name.split('/')[-1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
+                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name[0])
+                yield (blob_name[1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
@@ -1669,7 +1665,7 @@ class Download_Multi_File_Folder_Link(APIView):
             for j in folders_hash:
                 obj=Folder.objects.get(urlhash=j)
                 _,files=obj.get_subfolders_and_files()
-                blob_names.extend([i.content.name for i in files])
+                blob_names.extend([(i.content.name,i.order_path()) for i in files])
 
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
