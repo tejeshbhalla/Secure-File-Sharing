@@ -1512,11 +1512,8 @@ class Download_Multi_File_Folder(APIView):
         modified_at = datetime.datetime.now()
         perms = 0o600
         for blob_name in blob_names:
-                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name)
-                urlhash=blob_client.blob_name.split('/')[-2]
-                print(urlhash)
-                file_path=Files_Model.objects.get(urlhash=urlhash).order_path()
-                yield (file_path, modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
+                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name[0])
+                yield (blob_client[1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
@@ -1554,7 +1551,7 @@ class Download_Multi_File_Folder(APIView):
                         continue
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
-                    blob_names.append(obj.content.name)
+                    blob_names.append((obj.content.name,obj.order_path()))
                 for j in folders_hash:
                     obj=Folder.objects.filter(urlhash=j).first()
                     if not obj:
@@ -1562,7 +1559,7 @@ class Download_Multi_File_Folder(APIView):
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.get_subfolders_and_files()
-                    blob_names.extend([i.content.name for i in files])
+                    blob_names.extend([(i.content.name,i.order_path())for i in files])
             if type=='internal':
                 files_hash=request.data['file_hash']
                 folders_hash=request.data['folder_hash']
@@ -1573,7 +1570,7 @@ class Download_Multi_File_Folder(APIView):
                         continue
                     if  not obj.can_download_content :
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
-                    blob_names.append(obj.file_hash.content.name)
+                    blob_names.append(obj.file_hash.content.name,obj.file_hash.order_path())
                 for j in folders_hash:
                     folder=Folder.objects.filter(urlhash=j).first()
                     obj=Internal_Share_Folders.objects.get(folder_hash=folder,shared_with=user)
@@ -1582,7 +1579,7 @@ class Download_Multi_File_Folder(APIView):
                     if  not obj.can_download_content:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.folder_hash.get_subfolders_and_files()
-                    blob_names.extend([i.content.name for i in files])
+                    blob_names.extend([(i.content.name,i.order_path()) for i in files])
             if type=='group':
                 group_hash=request.data['urlhash']
                 files_hash=request.data['file_hash']
@@ -1600,7 +1597,7 @@ class Download_Multi_File_Folder(APIView):
                         _,sub_files_=i.get_subfolders_and_files()
                         sub_files_.extend(sub_files_)
                     files.extend(sub_files)
-                    blob_names.extend([i.content.name for i in files])
+                    blob_names.extend([(i.content.name,i.order_path()) for i in files])
                 else:
                     return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
 
