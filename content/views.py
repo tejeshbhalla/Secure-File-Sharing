@@ -1543,6 +1543,7 @@ class Download_Multi_File_Folder(APIView):
             if type=='home':
                 files_hash=request.data['file_hash'][0].split(',')
                 folders_hash=request.data['folder_hash'][0].split(',')
+                print(files_hash,folders_hash)
                 #added
                 for i in files_hash:
                     obj=Files_Model.objects.get(urlhash=i)
