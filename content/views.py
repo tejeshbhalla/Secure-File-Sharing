@@ -1541,8 +1541,8 @@ class Download_Multi_File_Folder(APIView):
             tenant=get_tenant(request)
             blob_names=[]
             if type=='home':
-                files_hash=request.data['file_hash'][0].split(',')
-                folders_hash=request.data['folder_hash'][0].split(',')
+                files_hash=request.data['file_hash'].split(',')
+                folders_hash=request.data['folder_hash'].split(',')
                 print(files_hash,folders_hash)
                 #added
                 for i in files_hash:
