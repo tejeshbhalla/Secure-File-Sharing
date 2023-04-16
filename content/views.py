@@ -1546,12 +1546,16 @@ class Download_Multi_File_Folder(APIView):
                 print(files_hash,folders_hash)
                 #added
                 for i in files_hash:
-                    obj=Files_Model.objects.get(urlhash=i)
+                    obj=Files_Model.objects.filter(urlhash=i).first()
+                    if not obj:
+                        continue
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.content.name)
                 for j in folders_hash:
-                    obj=Folder.objects.get(urlhash=j)
+                    obj=Folder.objects.filter(urlhash=j).first()
+                    if not obj:
+                        continue
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.get_subfolders_and_files()
@@ -1560,14 +1564,18 @@ class Download_Multi_File_Folder(APIView):
                 files_hash=request.data['file_hash']
                 folders_hash=request.data['folder_hash']
                 for i in files_hash:
-                    file=Files_Model.objects.get(urlhash=i)
+                    file=Files_Model.objects.filter(urlhash=i).first()
                     obj=Internal_Share.objects.get(file_hash=file,shared_with=user)
+                    if not obj:
+                        continue
                     if  not obj.can_download_content :
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.file_hash.content.name)
                 for j in folders_hash:
-                    folder=Folder.objects.get(urlhash=j)
+                    folder=Folder.objects.filter(urlhash=j).first()
                     obj=Internal_Share_Folders.objects.get(folder_hash=folder,shared_with=user)
+                    if not obj:
+                        continue
                     if  not obj.can_download_content:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.folder_hash.get_subfolders_and_files()
