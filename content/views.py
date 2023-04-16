@@ -185,7 +185,7 @@ class Internal_Folder_Detail(APIView):
                     data['files'].append({"urlhash":file.urlhash,"name":file.file_name,
                     "size":str(int(file.content.size/1024))+" kb","owner":file.owner.username,
                     "date_created":str(file.date_uploaded)[0:11],'is_file':True,'is_downloadable':f.is_downloadable,
-                    'can_share_content':f.can_share_content,
+                    'can_share_content':f.can_share_content,'can_add_delete_content':f.can_add_delete_content,
                     'can_download_content':f.can_download_content,'is_proctored':f.is_proctored,'download_link':download_url_generate_sas(file,get_client_ip(request)) if f.is_downloadable else None})
                 all_requests=user.requests_recieved.all()
                 for i in all_requests:
@@ -215,6 +215,7 @@ class Internal_Folder_Detail(APIView):
                     "size":str(int(i.content.size/1024))+" kb","owner":i.owner.username,
                     "date_created":str(i.date_uploaded)[0:11],'is_file':True,'is_downloadable':internal_share_folder.is_downloadable,
                     'can_share_content':internal_share_folder.can_share_content,
+                    'can_add_delete_content':internal_share_folder.can_add_delete_content,
                     'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,
                     'download_link':download_url_generate_sas(i,get_client_ip(request)) if internal_share_folder.can_download_content else None})
             for j in folders:
