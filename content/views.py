@@ -1504,8 +1504,8 @@ class Download_Folder_View(APIView):
 
 
 class Download_Multi_File_Folder(APIView):
-    authentication_classes = [JWTauthentication]
-    permissions = [IsAuthenticated]
+    #authentication_classes = [JWTauthentication]
+    #permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
 
     def member_files(self,blob_names,blob_service_client):
@@ -1533,8 +1533,12 @@ class Download_Multi_File_Folder(APIView):
                 yield chunk
 
     def post(self,request,type):
+        print(request.data)
         try:
-            user=get_user_from_tenant(request)
+            payload=jwt.decode(request.data['token'],SECRET_KEY,algorithms=['HS256',])
+            username=payload['username']
+            user=NewUser.objects.get(username=username)
+            tenant=get_tenant(request)
             blob_names=[]
             if type=='home':
                 files_hash=request.data['file_hash']
