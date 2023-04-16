@@ -325,8 +325,8 @@ def delete_all_drm(obj):
     return False
 
 
-def cache_file_path(key,file_path):
-    cache.set(key, file_path, timeout=7200) # cache for 2 hours
+def cache_file_path(key,binary):
+    cache.set(key, binary, timeout=7200) # cache for 2 hours
     return key
 
 def get_cached_file_path(key):
@@ -338,13 +338,10 @@ def get_cached_file_path(key):
 
 
 
-def convert_to_mp4_helper(binary,path):
+def convert_to_mp4_helper(binary):
     url = CONVERTER_URL
     files = {'file': binary}
     response = requests.post(url, files=files)
-
-    with open(path,'wb') as file:
-        file.write(response.content)
     return response.content
 
 
@@ -352,17 +349,14 @@ def convert_file_to_mp4(obj_link,obj_file):
     key=f'{obj_link.link_hash}_{obj_file.urlhash}'
     value=cache.get(key)
     if value:
-        with open(value,'rb') as file:
-            #print(file.read())
-            return value
+        return value
     else:
         url=obj_file.content.url
         r=requests.get(url)
         file_name=obj_file.file_name.split('.')
         file_name=file_name[0]+'.avi'
-        path=LOCAL_STORAGE_PATH+'/'+file_name
-        data=convert_to_mp4_helper(r.content,path)
-        cache_file_path(key,path)
+        data=convert_to_mp4_helper(r.content)
+        cache_file_path(key)
         return cache.get(key)
     return None
 
@@ -390,7 +384,7 @@ def set_poster(videoid):
 
 
 def upload_video(obj_link,obj_file):
-    path=convert_file_to_mp4(obj_link,obj_file)
+    data=convert_file_to_mp4(obj_link,obj_file)
     uploadInfo = obj_file.uploadinfo
     clientPayload = uploadInfo['clientPayload']
     uploadLink = clientPayload['uploadLink']
@@ -405,7 +399,7 @@ def upload_video(obj_link,obj_file):
         ('policy', clientPayload['policy']),
         ('success_action_status', '201'),
         ('success_action_redirect', ''),
-        ('file', (filename, open(path,'rb'), 'text/plain'))
+        ('file', (filename, data, 'text/plain'))
         ])
     response = requests.post(
     uploadLink,
