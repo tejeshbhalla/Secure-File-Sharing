@@ -1553,10 +1553,8 @@ class Download_Multi_File_Folder(APIView):
                         continue
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
-                    print('hi from here')
-                    print(obj.order_path())
+        
                     blob_names.append((obj.content.name,obj.order_path()))
-                    print(blob_names)
                 for j in folders_hash:
                     obj=Folder.objects.filter(urlhash=j).first()
                     if not obj:
@@ -1564,6 +1562,8 @@ class Download_Multi_File_Folder(APIView):
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.get_subfolders_and_files()
+                    print('printing path sir')
+                    print(files[0].order_path())
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
                     print(blob_names)
             if type=='internal':
