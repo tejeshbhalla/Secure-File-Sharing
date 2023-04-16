@@ -1553,6 +1553,8 @@ class Download_Multi_File_Folder(APIView):
                         continue
                     if obj.owner!=user:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
+                    print('hi from here')
+                    print(obj.order_path())
                     blob_names.append((obj.content.name,obj.order_path()))
                     print(blob_names)
                 for j in folders_hash:
