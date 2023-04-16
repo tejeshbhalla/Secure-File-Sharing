@@ -26,7 +26,7 @@ from Varency.settings import AZURE_ACCOUNT_NAME,AZURE_CONTAINER,AZURE_CONNECTION
 import jwt
 from zipfile import ZipFile
 from azure.storage.blob import BlobServiceClient,ContentSettings
-from django.http import StreamingHttpResponse,FileResponse
+from django.http import StreamingHttpResponse
 from stream_zip import ZIP_32, stream_zip
 import uuid
 from azure.core.exceptions import ResourceNotFoundError
@@ -1591,7 +1591,8 @@ class Download_Multi_File_Folder(APIView):
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
             name=f'{user.username}_{timezone.now()}'
-            response = FileResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),as_attachment=True,filename=f'{name}.zip')
+            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
             return response
         except Exception as e:
             print(e)            
