@@ -1603,6 +1603,8 @@ class Download_Multi_File_Folder(APIView):
                 else:
                     return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
 
+            print(blob_names)
+
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
             name=f'{user.username}_{timezone.now()}'
