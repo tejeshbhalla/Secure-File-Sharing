@@ -183,6 +183,13 @@ class Files_Model(models.Model):
             path=os.path.join(self.folder.order_parent_urlhash()[1:])
             return path/{self.file_name}
         pass
+    def order_path(self,*args,**kwargs):
+        if self.folder==None:
+            return f'{self.owner.username}/{self.file_name}'
+        else:
+            path=os.path.join(self.folder.order_parent()[1:])
+            return path/{self.file_name}
+        pass
 
 
 
