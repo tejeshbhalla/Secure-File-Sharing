@@ -52,3 +52,5 @@ urlpatterns = [
     path('download_multi_file_folder/<str:type>',Download_Multi_File_Folder.as_view(),name='download multi files and folders'),
     path('download_multi_file_folder/link',Download_Multi_File_Folder_Link.as_view(),name='download multi files and folders link'),
     ]
+
+#hi
