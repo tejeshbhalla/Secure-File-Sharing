@@ -53,4 +53,3 @@ urlpatterns = [
     path('download_multi_file_folder/link',Download_Multi_File_Folder_Link.as_view(),name='download multi files and folders link'),
     ]
 
-#hi

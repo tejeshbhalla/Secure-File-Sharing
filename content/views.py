@@ -1513,7 +1513,7 @@ class Download_Multi_File_Folder(APIView):
         perms = 0o600
         for blob_name in blob_names:
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name)
-                yield (blob_client.blob_name.split('/')[-1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
+                yield (blob_client.blob_name.split('/')[1:], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
