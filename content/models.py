@@ -189,6 +189,7 @@ class Files_Model(models.Model):
         else:
             print(self.folder.order_parent()[1:])
             path_='/'.join(self.folder.order_parent()[1:])
+            print(path_)
             return path_+'/'+{self.file_name}
         pass
 
