@@ -188,8 +188,7 @@ class Files_Model(models.Model):
             return f'{self.owner.username}/{self.file_name}'
         else:
             path_='/'.join(self.folder.order_parent()[1:])
-            path=os.path.join(path_)
-            return path/{self.file_name}
+            return path_+'/'+{self.file_name}
         pass
 
 
