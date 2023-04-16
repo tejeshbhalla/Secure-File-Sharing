@@ -370,7 +370,7 @@ def convert_file_to_mp4(obj_link,obj_file):
 def set_poster(videoid):
     url = f"https://dev.vdocipher.com/api/videos/{videoid}/files"
 
-    with open('thumbnail.png', 'rb') as f:
+    with open('Backend/content/thumbnail.png', 'rb') as f:
         file_contents = f.read()
 
     payload = {
