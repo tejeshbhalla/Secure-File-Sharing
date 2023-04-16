@@ -356,7 +356,7 @@ def convert_file_to_mp4(obj_link,obj_file):
         file_name=obj_file.file_name.split('.')
         file_name=file_name[0]+'.avi'
         data=convert_to_mp4_helper(r.content)
-        cache_file_path(key)
+        cache_file_path(key,data)
         return cache.get(key)
     return None
 
