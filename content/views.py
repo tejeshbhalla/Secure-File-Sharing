@@ -1533,7 +1533,6 @@ class Download_Multi_File_Folder(APIView):
                 yield chunk
 
     def post(self,request,type):
-        print(request.data)
         try:
             payload=jwt.decode(request.data['token'],SECRET_KEY,algorithms=['HS256',])
             username=payload['username']
@@ -1602,8 +1601,6 @@ class Download_Multi_File_Folder(APIView):
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
                 else:
                     return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
-
-            print(blob_names)
 
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
