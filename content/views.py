@@ -1514,6 +1514,7 @@ class Download_Multi_File_Folder(APIView):
         for blob_name in blob_names:
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name)
                 urlhash=blob_client.blob_name.split('/')[-2]
+                print(urlhash)
                 file_path=Files_Model.objects.get(urlhash=urlhash).order_path()
                 yield (file_path, modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
