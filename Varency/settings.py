@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-+)0aq35x-7qx!-7d%0cb*z227f+%yd3df4-8l*$i4h02t8(9^2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["api.varency.com",'localhost','varency.localhost:3000','tewg7.localtonet.com']
 
 USE_X_FORWARDED_HOST = True
 
@@ -57,7 +57,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'Varency.rate_limit.RateLimitMiddleware',
-    #'Varency.referer_middleware.RefererMiddleware',
+    'Varency.referer_middleware.RefererMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -169,9 +169,18 @@ STATIC_ROOT='/home/rsa-key-20230412/static'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.varency\.com$",
+     r"^https://varency\.com$",
+     r"^https://mail.google\.com$",
+     r"^https://outlook.office\.com$",
+      r"^https://outlook.office365\.com$",
+      r"^https://ba26-223-190-82-174.ngrok\.io$",
+      r"^http://varency\.localhost:3000$",
 
-#CORS_ALLOWED_ORIGINS = ['*']
-CORS_ORIGIN_ALLOW_ALL=True
+]
+
+#CORS_ORIGIN_ALLOW_ALL=True
 
 
 
@@ -203,7 +212,7 @@ AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=filesmodelap
 
 
 #url
-FRONT_END_URL="dev.varency.com/"
+FRONT_END_URL="varency.com/"
 
 
 #function url
@@ -231,8 +240,8 @@ TOKEN_URL_GOOGLE_DRIVE='https://accounts.google.com/o/oauth2/token'
 #onedrive
 CLIENT_ID_ONEDRIVE="c440bdf8-ff79-483e-be61-e653fbdb511b"
 SCOPES_ONEDRIVE='files.read.all offline_access  files.readwrite.all sites.read.all sites.readwrite.all'
-#REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
-REDIRECT_URI_ONEDRIVE="https://api.dev.varency.com/api/sync/get_token"
+REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
+#REDIRECT_URI_ONEDRIVE="https://api.dev.varency.com/api/sync/get_token"
 TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 CLIENT_SECRET='eBA8Q~qUzW5kPTiMHUCowR1LG2zM1MYZcjZgXdya'
 
@@ -245,10 +254,10 @@ CLAMAV_TCP_PORT = 3310
 CLAMAV_TCP_ADDR = '127.0.0.1'
 CLAMAV_ENABLED = False
 
-BACKEND_URL='https://api.dev.varency.com/'
+BACKEND_URL='https://api.varency.com/'
 
 
-#ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
+ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
 
 AWS_HEADERS = {
     'x-amz-server-side-encryption': 'aws:kms',
