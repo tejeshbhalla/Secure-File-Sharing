@@ -322,6 +322,7 @@ class Internal_Share_Folders(models.Model):
         folder=sub_folder.parent
         while not folder:
             share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
+            print(share)
             if share:
                 return share
             else:
@@ -332,6 +333,7 @@ class Internal_Share_Folders(models.Model):
         folder=file.folder
         while not folder:
             share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
+            print(share)
             if share:
                 return share
             else:
