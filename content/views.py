@@ -807,10 +807,12 @@ class Delete_Multi_Files_Folders(APIView):
                     return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete file'"})
                 files.append(file)  
             for i in files:
+                i.link_files.all().delete()
                 i.last_deleted=timezone.now()
                 i.deleted=True
                 i.save()
             for j in folders:
+                j.link_folders.all().delete()
                 j.last_deleted=timezone.now()
                 j.deleted=True
                 j.save()
