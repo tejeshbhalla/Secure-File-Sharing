@@ -818,7 +818,7 @@ class Delete_Multi_Files_Folders(APIView):
                 j.save()
             return Response(data={"message":"success"},status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(data={"message":{e}},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
 
 
