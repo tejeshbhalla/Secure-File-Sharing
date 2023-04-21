@@ -164,6 +164,7 @@ class Link_Serializer(serializers.ModelSerializer):
                 if obj==None or obj.owner.email!=user.email:
                     internal_share=get_object_or_None(Internal_Share,shared_with=user,file_hash=obj)
                     parent=Internal_Share_Folders.search_parent_file(user,obj)
+                    print(parent)
                     if not internal_share or not internal_share.can_share_content:
                         if not parent or not parent.can_share_content:
                             raise ValidationError("File does not exist or user has no permission to share")
@@ -180,6 +181,7 @@ class Link_Serializer(serializers.ModelSerializer):
                 if obj==None or obj.owner.email!=user.email:
                     internal_share_folder=get_object_or_None(Internal_Share_Folders,shared_with=user,folder_hash=obj)
                     parent=Internal_Share_Folders.search_parent(user,obj)
+                    print(parent)
                     if not internal_share_folder or  not internal_share_folder.can_share_content:
                         if not parent or not parent.can_share_content:
                             raise ValidationError("File does not exist or user has no permission to share")
