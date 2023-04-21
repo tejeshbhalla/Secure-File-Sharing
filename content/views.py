@@ -344,6 +344,15 @@ class Share_File(APIView):
                         obj=get_object_or_None(Files_Model,urlhash=file_hash)
                         file=Files_Model.objects.get(urlhash=file_hash)
                         if obj==None or obj.owner!=owner:
+                            parent_share=Internal_Share_Folders.search_parent_file(owner,file)
+                            if parent_share:
+                                obj=Internal_Share(owner=file.owner,shared_with=user,file_hash=file)
+                                obj.can_add_delete_content=can_add_delete_content
+                                obj.can_share_content=can_share_content
+                                obj.can_download_content=can_download_content
+                                obj.is_proctored=is_proctored
+                                obj.save()
+                                return Response(data={'message':f'Successfully shared files'},status=status.HTTP_400_BAD_REQUEST)
                             return Response(data={"message":f"You don't have privelages to share {file_hash} or file does not exist"},status=status.HTTP_400_BAD_REQUEST)
                         else:
                             obj=get_object_or_None(Internal_Share,shared_with=user,owner=owner,file_hash=file)
@@ -363,6 +372,15 @@ class Share_File(APIView):
                     for folder_hash in request.data['folder_hash']:
                         folder=get_object_or_None(Folder,urlhash=folder_hash)
                         if folder==None or folder.owner!=owner:
+                            parent_share=Internal_Share_Folders.search_parent(owner,folder)
+                            if parent_share:
+                                obj=Internal_Share_Folders(owner=folder.owner,shared_with=user,folder_hash=folder)
+                                obj.can_add_delete_content=can_add_delete_content
+                                obj.can_share_content=can_share_content
+                                obj.can_download_content=can_download_content
+                                obj.is_proctored=is_proctored
+                                obj.save()
+                                return Response(data={'message':f'Successfully shared folder'},status=status.HTTP_400_BAD_REQUEST)
                             return Response(data={"message":f"You don't have privelages to share {folder_hash} or file does not exist"},status=status.HTTP_400_BAD_REQUEST)
                         
                         obj=get_object_or_None(Internal_Share_Folders,shared_with=user,owner=owner,folder_hash=folder)
