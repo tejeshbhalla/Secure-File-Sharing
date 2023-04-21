@@ -321,8 +321,8 @@ class Internal_Share_Folders(models.Model):
     def search_parent(user,sub_folder):
         folder=sub_folder.parent
         while folder:
-            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
-            print(share)
+            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder).first()
+    
             if share:
                 return share
             else:
@@ -332,8 +332,7 @@ class Internal_Share_Folders(models.Model):
     def search_parent_file(user,file):
         folder=file.folder
         while folder:
-            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
-            print(share)
+            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder).first()
             if share:
                 return share
             else:
