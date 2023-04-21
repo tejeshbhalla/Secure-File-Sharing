@@ -1659,7 +1659,7 @@ class Download_Multi_File_Folder_Link(APIView):
                 return Response(data={'message':'Not downloadable'},status=status.HTTP_400_BAD_REQUEST)
             for i in files_hash:
                 obj=Files_Model.objects.get(urlhash=i)
-                blob_names.append(obj.content.name)
+                blob_names.append((obj.content.name,obj.order_path()))
             for j in folders_hash:
                 obj=Folder.objects.get(urlhash=j)
                 _,files=obj.get_subfolders_and_files()

@@ -163,8 +163,13 @@ class Link_Serializer(serializers.ModelSerializer):
                 obj=get_object_or_None(Files_Model,urlhash=file_hashes)
                 if obj==None or obj.owner.email!=user.email:
                     internal_share=get_object_or_None(Internal_Share,shared_with=user,file_hash=obj)
+                    parent=Internal_Share_Folders.search_parent_file(user,obj)
                     if not internal_share or not internal_share.can_share_content:
-                        raise ValidationError("File does not exist or user has no permission to share")
+                        if not parent or not parent.can_share_content:
+                            raise ValidationError("File does not exist or user has no permission to share")
+                        else:
+                            create_notifications(parent.owner,f'{user.email} created a link of your file {obj.file_name}')
+                            file_hash.append(obj.id)
                     else:
                         create_notifications(internal_share.owner,f'{user.email} created a link of your file {obj.file_name}')
                         file_hash.append(obj.id)
@@ -174,8 +179,13 @@ class Link_Serializer(serializers.ModelSerializer):
                 obj=get_object_or_None(Folder,urlhash=folder)
                 if obj==None or obj.owner.email!=user.email:
                     internal_share_folder=get_object_or_None(Internal_Share_Folders,shared_with=user,folder_hash=obj)
+                    parent=Internal_Share_Folders.search_parent(user,obj)
                     if not internal_share_folder or  not internal_share_folder.can_share_content:
-                        raise ValidationError("Folder does not exist or user has no permission to share")
+                        if not parent or not parent.can_share_content:
+                            raise ValidationError("File does not exist or user has no permission to share")
+                        else:
+                            create_notifications(parent.owner,f'{user.email} created a link of your file {obj.file_name}')
+                            folder_hash.append(obj.id)
                     else:
                         create_notifications(internal_share_folder.owner,f'{user.email} created a link of your folder {obj.name}')
                         folder_hash.append(obj.id)

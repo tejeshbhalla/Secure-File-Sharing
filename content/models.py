@@ -317,6 +317,29 @@ class Internal_Share_Folders(models.Model):
                 sub_share.delete()
         super(Internal_Share_Folders, self).delete(args, kwargs)
 
+    @staticmethod
+    def search_parent(user,sub_folder):
+        folder=sub_folder.parent
+        while not folder:
+            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
+            if share:
+                return share
+            else:
+                folder=folder.parent
+        return None
+    @staticmethod
+    def search_parent_file(user,file):
+        folder=file.folder
+        while not folder:
+            share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder)
+            if share:
+                return share
+            else:
+                folder=folder.parent
+        return None
+
+
+
 
 
 
