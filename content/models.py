@@ -347,7 +347,7 @@ class Internal_Share_Folders(models.Model):
 #logs model
 class Link_logs(models.Model):
     actions=models.JSONField()
-    link=models.ForeignKey(Link_Model,related_name='logs',on_delete=models.SET_NULL)
+    link=models.ForeignKey(Link_Model,related_name='logs',on_delete=models.SET_NULL,null=True)
     owner=models.ForeignKey(NewUser,related_name='link_logs',on_delete=models.CASCADE,null=True,blank=True)
 
 
