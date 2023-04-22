@@ -934,12 +934,7 @@ class CheckFileInfo(APIView):
                 else:
                     share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
                     if not share:
-                        path=file.path().split('/')[:-1]
-                        for i in path:
-                            f=Folder.objects.filter(urlhash=i).first()
-                            share=Internal_Share_Folders.filter(owner=file.owner,shared_with=user,folder_hash=f).first()
-                            if share:
-                                break      
+                        share=Internal_Share_Folders.search_parent_file(user,file)    
                     res = {
                         'BaseFileName': file.file_name,
                         'Size': file.content.size,
@@ -1033,12 +1028,7 @@ class GetFile(APIView):
                     return response
             share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
             if not share:
-                        path=file.path().split('/')[:-1]
-                        for i in path:
-                            f=Folder.objects.filter(urlhash=i).first()
-                            share=Internal_Share_Folders.filter(owner=file.owner,shared_with=user,folder_hash=f).first()
-                            if share:
-                                break
+                    share=Internal_Share_Folders.search_parent_file(user=user,file=file)
             if share:
                 file_mimetype=mimetypes.guess_type(file.file_name)
                 if file_mimetype is not None:
@@ -1063,12 +1053,7 @@ class GetFile(APIView):
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
             share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
             if not share:
-                        path=file.path().split('/')[:-1]
-                        for i in path:
-                            f=Folder.objects.filter(urlhash=i).first()
-                            share=Internal_Share_Folders.filter(owner=file.owner,shared_with=user,folder_hash=f).first()
-                            if share:
-                                break
+                    share=Internal_Share_Folders.search_parent_file(user=user,file=file)
             if share.can_add_delete_content:
                 content = request.read()
                 file_content=ContentFile(content,file.file_name)
@@ -1096,11 +1081,7 @@ class CheckFileInfoGroup(APIView):
             path=file.path().split('/')[:-1]
             group=People_Groups.objects.filter(group_hash=group_hash,files__in=[file]).first()
             if not group:
-                for i in path:
-                    f=Folder.objects.get(urlhash=i)
-                    group=People_Groups.objects.filter(group_hash=group_hash,folders__in=[f]).first()
-                    if group:
-                        break
+                group=People_Groups.search_parent_file(group_hash,file)
             perm=Group_Permissions.objects.get(group=group,user=user)
             if perm:
                 res = {
@@ -1133,11 +1114,7 @@ class GetFileGroup(APIView):
             path=file.path().split('/')[:-1]
             group=People_Groups.objects.filter(group_hash=group_hash,files__in=[file]).first()
             if not group:
-                for i in path:
-                    f=Folder.objects.get(urlhash=i)
-                    group=People_Groups.objects.filter(group_hash=group_hash,folders__in=[f]).first()
-                    if group:
-                        break
+                group=People_Groups.search_parent_file(group_hash,file)
             perm=Group_Permissions.objects.get(group=group,user=user)
             if perm:
                 file_mimetype=mimetypes.guess_type(file.file_name)
@@ -1158,12 +1135,7 @@ class GetFileGroup(APIView):
             file=Files_Model.objects.get(urlhash=file_id)
             group=People_Groups.objects.filter(group_hash=group_hash,files__in=[file]).first()
             if not group:
-                path=file.path().split('/')[:-1]
-                for i in path:
-                    f=Folder.objects.get(urlhash=i)
-                    group=People_Groups.objects.filter(group_hash=group_hash,folders__in=[f]).first()
-                    if group:
-                        break
+                group=People_Groups.search_parent_file(group_hash,file)
             perm=Group_Permissions.objects.get(group=group,user=user)
             if perm and perm.can_add_delete_content:
                 content = request.read()

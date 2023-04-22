@@ -229,6 +229,18 @@ class People_Groups(models.Model):
 
     def __str__(self):
         return f'{self.name}'
+    
+    @staticmethod
+    def search_parent_file(group_hash,file):
+        folder=file.folder
+        while folder:
+            group=People_Groups.objects.filter(group_hash=group_hash,files__in=[file])
+            if group:
+                return group
+            else:
+                folder=folder.parent
+        return None
+    
 
 class Group_Permissions(models.Model):
     group=models.ForeignKey(People_Groups,related_name='group_permissions',on_delete=models.CASCADE)
