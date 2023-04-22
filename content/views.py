@@ -1613,8 +1613,8 @@ class Download_Multi_File_Folder(APIView):
                     
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
             if type=='internal':
-                files_hash=request.data['file_hash']
-                folders_hash=request.data['folder_hash']
+                files_hash=request.data['file_hash'].split(',')
+                folders_hash=request.data['folder_hash'].split(',')
                 print(files_hash,folders_hash)
                 for i in files_hash:
                     file=Files_Model.objects.filter(urlhash=i).first()
@@ -1635,8 +1635,8 @@ class Download_Multi_File_Folder(APIView):
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
             if type=='group':
                 group_hash=request.data['urlhash']
-                files_hash=request.data['file_hash']
-                folders_hash=request.data['folder_hash']
+                files_hash=request.data['file_hash'].split(',')
+                folders_hash=request.data['folder_hash'].split(',')
                 files=Files_Model.objects.filter(urlhash__in=files_hash)
                 folders=Folder.objects.filter(urlhash__in=folders_hash)
                 grp = People_Groups.objects.filter(
