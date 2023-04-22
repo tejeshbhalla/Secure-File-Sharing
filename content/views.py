@@ -252,8 +252,11 @@ class CreateFilesView(APIView):
                 user=get_user_from_tenant(request)
                 serializer.validated_data['owner']=user
                 if folder and folder.owner!=user:
-                    per=Internal_Share_Folders.objects.get(folder_hash=folder,shared_with=user)
-                    if per.can_add_delete_content:
+                    per=Internal_Share_Folders.objects.filter(folder_hash=folder,shared_with=user).first()
+                    parent=Internal_Share_Folders.search_parent(user,folder)
+                    if parent and parent.can_add_delete_content:
+                        serializer.validated_data['owner']=folder.owner
+                    elif per and per.can_add_delete_content:
                         serializer.validated_data['owner']=per.owner
                     else:
                         return Response({'message':"Don't have privelage to share"},status=status.HTTP_400_BAD_REQUEST)
@@ -273,11 +276,18 @@ class CreateFilesView(APIView):
             if not files:
                 return Response(data={"message":f"file does not exist"},status=status.HTTP_400_BAD_REQUEST)
             user=get_user_from_tenant(request)
-                
             if files.owner==user:
                 files.delete()
                 return Response(data={"message":f"files deleted"},status=status.HTTP_200_OK)
-
+            else:
+                per=Internal_Share.objects.filter(file_hash=files,shared_with=user).first()
+                parent=Internal_Share_Folders.search_parent_file(user,files)
+                if per and per.can_add_delete_content:
+                    files.delete()
+                    return Response(data={"message":f"files deleted"},status=status.HTTP_200_OK)
+                elif parent and parent.can_add_delete_content:
+                    files.delete()
+                    return Response(data={"message":f"files deleted"},status=status.HTTP_200_OK)
             return Response(data={"message":f"You can't delete this file"},status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
@@ -286,9 +296,21 @@ class CreateFilesView(APIView):
 
     def put(self,request,urlhash):
         try:
-            file=Files_Model.objects.get(urlhash=urlhash)
             if 'file_name' not in request.data:
                 return Response(data={'message':'File Name not in data'},status=status.HTTP_400_BAD_REQUEST)
+            user=get_user_from_tenant(request)
+            file=Files_Model.objects.get(urlhash=urlhash)
+            per=Internal_Share.objects.filter(file_hash=file,shared_with=user).first()
+            parent=Internal_Share_Folders.search_parent_file(user,file)
+            if per and per.can_add_delete_content:
+                file.file_name=request.data['file_name']
+                file.save()
+                return Response(data={"message":f"file updated"},status=status.HTTP_200_OK)
+            elif parent and parent.can_add_delete_content:
+                file.file_name=request.data['file_name']
+                file.save()
+                return Response(data={"message":f"file updated"},status=status.HTTP_200_OK)
+
             if len(request.data['file_name']):
                 file.file_name=request.data['file_name']
                 file.save()
@@ -864,13 +886,21 @@ class Upload_Folder(APIView):
     def post(self,request,*args,**kwargs):
         try:
             folders_dict={} #dict maintains all keys with urlhash
-            user=get_user(request)
-            owner=NewUser.objects.get(username=user)
-            request.data.pop('shared_with')
+            user=get_user_from_tenant(request)
             parent_hash=get_object_or_None(Folder,urlhash=request.data['parent_hash'])
+            owner=user
+
+            if parent_hash:
+                per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
+                parent=Internal_Share_Folders.search_parent(user,parent_hash)
+                if per and per.can_add_delete_content:
+                    owner=per.owner
+                if parent and parent.can_add_delete_content:
+                    owner=parent.owner
+
+            request.data.pop('shared_with')
             request.data.pop('parent_hash')
             request.data.pop('folder_name')
-            
             for i in request.data.keys():
                 folder_list=i.split("/")[:-1]
                 for j in range(0,len(folder_list)):
