@@ -980,6 +980,7 @@ class CheckFileInfo_Link(APIView):
                             'DisablePrint':not link.is_downloadable,
                             'WatermarkText':link.owner.username,
                         }
+                        print('data sent')
                         return Response(data=res,status=status.HTTP_200_OK)
                 return Response(data=f'error not authorized ',status=status.HTTP_400_BAD_REQUEST)
             
