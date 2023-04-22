@@ -1621,7 +1621,7 @@ class Download_Multi_File_Folder(APIView):
                     obj=Internal_Share.objects.filter(file_hash=file,shared_with=user).first()
                     if file and not obj:
                         obj=Internal_Share_Folders.search_parent_file(user,file)
-                    if  not obj.can_download_content :
+                    if obj and  not obj.can_download_content :
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     blob_names.append(obj.file_hash.content.name,obj.file_hash.order_path())
                 for j in folders_hash:
@@ -1629,7 +1629,7 @@ class Download_Multi_File_Folder(APIView):
                     obj=Internal_Share_Folders.objects.filter(folder_hash=folder,shared_with=user).first()
                     if folder and not obj:
                         obj=Internal_Share_Folders.search_parent(user,folder)
-                    if  not obj.can_download_content:
+                    if obj and not obj.can_download_content:
                         return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
                     _,files=obj.folder_hash.get_subfolders_and_files()
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
