@@ -238,7 +238,17 @@ class Link_Model(models.Model):
         if self.password and not has_link_password:
             return ValidationError('Password cannot be added (Not in plan)')
         return
-        
+    
+    @staticmethod
+    def search_parent_file(link_hash,file):
+        folder=file.folder
+        while folder:
+            link=Link_Model.objects.filter(link_hash=link_hash,folder_hash__in=folder).first()
+            if link:
+                return link
+            else:
+                folder=folder.parent
+        return None
         
 
     def save(self,*args, **kwargs):
