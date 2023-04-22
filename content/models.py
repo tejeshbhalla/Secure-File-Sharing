@@ -249,6 +249,16 @@ class Link_Model(models.Model):
             else:
                 folder=folder.parent
         return None
+    @staticmethod
+    def search_parent(link_hash,folder):
+        folder=folder.parent
+        while folder:
+            link=Link_Model.objects.filter(link_hash=link_hash,folder_hash__in=[folder]).first()
+            if link:
+                return link
+            else:
+                folder=folder.parent
+        return None
         
 
     def save(self,*args, **kwargs):
@@ -263,6 +273,8 @@ class Link_Model(models.Model):
     def genereate_password():
         password=id_generator(size=8)
         return password
+    
+
 
     
 
