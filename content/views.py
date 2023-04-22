@@ -1615,6 +1615,7 @@ class Download_Multi_File_Folder(APIView):
             if type=='internal':
                 files_hash=request.data['file_hash']
                 folders_hash=request.data['folder_hash']
+                print(files_hash,folders_hash)
                 for i in files_hash:
                     file=Files_Model.objects.filter(urlhash=i).first()
                     obj=Internal_Share.objects.filter(file_hash=file,shared_with=user).first()
