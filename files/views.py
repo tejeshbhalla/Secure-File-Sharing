@@ -996,7 +996,7 @@ class GetFileLink(APIView):
         try:
             link_hash,file_id=file_id.split('_')
             file=Files_Model.objects.get(urlhash=file_id)
-            link=Link_Model.objects.get(link_hash=link_hash,file_hash__in=[file])
+            link=Link_Model.objects.filter(link_hash=link_hash,file_hash__in=[file]).first()
             if not link:
                     link=Link_Model.search_parent_file(link_hash,file)
             if link:
