@@ -243,7 +243,7 @@ class Link_Model(models.Model):
     def search_parent_file(link_hash,file):
         folder=file.folder
         while folder:
-            link=Link_Model.objects.filter(link_hash=link_hash,folder_hash__in=folder).first()
+            link=Link_Model.objects.filter(link_hash=link_hash,folder_hash__in=[folder]).first()
             if link:
                 return link
             else:
