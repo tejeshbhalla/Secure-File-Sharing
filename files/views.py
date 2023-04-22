@@ -967,8 +967,10 @@ class CheckFileInfo_Link(APIView):
                 link_hash,file_hash=file_id.split('_')
                 file=Files_Model.objects.get(urlhash=file_hash)
                 link=Link_Model.objects.filter(link_hash=link_hash,file_hash__in=[file]).first()
+                print(link,'1st call')
                 if not link:
                     link=Link_Model.search_parent_file(link_hash,file)
+                    print(link,'second call')
                 if link:
                         res = {
                             'BaseFileName': file.file_name,
