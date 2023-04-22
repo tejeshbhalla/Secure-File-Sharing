@@ -1641,20 +1641,21 @@ class Download_Multi_File_Folder(APIView):
                 group_hash=request.data['urlhash']
                 files_hash=request.data['file_hash'].split(',')
                 folders_hash=request.data['folder_hash'].split(',')
-                files=Files_Model.objects.filter(urlhash__in=files_hash)
-                folders=Folder.objects.filter(urlhash__in=folders_hash)
-                grp = People_Groups.objects.filter(
-                    Q(files__in=files) | Q(folders__in=folders),
-                    group_hash=group_hash
-                ).first()
-
-                if grp:
-                    sub_files=[]
-                    for i in folders:
-                        _,sub_files_=i.get_subfolders_and_files()
-                        sub_files_.extend(sub_files_)
-                    files.extend(sub_files)
-                    blob_names.extend([(i.content.name,i.order_path()) for i in files])
+                for i in files_hash:
+                    obj=Files_Model.objects.get(urlhash=i)
+                    link=Link_Model.objects.filter(file_hash__in=[obj],link_hash=link_hash).first()
+                    if not link:
+                        link=Link_Model.search_parent_file(link_hash,obj)
+                    if link and link.is_downloadable:
+                        blob_names.append((obj.content.name,obj.order_path()))
+                for j in folders_hash:
+                    obj=Folder.objects.get(urlhash=j)
+                    link=Link_Model.objects.filter(folder_hash__in=[obj],link_hash=link_hash).first()
+                    if not link:
+                        link=Link_Model.search_parent(link_hash,obj)
+                    if link and link.is_downloadable:
+                        _,files=obj.get_subfolders_and_files()
+                        blob_names.extend([(i.content.name,i.order_path()) for i in files])
                 else:
                     return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
 
@@ -1703,8 +1704,6 @@ class Download_Multi_File_Folder_Link(APIView):
             link_hash=request.data['link_hash']
             files_hash=request.data['file_hash']
             folders_hash=request.data['folder_hash']
-            files=Files_Model.objects.filter(urlhash__in=files_hash)
-            folders=Folder.objects.filter(urlhash__in=folders_hash)
             
             for i in files_hash:
                 obj=Files_Model.objects.get(urlhash=i)
