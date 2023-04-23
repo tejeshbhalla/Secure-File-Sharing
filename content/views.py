@@ -1430,6 +1430,8 @@ class Get_File_Detail(APIView):
             if type=='group':
                 obj=Files_Model.objects.get(urlhash=file_hash)
                 grp=People_Groups.objects.filter(group_hash=obj_hash,files__in=[obj])[0]
+                if not grp:
+                    grp=People_Groups.search_parent_file(obj_hash,obj)
                 grp_per=Group_Permissions.objects.filter(group=grp,user=user)[0]
                 if grp:
                     data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
@@ -1442,6 +1444,8 @@ class Get_File_Detail(APIView):
             if type=='internal_share':
                 obj=Files_Model.objects.get(urlhash=file_hash)
                 internal_share=Internal_Share.objects.filter(file_hash=obj,shared_with=user)[0]
+                if not internal_share:
+                    internal_share=Internal_Share_Folders.search_parent_file(user,obj)
                 data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                     "date_created":str(obj.date_uploaded)[0:11],'is_file':True,'is_downloadable':internal_share.is_downloadable,
