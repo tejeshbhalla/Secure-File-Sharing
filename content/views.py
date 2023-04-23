@@ -943,7 +943,7 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 4 * 1024 * 1024  # 4 MB chunks
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
                 while True:
                     chunk = file.read(chunk_size)
