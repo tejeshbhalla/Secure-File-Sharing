@@ -1437,6 +1437,7 @@ class Get_File_Detail(APIView):
                     data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                     "date_created":str(obj.date_uploaded)[0:11],'is_file':True,
+                    'can_add_delete_content':grp_per.can_add_delete_content,
                     'can_share_content':grp_per.can_share_content,
                     'can_download_content':grp_per.can_download_content,'is_proctored':grp_per.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if grp_per.can_download_content else None}
                 return Response(data=data,status=status.HTTP_200_OK)
@@ -1449,8 +1450,9 @@ class Get_File_Detail(APIView):
                 data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                     "date_created":str(obj.date_uploaded)[0:11],'is_file':True,'is_downloadable':internal_share.is_downloadable,
+                    'can_add_delete_content':internal_share.can_add_delete_content,
                     'can_share_content':internal_share.can_share_content,
-                    'can_download_content':internal_share.can_download_content,'is_proctored':internal_share.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if internal_share.is_downloadable else None}
+                    'can_download_content':internal_share.can_download_content,'is_proctored':internal_share.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if internal_share.can_download_content else None}
                 return Response(data=data,status=status.HTTP_200_OK)
             if type=='home':
                 obj=Files_Model.objects.get(owner=user,urlhash=file_hash)
