@@ -934,7 +934,8 @@ class CheckFileInfo(APIView):
                 else:
                     share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
                     if not share:
-                        share=Internal_Share_Folders.search_parent_file(user,file)    
+                        share=Internal_Share_Folders.search_parent_file(user,file)  
+                    print(share,share.can_add_delete_content,share.can_download_content,share.can_download_content)  
                     res = {
                         'BaseFileName': file.file_name,
                         'Size': file.content.size,
@@ -970,9 +971,9 @@ class CheckFileInfo_Link(APIView):
                             'Size': file.content.size,
                             'UserId': 'Guest',
                             'UserCanWrite':False,
-                            'HidePrintOption':not link.is_downloadable,
-                            'DisableExport':not link.is_downloadable,
-                            'DisablePrint':not link.is_downloadable,
+                            'HidePrintOption': link.is_downloadable,
+                            'DisableExport': link.is_downloadable,
+                            'DisablePrint': link.is_downloadable,
                             'WatermarkText':link.owner.username,
                         }
                         print('data sent')
