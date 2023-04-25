@@ -134,7 +134,7 @@ def download_and_upload_folder_google(azure_connection_string, container_name, a
                 headers_with_range["Range"] = f"bytes={byte_range_start}-{byte_range_end}"
                 response = requests.get(download_url, headers=headers_with_range, stream=True)
                 chunk = response.content
-                if not chunk:
+                if not chunk or response.status_code!=206:
                     break
                 blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=response.headers["content-type"]))
                 byte_range_start += chunk_size
