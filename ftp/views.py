@@ -395,6 +395,7 @@ class List_Google_Drive_Folders(APIView):
                 token_detail=json.loads(server.user_token)
             else:
                 token_detail=server.user_token
+            print(token_detail)
             access_token=token_detail['access_token']
             refreshToken=token_detail['refresh_token']
             print('hi',access_token,refreshToken)
