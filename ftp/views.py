@@ -361,6 +361,7 @@ class List_Google_Drive_Folders(APIView):
             }
 
         response = requests.get(url, headers=headers,params=params)
+        print(response)
         if response.status_code == 200:
             data = response.json()
             children = []
