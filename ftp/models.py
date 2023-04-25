@@ -16,7 +16,7 @@ class Server_Connection(models.Model):
 
 
 class Sync_Direction(models.Model):
-    folder_from_id=models.CharField(max_length=50)
+    folder_from_id=models.CharField(max_length=1000)
     folder_to_id=models.ForeignKey(Folder,on_delete=models.CASCADE,related_name='folder_syncs')
     connection=models.ForeignKey(Server_Connection,on_delete=models.CASCADE,related_name='connection_syncs')
     status_url=models.URLField(max_length=1000,null=True,blank=True)
