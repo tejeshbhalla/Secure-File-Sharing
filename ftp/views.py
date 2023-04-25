@@ -395,16 +395,13 @@ class List_Google_Drive_Folders(APIView):
                 token_detail=json.loads(server.user_token)
             else:
                 token_detail=server.user_token
-            print(token_detail)
             access_token=token_detail['access_token']
             refreshToken=token_detail['refresh_token']
-            print('hi',access_token,refreshToken)
             token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
             if changed:
-                token_detail['access_token']=token
+                token_detail['access_token']=token['access_token']
                 server.user_token=token_detail
                 server.save()
-            print(token_detail)
             children,count = self.get_folder_children(id, token_detail['access_token'])
             return Response(data={'children': children, 'parent': id,'file_count':count}, status=200)
         except Exception as e:
