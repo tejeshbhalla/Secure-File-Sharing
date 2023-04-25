@@ -318,13 +318,10 @@ class Start_Sync(APIView):
                             obj.user_token=token_changed
                             obj.save()
                     else:
-                        print('hii')
+                        access_token=token_detail['access_token']
                         token,changed=check_and_refresh_googledrive(request,token_detail['access_token'],token_detail['refresh_token'])
-                        print(token,changed,'google')
                         if changed:
-                            token_detail=token
-                        if type(token_detail)==str:
-                            token_detail=json.loads(token_detail)
+                            access_token=token
                     
                     command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type_]
                     #hi
