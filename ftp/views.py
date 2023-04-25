@@ -306,7 +306,8 @@ class Start_Sync(APIView):
                     username=user.username
                     folder_to_id=j.folder_to_id.urlhash
                     folder_id=j.folder_from_id
-                    token_detail=json.loads(obj.user_token)
+                    if type(token_detail)==str:
+                        token_detail=json.loads(obj.user_token)
                     type_=obj.type
                     if type_=='onedrive':
                         token_changed,changed=check_and_refresh_token_onedrive('str',token_detail['access_token'],token_detail['refresh_token'])
@@ -358,7 +359,6 @@ class List_Google_Drive_Folders(APIView):
             raise Exception(f"Error: {response.text}")
 
     def get_folder_children(self, folder_id, access_token):
-        print(folder_id,access_token)
         if folder_id=='root':
             url='https://www.googleapis.com/drive/v3/files'
         else:
@@ -372,7 +372,6 @@ class List_Google_Drive_Folders(APIView):
             }
 
         response = requests.get(url, headers=headers,params=params)
-        print(response)
         if response.status_code == 200:
             data = response.json()
             children = []
