@@ -63,7 +63,7 @@ def download_and_upload_folder_onedrive(azure_connection_string,container_name,a
         # If the item is a file, download and upload it to Blob storage
         else:
             # Download and upload the file content in chunks
-            chunk_size = 100*1024 * 1024 # 4 MB
+            chunk_size = 40*1024 * 1024 # 4 MB
             download_url = item['@microsoft.graph.downloadUrl']
             #response = requests.get(download_url, headers=headers, stream=True)
             blob_service_client = BlobServiceClient.from_connection_string(
@@ -114,7 +114,7 @@ def download_and_upload_folder_google(azure_connection_string, container_name, a
         # If the item is a file, download and upload it to Blob storage
         else:
             # Download and upload the file content in chunks
-            chunk_size = 100 * 1024 * 1024  # 4 MB
+            chunk_size = 40 * 1024 * 1024  # 4 MB
             download_url = f"https://www.googleapis.com/drive/v3/files/{item_id}?alt=media"
             blob_service_client = BlobServiceClient.from_connection_string(azure_connection_string)
             if sub_path:
