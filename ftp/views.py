@@ -125,9 +125,11 @@ class Post_Code(APIView):
                 email_obj=Server_Connection.objects.filter(user_email=email).first()
                 if email_obj:
                     obj.user_token=email_obj.user_token
+                    obj.user_email=email_obj.user_email
                     obj.save()
                 else:
                     obj.user_token=token
+                    obj.user_email=email
                     obj.save()
             return Response(status=302, headers={'location': f'https://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/googledrive'})
 
