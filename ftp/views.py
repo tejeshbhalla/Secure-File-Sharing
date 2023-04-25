@@ -400,7 +400,7 @@ class List_Google_Drive_Folders(APIView):
             refreshToken=token_detail['refresh_token']
             token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
             if changed:
-                token_detail['access_token']=token['access_token']
+                token_detail['access_token']=json.loads(token)['access_token']
                 server.user_token=token_detail
                 server.save()
             children,count = self.get_folder_children(id, token_detail['access_token'])
