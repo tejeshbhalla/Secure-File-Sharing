@@ -177,7 +177,7 @@ def check_and_refresh_googledrive(request, access_token, refresh_token):
         # Define the data to include in the POST request to refresh the token
         data = {
             'client_id': CLIENT_ID,
-            'client_secret': CLIENT_SECRET,
+            'client_secret': CLIENT_SECRET_GOOGLE_DRIVE,
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token'
         }
