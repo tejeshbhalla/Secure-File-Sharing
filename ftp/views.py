@@ -331,7 +331,7 @@ class List_Google_Drive_Folders(APIView):
     permission_classes = [IsAuthenticated]
 
     def get_folder_name(self, folder_id, access_token):
-        if folder_id=='my-drive':
+        if folder_id=='root':
             url='https://www.googleapis.com/drive/v3/files'
         else:
             url = f"https://www.googleapis.com/drive/v3/files?q='{folder_id}' in parents"
@@ -347,7 +347,7 @@ class List_Google_Drive_Folders(APIView):
             raise Exception(f"Error: {response.text}")
 
     def get_folder_children(self, folder_id, access_token):
-        if folder_id=='my-drive':
+        if folder_id=='root':
             url='https://www.googleapis.com/drive/v3/files'
         else:
             url = f"https://www.googleapis.com/drive/v3/files?q='{folder_id}' in parents"
