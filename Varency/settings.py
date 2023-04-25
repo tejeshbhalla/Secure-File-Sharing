@@ -224,7 +224,7 @@ client_secret = "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"
 #google drive 
 CLIENT_ID = '439305909942-2u20aq9v6jsn2okfpjd3tu5rhmdt991u.apps.googleusercontent.com'
 CLIENT_SECRET_GOOGLE_DRIVE = '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'
-OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive'
+OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email'
 REDIRECT_URI = 'https://api.dev.varency.com/api/sync/google_drive/get_token'
 TOKEN_URL_GOOGLE_DRIVE='https://accounts.google.com/o/oauth2/token'
 
