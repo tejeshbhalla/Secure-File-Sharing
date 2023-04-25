@@ -318,8 +318,9 @@ class Start_Sync(APIView):
                             obj.user_token=token_changed
                             obj.save()
                     else:
-                        print(token_detail)
+                        print('hii')
                         token,changed=check_and_refresh_googledrive(request,token_detail['access_token'],token_detail['refreshToken'])
+                        print(token,changed,'google')
                         if changed:
                             token_detail=token
                         if type(token_detail)==str:
