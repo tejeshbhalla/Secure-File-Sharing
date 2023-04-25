@@ -306,10 +306,9 @@ class Start_Sync(APIView):
                     username=user.username
                     folder_to_id=j.folder_to_id.urlhash
                     folder_id=j.folder_from_id
+                    token_detail=obj.user_token
                     if type(token_detail)==str:
                         token_detail=json.loads(obj.user_token)
-                    else:
-                        token_detail=obj.user_token
                     type_=obj.type
                     if type_=='onedrive':
                         token_changed,changed=check_and_refresh_token_onedrive('str',token_detail['access_token'],token_detail['refresh_token'])
