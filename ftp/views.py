@@ -347,6 +347,7 @@ class List_Google_Drive_Folders(APIView):
             raise Exception(f"Error: {response.text}")
 
     def get_folder_children(self, folder_id, access_token):
+        print(folder_id,access_token)
         if folder_id=='root':
             url='https://www.googleapis.com/drive/v3/files'
         else:
