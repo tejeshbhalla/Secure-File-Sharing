@@ -357,7 +357,7 @@ class List_Google_Drive_Folders(APIView):
             "Content-Type": "application/json"
         }
         params = {
-                 "fields": "id,name",
+                # "fields": "id,name",
             }
 
         response = requests.get(url, headers=headers,params=params)
