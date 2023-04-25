@@ -193,3 +193,17 @@ def check_and_refresh_googledrive(request, access_token, refresh_token):
     return access_token, changed
 
 
+
+
+
+def get_user_email(access_token):
+    url = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    headers = {"Authorization": f"Bearer {access_token}"}
+    params = {"alt": "json"}
+
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("email")
+    else:
+        raise Exception(f"Error: {response.text}")

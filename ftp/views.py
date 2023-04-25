@@ -13,7 +13,7 @@ from files.jwt_utils import JWTauthentication
 from content.models import Folder
 from .serializers import ServerSerializer,SyncDirectionSerializer,SyncDirectionSerializer2
 from files.models import NewUser
-from .utils import check_and_refresh_googledrive,get_access_token_from_code_googledrive,check_and_refresh_token_onedrive,get_authorize_url,get_authorize_url_onedrive,get_access_token_from_code
+from .utils import get_user_email,check_and_refresh_googledrive,get_access_token_from_code_googledrive,check_and_refresh_token_onedrive,get_authorize_url,get_authorize_url_onedrive,get_access_token_from_code
 from oauth2client.client import  OAuth2WebServerFlow
 import requests
 import json
@@ -118,9 +118,18 @@ class Post_Code(APIView):
             code=request.GET['code']
             token=get_access_token_from_code_googledrive(request,code)
             obj=Server_Connection.objects.filter(server_name=server_name).first()
-            obj.user_token=token
-            obj.save()
-            return Response(status=302, headers={'location': f'http://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/googledrive'})
+            if token:
+                tk=json.loads(token)
+                access_token=tk['access_token']
+                email=get_user_email(access_token)
+                email_obj=Server_Connection.objects.filter(user_email=email).first()
+                if email_obj:
+                    obj.user_token=email_obj.user_token
+                    obj.save()
+                else:
+                    obj.user_token=token
+                    obj.save()
+            return Response(status=302, headers={'location': f'https://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/googledrive'})
 
         except Exception as e:
             
@@ -201,7 +210,7 @@ class Post_Code_OneDrive(APIView):
             obj=Server_Connection.objects.filter(server_name=server_name).first()
             obj.user_token=token
             obj.save()
-            return Response(status=302, headers={'location': f'http://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/onedrive'})
+            return Response(status=302, headers={'location': f'https://{user.tenant.subdomain}.{FRONT_END_URL}integrations/server/onedrive'})
         except Exception as e:
             return Response(data={'message':{str(e)}},status=status.HTTP_400_BAD_REQUEST)
 
