@@ -181,7 +181,7 @@ def check_and_refresh_googledrive(request, access_token, refresh_token):
             'refresh_token': refresh_token,
             'grant_type': 'refresh_token'
         }
-
+        print(refresh_token)
         # Make a POST request to the endpoint to refresh the token
         response = requests.post(endpoint, data=data)
         print(response.text)
