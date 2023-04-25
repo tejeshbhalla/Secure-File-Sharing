@@ -155,7 +155,7 @@ def call():
     container_name=arg1[6]
     type=arg1[7]
     if type=='googledrive':
-        download_and_upload_folder_google(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
+        download_and_upload_folder_google(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\googledrive\\{folder_in}')
     else:
         download_and_upload_folder_onedrive(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
 
