@@ -129,19 +129,22 @@ def download_and_upload_folder_google(azure_connection_string, container_name, a
                     blob_client.create_append_blob()
             byte_range_start = 0
             byte_range_end = chunk_size - 1
-            while True:
-                headers_with_range = headers.copy()
-                headers_with_range["Range"] = f"bytes={byte_range_start}-{byte_range_end}"
-                response = requests.get(download_url, headers=headers_with_range, stream=True)
-                chunk = response.content
-                if not chunk or response.status_code!=206:
-                    break
-                blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=response.headers["content-type"]))
-                byte_range_start += chunk_size
-                byte_range_end += chunk_size
-            blob_client.upload_blob(b'', blob_type="AppendBlob")
-            arr = item_path.split('\\')
-            create_content(item_name, arr[0], item_path, arr[2])
+            try:
+                while True:
+                    headers_with_range = headers.copy()
+                    headers_with_range["Range"] = f"bytes={byte_range_start}-{byte_range_end}"
+                    response = requests.get(download_url, headers=headers_with_range, stream=True)
+                    chunk = response.content
+                    if not chunk or response.status_code!=206:
+                        break
+                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=response.headers["content-type"]))
+                    byte_range_start += chunk_size
+                    byte_range_end += chunk_size
+                blob_client.upload_blob(b'', blob_type="AppendBlob")
+                arr = item_path.split('\\')
+                create_content(item_name, arr[0], item_path, arr[2])
+            except Exception as e:
+                continue
 
 
 
