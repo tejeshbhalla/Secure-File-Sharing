@@ -24,7 +24,7 @@ class Sync_Direction(models.Model):
 
 
     def save(self,*args, **kwargs):
-        syn=Sync_Direction.objects.filter(folder_from_id=self.folder_from_id)
-        if len(syn):
+        syn=Sync_Direction.objects.filter(folder_from_id=self.folder_from_id).first()
+        if syn and syn.connection.type==self.connection.type:
             raise ValidationError(f"Sync from {self.folder_from_name} already exists")
         super(Sync_Direction, self).save(*args, **kwargs)
