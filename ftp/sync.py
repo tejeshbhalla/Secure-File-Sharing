@@ -56,7 +56,7 @@ def download_and_upload_folder_onedrive(azure_connection_string,container_name,a
     for item in response.json()["value"]:
         item_id = item["id"]
         item_name = item["name"]
-        item_path = os.path.join(folder_path, item_name)
+        item_path =  item_name
         # If the item is a folder, recursively call this function
         if not (len(item_name.split('.'))>1):
             download_and_upload_folder_onedrive(azure_connection_string,container_name,access_token,item_id, parent_id=item,sub_path=sub_path+'\\'+item_name)
@@ -107,7 +107,7 @@ def download_and_upload_folder_google(azure_connection_string, container_name, a
     for item in response.json()["files"]:
         item_id = item["id"]
         item_name = item["name"]
-        item_path = os.path.join(folder_path, item_name)
+        item_path =  item_name
         # If the item is a folder, recursively call this function
         if item["mimeType"] == "application/vnd.google-apps.folder":
             download_and_upload_folder_google(azure_connection_string, container_name, access_token, item_id, parent_id=item, sub_path=sub_path + '\\' + item_name)
@@ -155,9 +155,9 @@ def call():
     container_name=arg1[6]
     type=arg1[7]
     if type=='googledrive':
-        download_and_upload_folder_google(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\googledrive\\{folder_in}')
+        download_and_upload_folder_google(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\{folder_in}')
     else:
-        download_and_upload_folder_onedrive(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\onedrive\\{folder_in}')
+        download_and_upload_folder_onedrive(connection_string,container_name,access_token,folder_path=folder_to_sync,sub_path=f'{username}\\{folder_in}')
 
 
 call()
