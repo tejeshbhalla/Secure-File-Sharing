@@ -30,6 +30,7 @@ urlpatterns = [
     path('request/file_upload/<str:urlhash>',Request_File_Upload.as_view(),name='request file upload'),
     path("file/internal_file",Internal_File_Notification.as_view(),name='create log for internal share view file'),
     path('request/create_request',Request_File_Create.as_view(),name='create request'),
+    path('request/delete_request/<str:urlhash>',Request_File_Create.as_view(),name='delete request'),
     path('deleted/permenently_delete',Permenently_Delete.as_view(),name='permenently delete'),
     path("file_update/<str:urlhash>",CreateFilesView.as_view(),name='update file'),
     path('internal/notification/<str:file_hash>',Internal_File_Notification.as_view(),name='internal notification'),

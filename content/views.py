@@ -189,7 +189,7 @@ class Internal_Folder_Detail(APIView):
                     'can_download_content':f.can_download_content,'is_proctored':f.is_proctored,'download_link':download_url_generate_sas(file,get_client_ip(request)) if f.is_downloadable else None})
                 all_requests=user.requests_recieved.all()
                 for i in all_requests:
-                    data['requests'].append({'file_name':i.file_name,'user_to':i.user_to.email,'request_hash':i.request_hash})
+                    data['requests'].append({'file_name':i.file_name,'user_to':i.user_to.email,'request_hash':i.request_hash,'user_from':i.user_from.email})
                 return Response(data,status.HTTP_200_OK)
             folder=Folder.objects.get(urlhash=urlhash)
             all_internals_folders=user.folders_shared_with_you
@@ -1062,6 +1062,17 @@ class Request_File_Create(APIView):
             return Response(data=sz.errors,status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+    def delete(self,request,urlhash):
+        try:
+            tenant=get_tenant(request)
+            r=Request_File.objects.get(request_hash=urlhash)
+            if r:
+                r.delete()
+                return Response('successfully redacted request',status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(f'{e}',status=status.HTTP_400_BAD_REQUEST)
+        
 
 
 class Request_File_Upload(APIView):
