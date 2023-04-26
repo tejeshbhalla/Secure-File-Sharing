@@ -278,9 +278,9 @@ class Otp_verify_view(APIView):
             tenant=get_tenant(request)
             user=NewUser.objects.filter(tenant=tenant).filter(email=request.data['email']).first()
             otp_model=user.otps.all().first()
-            utc=pytz.utc
+            now=timezone.now()
             if otp_model.otp==request.data['otp']:
-                if otp_model.time_expired<utc.localize(timezone.now()):
+                if otp_model.time_expired<now:
                    
                     return Response(data={"message":"otp expired"},status=status.HTTP_400_BAD_REQUEST)
                 d={'username':user.username, 'token':user.token('login')}
