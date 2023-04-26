@@ -1654,7 +1654,7 @@ class Download_Multi_File_Folder(APIView):
                     _,files=obj.folder_hash.get_subfolders_and_files()
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
             if type=='group':
-                group_hash=request.data['urlhash']
+                group_hash=request.data['group_hash']
                 files_hash=request.data['file_hash'].split(',')
                 folders_hash=request.data['folder_hash'].split(',')
                 for i in files_hash:
