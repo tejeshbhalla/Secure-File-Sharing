@@ -559,7 +559,7 @@ class Group_Folder_Detail(APIView):
                 data={'files':[],'children':[],'parent_permissions':{'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read}}
                 for j in folders:
                     data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read,
-                'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if per.can_download_content else None,'can_download_content':per.can_download_content})
+                'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(j,get_client_ip(request))}' if per.can_download_content else None,'can_download_content':per.can_download_content})
                 for i in files:
                     data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download_content':per.can_download_content,
                                           'download_link':download_url_generate_sas(i,get_client_ip(request)) if per.can_download_content else None})
@@ -570,7 +570,7 @@ class Group_Folder_Detail(APIView):
             files=folder.files.all()
             for j in children:
                 data['children'].append({'urlhash':j.urlhash,'name':j.name,'owner':j.owner.username,'is_folder':True,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read,
-                                         'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if per.can_download_content else None,'can_download_content':per.can_download_content})
+                                         'download_link':f'{settings.BACKEND_URL}api/content/folder_download/{create_media_jwt(j,get_client_ip(request))}' if per.can_download_content else None,'can_download_content':per.can_download_content})
             for i in files:
                 data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read,'can_share':per.can_share_content,'can_download_content':per.can_download_content,
                                       'download_link':download_url_generate_sas(i,get_client_ip(request)) if per.can_download_content else None})
