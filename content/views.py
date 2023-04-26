@@ -1128,7 +1128,6 @@ class Link_Count_Dashboard(APIView):
             total_links=len(all_links)
             active_links=0
             now=timezone.now()
-            now=pytz.utc.localize(now)
             for i in all_links:
                 if i.expiry_date and i.expiry_date<now or (i.deleted):
                     continue
