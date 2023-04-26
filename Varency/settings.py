@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'Varency.rate_limit.RateLimitMiddleware',
+    'Varency.ip_check.IPCheckMiddleware',
     #'Varency.referer_middleware.RefererMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
