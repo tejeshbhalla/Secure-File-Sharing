@@ -34,6 +34,7 @@ from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
 from django.db.models import Q
 import gevent
+from .utils import validate_share
 
 
 
@@ -368,6 +369,7 @@ class Share_File(APIView):
                         if obj==None or obj.owner!=owner:
                             parent_share=Internal_Share_Folders.search_parent_file(owner,file)
                             if parent_share:
+                                validate_share(parent_share,request.data)
                                 obj=Internal_Share(owner=file.owner,shared_with=user,file_hash=file)
                                 obj.can_add_delete_content=can_add_delete_content
                                 obj.can_share_content=can_share_content
@@ -396,6 +398,7 @@ class Share_File(APIView):
                         if folder==None or folder.owner!=owner:
                             parent_share=Internal_Share_Folders.search_parent(owner,folder)
                             if parent_share:
+                                validate_share(parent_share,request.data)
                                 obj=Internal_Share_Folders(owner=folder.owner,shared_with=user,folder_hash=folder)
                                 obj.can_add_delete_content=can_add_delete_content
                                 obj.can_share_content=can_share_content

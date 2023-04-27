@@ -23,7 +23,7 @@ import requests
 from requests_toolbelt import MultipartEncoder
 from django.core.cache import cache
 import re
-
+from django.core.exceptions import ValidationError
 
 
 
@@ -459,3 +459,20 @@ def get_video_otp(obj):
     return None
 
 
+
+
+def validate_share(internal_share,data):
+    can_add_delete_content=data['can_add_delete_content']
+    can_share_content=data['can_share_content']
+    can_download_content=data['can_download_content']
+    is_proctored=data['is_proctored']
+    if not internal_share.can_add_delete_content and can_add_delete_content:
+        raise ValidationError('Invalid privelages cant have permission you dont own')
+    if not internal_share.can_share_content and can_share_content:
+        raise ValidationError('Invalid privelages cant have permission you dont own')
+    if not internal_share.can_download_content and can_download_content:
+        raise ValidationError('Invalid privelages cant have permission you dont own')
+    if not internal_share.is_proctored and is_proctored:
+        raise ValidationError('Invalid privelages cant have permission you dont own')
+
+    
