@@ -1656,8 +1656,11 @@ class Download_Multi_File_Folder(APIView):
                 group_hash=request.data['group_hash']
                 files_hash=request.data['file_hash'].split(',')
                 folders_hash=request.data['folder_hash'].split(',')
+                print(files_hash,folders_hash)
                 for i in files_hash:
                     obj=Files_Model.objects.filter(urlhash=i).first()
+                    if not obj:
+                        continue
                     grp=People_Groups.objects.filter(files__in=[obj],group_hash=group_hash).first()
                     if not grp:
                         grp=People_Groups.search_parent_file(group_hash,obj)
@@ -1665,6 +1668,8 @@ class Download_Multi_File_Folder(APIView):
                         blob_names.append((obj.content.name,obj.order_path()))
                 for j in folders_hash:
                     obj=Folder.objects.filter(urlhash=j).first()
+                    if not obj:
+                        continue
                     grp=People_Groups.objects.filter(folders__in=[obj],group_hash=group_hash).first()
                     if not grp:
                         grp=People_Groups.search_parent(group_hash,obj)
