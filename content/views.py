@@ -1676,8 +1676,7 @@ class Download_Multi_File_Folder(APIView):
                     if grp and grp.is_downloadable:
                         _,files=obj.get_subfolders_and_files()
                         blob_names.extend([(i.content.name,i.order_path()) for i in files])
-                else:
-                    return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
+
 
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
