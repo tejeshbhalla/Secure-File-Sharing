@@ -243,6 +243,17 @@ class People_Groups(models.Model):
                 folder=folder.parent
         return None
     
+    @staticmethod
+    def search_parent(group_hash,folder):
+        folder=folder.parent
+        while folder:
+            group=People_Groups.objects.filter(group_hash=group_hash,folders__in=[folder]).first()
+            if group:
+                return group
+            else:
+                folder=folder.parent
+        return None
+    
 
 class Group_Permissions(models.Model):
     group=models.ForeignKey(People_Groups,related_name='group_permissions',on_delete=models.CASCADE)
@@ -305,3 +316,4 @@ class Group_logs(models.Model):
     actions=models.JSONField()
     group=models.ForeignKey(People_Groups,related_name='group_logs',on_delete=models.CASCADE,null=True,blank=True)
     datetime=models.DateTimeField(default=datetime.now())
+
