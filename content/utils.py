@@ -194,6 +194,7 @@ def link_auth_check(obj,password=''):
     
 
 def download_url_generate_sas(obj,ip):
+    print(obj.content.name)
     blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
     blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER,blob=obj.content.name)
     start_time = datetime.utcnow()
