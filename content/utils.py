@@ -22,6 +22,7 @@ import json
 import requests
 from requests_toolbelt import MultipartEncoder
 from django.core.cache import cache
+import re
 
 
 
@@ -194,18 +195,20 @@ def link_auth_check(obj,password=''):
     
 
 def download_url_generate_sas(obj,ip):
-    print(obj.content.name)
+    
     blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
     blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER,blob=obj.content.name)
     start_time = datetime.utcnow()
     expiry_time = start_time + timedelta(minutes=EXPIRY_SAS_TIME)
     permissions = BlobSasPermissions(read=True)
     content_disposition = f"attachment; filename={obj.file_name}"
+    name=obj.content.name
+    name = re.sub(r"\\", "/", name)
     sas_token = generate_blob_sas(
     account_name=blob_service_client.account_name,
     account_key=blob_service_client.credential.account_key,
     container_name=AZURE_CONTAINER,
-    blob_name=obj.content.name,
+    blob_name=name,
     permission=permissions,
     expiry=expiry_time,
     start=start_time,
