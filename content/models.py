@@ -341,7 +341,7 @@ class Internal_Share_Folders(models.Model):
 
     @staticmethod
     def search_parent(user,sub_folder):
-        folder=sub_folder.parent
+        folder=sub_folder
         while folder:
             share=Internal_Share_Folders.objects.filter(shared_with=user,folder_hash=folder).first()
     
