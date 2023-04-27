@@ -232,6 +232,8 @@ class People_Groups(models.Model):
     
     @staticmethod
     def search_parent_file(group_hash,file):
+        if not file:
+            return None
         folder=file.folder
         while folder:
             group=People_Groups.objects.filter(group_hash=group_hash,files__in=[file])
