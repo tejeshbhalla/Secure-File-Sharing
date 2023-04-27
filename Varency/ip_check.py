@@ -29,7 +29,7 @@ class IPCheckMiddleware:
                 cache.set(cache_key, ip_info, 3600)
 
         # Check if the IP address is from a proxy or hosting server
-        if ip_info['proxy'] or ip_info['hosting']:
+        if ip_info['proxy']:
             return HttpResponseForbidden('Invalid Request',status=405)
 
         # If the IP information is in the cache and it's not from a proxy or hosting server, proceed with the request
