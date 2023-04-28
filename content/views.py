@@ -1046,10 +1046,10 @@ class Deleted_Folder_Details_All(APIView):
             data={"name":"trash","parent":None,"owner":{"email":user.email,"username":user.username},"files":[],"children":[]}
             for i in files:
                 data['files'].append({'urlhash':i.urlhash,'name':i.file_name,'owner':i.owner.username,'is_file':True,
-                                      'date_created':i.date_uploaded[0:11]})
+                                      'date_created':i.date_uploaded})
             for i in folders:
                 data['children'].append({'urlhash':i.urlhash,'name':i.name,'owner':i.owner.username,'is_file':True,
-                                      'date_created':i.date_created[0:11]})
+                                      'date_created':i.date_created})
             return Response(data=data,status=status.HTTP_200_OK)
         except Exception as e:
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
