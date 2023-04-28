@@ -24,6 +24,7 @@ from requests_toolbelt import MultipartEncoder
 from django.core.cache import cache
 import re
 from django.core.exceptions import ValidationError
+from .models import Internal_Share,Internal_Share_Folders
 
 
 
@@ -476,3 +477,10 @@ def validate_share(internal_share,data):
         raise ValidationError('Invalid privelages cant have permission you dont own')
 
     
+def validate_share_already_exist(obj,user,owner):
+    folder=Internal_Share_Folders.objects.filter(folder_hash=obj,shared_with=user,owner=owner).first()
+    if folder:
+        raise ValidationError(f'Already shared folder with {user.username} kindly update their permissions in case of a change')
+    file=Internal_Share.objects.filter(file_hash=obj,shared_with=user,owner=owner).first()
+    if file:
+        raise ValidationError(f'Already shared file with {user.username} kindly update their permissions in case of a change')

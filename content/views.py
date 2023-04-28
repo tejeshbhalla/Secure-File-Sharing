@@ -34,7 +34,7 @@ from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
 from django.db.models import Q
 import gevent
-from .utils import validate_share
+from .utils import validate_share,validate_share_already_exist
 
 
 
@@ -377,6 +377,7 @@ class Share_File(APIView):
                     for file_hash in request.data['file_hash']:
                         obj=get_object_or_None(Files_Model,urlhash=file_hash)
                         file=Files_Model.objects.get(urlhash=file_hash)
+                        validate_share_already_exist(file,user,owner)
                         if obj==None or obj.owner!=owner:
                             parent_share=Internal_Share_Folders.search_parent_file(owner,file)
                             if parent_share:
@@ -406,6 +407,7 @@ class Share_File(APIView):
                                 obj.save()
                     for folder_hash in request.data['folder_hash']:
                         folder=get_object_or_None(Folder,urlhash=folder_hash)
+                        validate_share_already_exist(folder,user,owner)
                         if folder==None or folder.owner!=owner:
                             parent_share=Internal_Share_Folders.search_parent(owner,folder)
                             if parent_share:
