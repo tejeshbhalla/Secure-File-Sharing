@@ -328,15 +328,6 @@ class Internal_Share_Folders(models.Model):
     def __str__(self):
         return f'{self.link_hash}_{self.owner}'
     def delete(self, *args, **kwargs):
-        sub_files,sub_folders=self.folder_hash.get_subfolders_and_files()
-        for i in sub_files:
-            sub_share=Internal_Share.objects.filter(owner=self.owner,file_hash=i,shared_with=self.shared_with).first()
-            if sub_share:
-                sub_share.delete()
-        for i in sub_folders:
-            sub_share=Internal_Share_Folders.objects.filter(owner=self.owner,folder_hash=i,shared_with=self.shared_with).first()
-            if sub_share:
-                sub_share.delete()
         super(Internal_Share_Folders, self).delete(args, kwargs)
 
     @staticmethod
