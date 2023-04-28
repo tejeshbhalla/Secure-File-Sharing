@@ -173,7 +173,10 @@ class Internal_Folder_Detail(APIView):
                 all_internals_folders=user.folders_shared_with_you.all()
                 data={"name":"root","parent":None,"files":[],"children":[],'requests':[]}
                 for i in all_internals_folders:
+    
                     folders=i.folder_hash
+                    if folders.deleted:
+                        continue
                     data['children'].append({"urlhash":folders.urlhash,"name":folders.name,"owner":folders.owner.username,
                     "date_created":folders.date_created,"date_modified":folders.date_modified,
                     'path':folders.order_parent(),
@@ -183,6 +186,8 @@ class Internal_Folder_Detail(APIView):
                     'can_add_delete_content':i.can_add_delete_content,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(folders,get_client_ip(request))}' if i.can_download_content else None })
                 for f in all_internals_files:
                     file=f.file_hash
+                    if file.deleted:
+                        continue
                     data['files'].append({"urlhash":file.urlhash,"name":file.file_name,
                     "size":str(int(file.content.size/1024))+" kb","owner":file.owner.username,
                     "date_created":str(file.date_uploaded)[0:11],'is_file':True,'is_downloadable':f.is_downloadable,
@@ -212,6 +217,8 @@ class Internal_Folder_Detail(APIView):
             files=folder.files.all()
             folders=folder.children.all()
             for i in files:
+                 if i.deleted:
+                     continue
                  data['files'].append({"urlhash":i.urlhash,"name":i.file_name,
                     "size":str(int(i.content.size/1024))+" kb","owner":i.owner.username,
                     "date_created":str(i.date_uploaded)[0:11],'is_file':True,'is_downloadable':internal_share_folder.is_downloadable,
@@ -220,6 +227,8 @@ class Internal_Folder_Detail(APIView):
                     'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,
                     'download_link':download_url_generate_sas(i,get_client_ip(request)) if internal_share_folder.can_download_content else None})
             for j in folders:
+                if j.deleted:
+                    continue
                 data['children'].append({"urlhash":j.urlhash,"name":j.name,"owner":j.owner.username,"date_created":j.date_created,"date_modified":j.date_modified,'path':j.order_parent(),'hash_path':j.order_parent_urlhash(),
                 'is_downloadable':internal_share_folder.is_downloadable,
                     'can_share_content':internal_share_folder.can_share_content,
@@ -844,12 +853,10 @@ class Delete_Multi_Files_Folders(APIView):
                 files.append(file)  
             for i in files:
                 i.link_files.all().delete()
-                i.internal_link_files.all().delete()
                 i.last_deleted=timezone.now()
                 i.deleted=True
                 i.save()
             for j in folders:
-                j.internal_link_folders.all().delete()
                 j.link_folders.all().delete()
                 j.last_deleted=timezone.now()
                 j.deleted=True
