@@ -1294,14 +1294,18 @@ class Remove_Shared(APIView):
                 folder=get_object_or_None(Folder,urlhash=urlhash)
                 if not folder :
                     return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete folders'"})
+                print(folder)
                 all_shares=Internal_Share_Folders.objects.get(shared_with=user,folder_hash=folder)
+                print(all_shares)
                 all_shares.delete()
             
             for urlhash in request.data['file_hash']:
                 file=get_object_or_None(Files_Model,urlhash=urlhash)
+                print(file)
                 if not file:
                     return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete file'"})
                 all_shares=Internal_Share.objects.get(shared_with=user,file_hash=file)
+                print(all_shares)
                 all_shares.delete()
     
             return Response(data={"message":"success"},status=status.HTTP_200_OK)
