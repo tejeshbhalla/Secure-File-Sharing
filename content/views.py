@@ -491,6 +491,7 @@ class Share_File(APIView):
                 folder_share.can_add_delete_content=request.data['permissions']['can_add_delete_content']
                 folder_share.can_share_content=request.data['permissions']['can_share_content']
                 folder_share.can_download_content=request.data['permissions']['can_download_content']
+                folder_share.is_proctored=request.data['permissions']['is_proctored']
                 folder_share.save()
             return Response(data={"message":'successfully removed'},status=status.HTTP_200_OK)
         except Exception as e:
