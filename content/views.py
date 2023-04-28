@@ -638,12 +638,14 @@ class Visit_File_Link_Client(APIView):
                         for i in folder.children.all():
                             if i.deleted:
                                 continue
-                            data["children"].append({'urlhash':i.urlhash,'name':i.name,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if obj.is_downloadable else None,'can_download_content':obj.is_downloadable})
+                            data["children"].append({'urlhash':i.urlhash,'name':i.name,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if obj.is_downloadable else None,'can_download_content':obj.is_downloadable,
+                                                     "date_created":str(i.date_created)[0:11],'owner':i.owner.username,'is_folder':True})
                         for i in folder.files.all():
                             if i.deleted:
                                 continue
                             data['files'].append({'name':i.file_name,'urlhash':i.urlhash,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','can_download_content':obj.is_downloadable,'is_proctored':obj.is_proctored,
-                                                  'download_link':download_url_generate_sas(i,get_client_ip(request)) if obj.is_downloadable else None})
+                                                  'download_link':download_url_generate_sas(i,get_client_ip(request)) if obj.is_downloadable else None,
+                                                  'is_file':True,"date_created":str(i.date_uploaded)[0:11],'owner':i.owner.username})
                         
                         return Response(data=data,status=status.HTTP_200_OK)
                     else:
@@ -677,12 +679,14 @@ class Visit_File_Link_Client(APIView):
                         if i.deleted:
                             continue
                         data['children'].append({"urlhash":i.urlhash,"name":i.name,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if obj.is_downloadable else None,
-                                                 'can_download_content':obj.is_downloadable})
+                                                 'can_download_content':obj.is_downloadable,
+                                                 "date_created":str(i.date_created)[0:11],'owner':i.owner.username,'is_folder':True})
                     for files in obj.file_hash.all():
                         if files.deleted:
                             continue
                         data['files'].append({'name':files.file_name,'urlhash':files.urlhash,"url":f'{BACKEND_URL}content/media/{create_media_jwt(files,get_client_ip(request))}','can_download_content':obj.is_downloadable,'is_proctored':obj.is_proctored,
-                                              'download_link':download_url_generate_sas(files,get_client_ip(request)) if obj.is_downloadable else None})
+                                              'download_link':download_url_generate_sas(files,get_client_ip(request)) if obj.is_downloadable else None,
+                                              'is_file':True,"date_created":str(files.date_uploaded)[0:11],'owner':files.owner.username})
                     if obj.access_limit:
                         obj.access_limit-=1
                         obj.save()
