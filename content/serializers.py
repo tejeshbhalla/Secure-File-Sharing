@@ -171,10 +171,19 @@ class Link_Serializer(serializers.ModelSerializer):
                             create_notifications(parent.owner,f'{user.email} created a link of your file {obj.file_name}')
                             file_hash.append(obj.id)
                             validated_data['owner']=obj.owner
+                            if validated_data['is_downloadble'] != parent.can_download_content:
+                                raise ValidationError('You are only authorized to give permissions that you own')
+                            if validated_data['is_proctored'] != parent.is_proctored:
+                                raise ValidationError('You are only authorized to give permissions that you own')
+                            
                     else:
                         create_notifications(internal_share.owner,f'{user.email} created a link of your file {obj.file_name}')
                         file_hash.append(obj.id)
                         validated_data['owner']=obj.owner
+                        if validated_data['is_downloadble'] != internal_share.can_download_content:
+                                raise ValidationError('You are only authorized to give permissions that you own')
+                        if validated_data['is_proctored'] != internal_share.is_proctored:
+                                raise ValidationError('You are only authorized to give permissions that you own')
                 file_hash.append(obj.id)
         if 'folder_hash' in validated_data:
             for folder in validated_data['folder_hash']:
