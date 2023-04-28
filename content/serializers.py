@@ -195,7 +195,7 @@ class Link_Serializer(serializers.ModelSerializer):
                         if not parent or not parent.can_share_content:
                             raise ValidationError("File does not exist or user has no permission to share")
                         else:
-                            create_notifications(parent.owner,f'{user.email} created a link of your file {obj.file_name}')
+                            create_notifications(parent.owner,f'{user.email} created a link of your folder {obj.name}')
                             folder_hash.append(obj.id)
                             validated_data['owner']=obj.owner
                     else:
