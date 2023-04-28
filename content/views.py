@@ -844,10 +844,12 @@ class Delete_Multi_Files_Folders(APIView):
                 files.append(file)  
             for i in files:
                 i.link_files.all().delete()
+                i.internal_link_files.all().delete()
                 i.last_deleted=timezone.now()
                 i.deleted=True
                 i.save()
             for j in folders:
+                j.internal_link_folders.all().delete()
                 j.link_folders.all().delete()
                 j.last_deleted=timezone.now()
                 j.deleted=True
