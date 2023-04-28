@@ -636,8 +636,12 @@ class Visit_File_Link_Client(APIView):
                         data={'owner':obj.owner.email,'files':[],'children':[]}
                         folder=Folder.objects.filter(urlhash=folder_hash).first()
                         for i in folder.children.all():
+                            if i.deleted:
+                                continue
                             data["children"].append({'urlhash':i.urlhash,'name':i.name,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if obj.is_downloadable else None,'can_download_content':obj.is_downloadable})
                         for i in folder.files.all():
+                            if i.deleted:
+                                continue
                             data['files'].append({'name':i.file_name,'urlhash':i.urlhash,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','can_download_content':obj.is_downloadable,'is_proctored':obj.is_proctored,
                                                   'download_link':download_url_generate_sas(i,get_client_ip(request)) if obj.is_downloadable else None})
                         
@@ -670,9 +674,13 @@ class Visit_File_Link_Client(APIView):
 
                     data={'owner':obj.owner.email,'files':[],'children':[]}
                     for i in obj.folder_hash.all():
+                        if i.deleted:
+                            continue
                         data['children'].append({"urlhash":i.urlhash,"name":i.name,'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}' if obj.is_downloadable else None,
                                                  'can_download_content':obj.is_downloadable})
                     for files in obj.file_hash.all():
+                        if files.deleted:
+                            continue
                         data['files'].append({'name':files.file_name,'urlhash':files.urlhash,"url":f'{BACKEND_URL}content/media/{create_media_jwt(files,get_client_ip(request))}','can_download_content':obj.is_downloadable,'is_proctored':obj.is_proctored,
                                               'download_link':download_url_generate_sas(files,get_client_ip(request)) if obj.is_downloadable else None})
                     if obj.access_limit:
