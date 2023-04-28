@@ -443,10 +443,10 @@ class Share_File(APIView):
                 return Response(data={"message":'email not in data'},status=status.HTTP_400_BAD_REQUEST)
             user=NewUser.objects.get(email=request.data['email'],tenant=tenant)
             if file:
-                file_share=Internal_Share.objects.get(shared_with=user,owner=owner,file_hash=file)
+                file_share=Internal_Share.objects.get(shared_with=user,file_hash=file)
                 file_share.delete()
             if folder:
-                folder_share=Internal_Share_Folders.objects.get(shared_with=user,owner=owner,folder_hash=folder)
+                folder_share=Internal_Share_Folders.objects.get(shared_with=user,folder_hash=folder)
                 folder_share.delete()
             return Response(data={"message":'successfully removed'},status=status.HTTP_200_OK)
         except Exception as e:
