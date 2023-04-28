@@ -839,7 +839,8 @@ class Delete_Multi_Files_Folders(APIView):
                         files.append(file)
                     if parent and parent.can_add_delete_content:
                         files.append(file)
-                    return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete file'"})
+                    else:
+                        return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete file'"})
                 files.append(file)  
             for i in files:
                 i.link_files.all().delete()
