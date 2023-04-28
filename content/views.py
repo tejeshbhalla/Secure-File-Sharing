@@ -450,7 +450,7 @@ class Share_File(APIView):
                 folder_share.delete()
             return Response(data={"message":'successfully removed'},status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(data={"message":f'{e}'},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message":f'{str(e)}'},status=status.HTTP_400_BAD_REQUEST)
     def put(self,request,urlhash):
         try:
             tenant=get_tenant(request)
