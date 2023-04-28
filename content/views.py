@@ -823,12 +823,22 @@ class Delete_Multi_Files_Folders(APIView):
             for urlhash in request.data['folder_hash']:
                 folder=get_object_or_None(Folder,urlhash=urlhash)
                 if not folder or folder.owner!=user:
-                    return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete folders'"})
+                    internal_share=Internal_Share_Folders.search_parent(user,folder)
+                    if internal_share and internal_share.can_add_delete_content:
+                        folders.append(folder)
+                    else:
+                        return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete folders'"})
                 folders.append(folder)
             
             for urlhash in request.data['file_hash']:
                 file=get_object_or_None(Files_Model,urlhash=urlhash)
                 if not file or file.owner!=user:
+                    internal_share=Internal_Share.objects.filter(file_hash=file,shared_with=user).first()
+                    parent=Internal_Share_Folders.search_parent_file(user,file)
+                    if internal_share and internal_share.can_add_delete_content:
+                        files.append(file)
+                    if parent and parent.can_add_delete_content:
+                        files.append(file)
                     return Response(data={"message":f"{urlhash} does not exist or you don't have privelages to delete file'"})
                 files.append(file)  
             for i in files:
