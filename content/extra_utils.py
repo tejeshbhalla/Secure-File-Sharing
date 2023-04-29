@@ -5,12 +5,15 @@ from django.core.exceptions import ValidationError
 
 
 def validate_share_already_exist(obj,user,owner):
-    folder=Internal_Share_Folders.objects.filter(folder_hash=obj,shared_with=user,owner=owner).first()
-    if folder:
-        raise ValidationError(f'Already shared folder with {user.username} kindly update their permissions in case of a change')
-    file=Internal_Share.objects.filter(file_hash=obj,shared_with=user,owner=owner).first()
-    if file:
-        raise ValidationError(f'Already shared file with {user.username} kindly update their permissions in case of a change')
+    name=obj.__class__.__name__
+    if 'Folder' in name:
+        folder=Internal_Share_Folders.objects.filter(folder_hash=obj,shared_with=user,owner=owner).first()
+        if folder:
+            raise ValidationError(f'Already shared folder with {user.username} kindly update their permissions in case of a change')
+    if 'Files' in name:
+        file=Internal_Share.objects.filter(file_hash=obj,shared_with=user,owner=owner).first()
+        if file:
+            raise ValidationError(f'Already shared file with {user.username} kindly update their permissions in case of a change')
 
 def check_parent(parents,folder_hash):
     for i in parents:
