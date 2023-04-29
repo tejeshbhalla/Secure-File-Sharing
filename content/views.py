@@ -114,7 +114,7 @@ class FolderDetailView(APIView):
                         continue
                     all_internal_folders=Internal_Share_Folders.objects.filter(owner=owner,folder_hash=i).all()
                     users=[{'username':user.shared_with.username,'email':user.shared_with.email,'can_add_delete_content':user.can_add_delete_content,'can_share_content':user.can_share_content,
-                    'can_download_content':user.can_download_content} for user in all_internal_folders]
+                    'can_download_content':user.can_download_content,'is_proctored':user.is_proctored} for user in all_internal_folders]
                     data['children'].append({"urlhash":i.urlhash,"name":i.name,"owner":i.owner.username,"date_created":str(i.date_created)[0:11],"date_modified":i.date_modified,"is_folder":True,'shared_with':users,
                     'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}'})
                 for i in files:
@@ -143,7 +143,7 @@ class FolderDetailView(APIView):
                     continue
                 all_internal_folders=i.internal_link_folders.all()
                 users=[{'username':user.shared_with.username,'email':user.shared_with.email,'can_add_delete_content':user.can_add_delete_content,'can_share_content':user.can_share_content,
-                    'can_download_content':user.can_download_content} for user in all_internal_folders]
+                    'can_download_content':user.can_download_content,'is_proctored':user.is_proctored} for user in all_internal_folders]
                 data['children'].append({"urlhash":i.urlhash,"name":i.name,"owner":i.owner.username,"date_created":i.date_created,"date_modified":i.date_modified,'shared_with':users,
                                          'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}'})
             for i in folder.files.all():
