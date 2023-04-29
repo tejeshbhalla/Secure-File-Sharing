@@ -387,7 +387,7 @@ class Share_File(APIView):
                                 obj.can_download_content=can_download_content
                                 obj.is_proctored=is_proctored
                                 obj.save()
-                                return Response(data={'message':f'Successfully shared files'},status=status.HTTP_400_BAD_REQUEST)
+                                return Response(data={'message':f'Successfully shared files'},status=status.HTTP_200_OK)
                             return Response(data={"message":f"You don't have privelages to share {file_hash} or file does not exist"},status=status.HTTP_400_BAD_REQUEST)
                         else:
                             obj=get_object_or_None(Internal_Share,shared_with=user,owner=owner,file_hash=file)
@@ -417,7 +417,7 @@ class Share_File(APIView):
                                 obj.can_download_content=can_download_content
                                 obj.is_proctored=is_proctored
                                 obj.save()
-                                return Response(data={'message':f'Successfully shared folder'},status=status.HTTP_400_BAD_REQUEST)
+                                return Response(data={'message':f'Successfully shared folder'},status=status.HTTP_200_OK)
                             return Response(data={"message":f"You don't have privelages to share {folder_hash} or file does not exist"},status=status.HTTP_400_BAD_REQUEST)
                         
                         obj=get_object_or_None(Internal_Share_Folders,shared_with=user,owner=owner,folder_hash=folder)
