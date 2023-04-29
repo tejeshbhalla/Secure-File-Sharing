@@ -24,7 +24,6 @@ from requests_toolbelt import MultipartEncoder
 from django.core.cache import cache
 import re
 from django.core.exceptions import ValidationError
-from .models import Internal_Share,Internal_Share_Folders
 
 
 
