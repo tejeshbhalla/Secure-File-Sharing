@@ -11,3 +11,4 @@ def revoke_access(user,hash):
     else:
         links=Link_Model.objects.filter(owner=user,folder_hash__in=[hash])
         links.delete()
+

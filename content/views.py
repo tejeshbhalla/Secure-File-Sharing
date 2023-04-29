@@ -35,7 +35,7 @@ from django.core.cache import cache
 from django.db.models import Q
 import gevent
 from .utils import validate_share
-from extra_utils import validate_share_already_exist
+from .extra_utils import validate_share_already_exist
 
 
 
