@@ -142,14 +142,16 @@ class FolderDetailView(APIView):
                 if i.deleted:
                     continue
                 all_internal_folders=i.internal_link_folders.all()
-                users=[user.shared_with.username for user in all_internal_folders]
+                users=[{'username':user.shared_with.username,'email':user.shared_with.email,'can_add_delete_content':user.can_add_delete_content,'can_share_content':user.can_share_content,
+                    'can_download_content':user.can_download_content} for user in all_internal_folders]
                 data['children'].append({"urlhash":i.urlhash,"name":i.name,"owner":i.owner.username,"date_created":i.date_created,"date_modified":i.date_modified,'shared_with':users,
                                          'download_link':f'{BACKEND_URL}api/content/folder_download/{create_media_jwt(i,get_client_ip(request))}'})
             for i in folder.files.all():
                 if i.deleted:
                     continue
                 all_internal_files=i.internal_link_files.all()
-                users=[user.shared_with.username for user in all_internal_files]
+                users=[{'username':user.shared_with.username,'email':user.shared_with.email,'can_add_delete_content':user.can_add_delete_content,'can_share_content':user.can_share_content,
+                    'can_download_content':user.can_download_content,'is_proctored':user.is_proctored} for user in all_internal_files]
                 data['files'].append({"urlhash":i.urlhash,"name":i.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}',"size":str(int(i.content.size/1024))+" kb","owner":i.owner.username,"date_created":str(i.date_uploaded)[0:11],'is_file':True,'shared_with':users
                                       ,'download_link':download_url_generate_sas(i,get_client_ip(request))})
             if folder.owner!=owner:
