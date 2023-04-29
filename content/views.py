@@ -364,9 +364,7 @@ class Share_File(APIView):
                 return Response(data={"message":f"shared folders not in data"},status=status.HTTP_400_BAD_REQUEST)
             for users in request.data['shared_with']:
                     user=get_object_or_None(NewUser,email=users,tenant=tenant)
-                    print(user,owner)
-                    if user==owner:
-                        return Response(data={'message':"Can't share with yourself"})
+            
                     can_add_delete_content=request.data['can_add_delete_content']
                     can_share_content=request.data['can_share_content']
                     can_download_content=request.data['can_download_content']
