@@ -12,13 +12,13 @@ import django
 django.setup()
 from files.models import NewUser
 from content.models import Folder,Files_Model
+from content.utils import create_notifications
 
 def create_content(filename,username,path,urlhash):
-    #print(path)
+
     owner=NewUser.objects.get(username=username)
     parent_folder=Folder.objects.get(urlhash=urlhash)
     all_paths=path.split('\\')[3:-1]
-    #file_name=path.split('\\')[-1]
     file_obj=path
     for i in all_paths:
                 folder=Folder.objects.filter(name=i,parent=parent_folder)
@@ -34,10 +34,12 @@ def create_content(filename,username,path,urlhash):
        file_instance = Files_Model(file_name=filename, owner=owner, folder=parent_folder)
        file_instance.content.name=file_obj
        file_instance.save()
+       create_notifications(file_instance,extras=f'Synced file {file_instance.file_name}',type='Sync')
     else:
        file_instance = file_instance[0]
        file_instance.content.name=file_obj
        file_instance.save()
+       create_notifications(file_instance,extras=f'Synced file {file_instance.file_name}',type='Sync')
                      
 
 

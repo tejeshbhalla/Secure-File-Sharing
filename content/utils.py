@@ -161,7 +161,7 @@ def get_client_ip(request):
 
 
 
-def create_notifications(instance,extras=''):
+def create_notifications(instance,extras='',type=''):
     name=instance.__class__.__name__
     if 'Internal' in name:
         users=instance.shared_with.all()
@@ -177,6 +177,10 @@ def create_notifications(instance,extras=''):
     if 'User' in name:
         owner=instance
         n=Notifications(user=owner,text=extras,type='Personal')
+        n.save()
+    if type=='Sync':
+        owner=instance
+        n=Notifications(user=owner,text=extras,type=type)
         n.save()
 
 
