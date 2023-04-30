@@ -179,7 +179,7 @@ def create_notifications(instance,extras='',type=''):
         n=Notifications(user=owner,text=extras,type='Personal')
         n.save()
     if type=='Sync':
-        owner=instance
+        owner=instance.owner
         n=Notifications(user=owner,text=extras,type=type)
         n.save()
 
