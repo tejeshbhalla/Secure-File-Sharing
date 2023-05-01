@@ -173,7 +173,7 @@ class Internal_Folder_Detail(APIView):
             if urlhash=='root':
                 all_internals_files=user.files_shared_with_you.all()
                 all_internals_folders=user.folders_shared_with_you.all()
-                data={"name":"root","parent":None,"files":[],"children":[],'requests':[]}
+                data={"name":"root","parent":None,"files":[],"children":[],'requests':[],'hash_path':['root'],'path':['root']}
                 for i in all_internals_folders:
     
                     folders=i.folder_hash
@@ -215,7 +215,8 @@ class Internal_Folder_Detail(APIView):
                 return Response(data={"message":'unauthorized'},status=status.HTTP_400_BAD_REQUEST)
             data={"name":folder.name,"parent":parent,"files":[],"children":[],'parent_permissions':{'is_downloadable':internal_share_folder.is_downloadable,
                     'can_share_content':internal_share_folder.can_share_content,
-                    'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,'can_add_delete':internal_share_folder.can_add_delete_content}}
+                    'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,'can_add_delete':internal_share_folder.can_add_delete_content,
+                    'hash_path':folder.order_parent_urlhash(),'path':folder.order_parent()}}
             files=folder.files.all()
             folders=folder.children.all()
             for i in files:
