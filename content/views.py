@@ -1305,26 +1305,13 @@ class Storage_Share(APIView):
             cached_response = cache.get(cache_key)
             if cached_response is not None:
                 return Response(data=cached_response, status=status.HTTP_200_OK)
-            all_files=user.files.all()
             d={}
             total=user.storage_amount_used
-            for i in all_files:
-                file_ext=i.file_name.split('.')
-                ext=file_ext[-1]
-                size=float(i.filesize_gb)
-                if ext not in d:
-                    d[ext]=0
-                    d[ext]+=size
-                d[ext]+=size
+
             d['total']=total
             d['available']=user.total_available_space()-d['total']
     
-            for i in d.keys():
-                d[i]=d[i]/(user.total_available_space())*100
-
-            d['total_gb']=total
-            d['available_gb']=user.total_available_space()
-
+           
             cache.set(cache_key, d, timeout=self.cache_timeout)
             return Response(data=d, status=status.HTTP_200_OK)
 
