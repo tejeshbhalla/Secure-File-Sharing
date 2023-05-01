@@ -215,8 +215,7 @@ class Internal_Folder_Detail(APIView):
                 return Response(data={"message":'unauthorized'},status=status.HTTP_400_BAD_REQUEST)
             data={"name":folder.name,"parent":parent,"files":[],"children":[],'parent_permissions':{'is_downloadable':internal_share_folder.is_downloadable,
                     'can_share_content':internal_share_folder.can_share_content,
-                    'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,'can_add_delete':internal_share_folder.can_add_delete_content,
-                    'hash_path':folder.order_parent_urlhash(),'path':folder.order_parent()}}
+                    'can_download_content':internal_share_folder.can_download_content,'is_proctored':internal_share_folder.is_proctored,'can_add_delete':internal_share_folder.can_add_delete_content},'hash_path':folder.order_parent_urlhash(),'path':folder.order_parent()}
             files=folder.files.all()
             folders=folder.children.all()
             for i in files:
