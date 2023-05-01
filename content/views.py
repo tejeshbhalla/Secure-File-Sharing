@@ -1306,9 +1306,8 @@ class Storage_Share(APIView):
             if cached_response is not None:
                 return Response(data=cached_response, status=status.HTTP_200_OK)
             d={}
-            total=user.storage_amount_used
 
-            d['total']=total
+            d['total']=user.total_available_space()
             d['available']=user.total_available_space()-d['total']
     
            
