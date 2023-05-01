@@ -1297,10 +1297,16 @@ class Storage_Share(APIView):
     authentication_classes=[JWTauthentication]
     permissions=[IsAuthenticated]
     throttle_classes = [UserRateThrottle]
+    cache_key_prefix = 'storage_share_cache_'
+    cache_timeout = 60 * 5  # cache for 5 minutes
 
     def get(self,request):
         try:
             user=get_user_from_tenant(request)
+            cache_key = f"{self.cache_key_prefix}{user.pk}"
+            cached_response = cache.get(cache_key)
+            if cached_response is not None:
+                return Response(data=cached_response, status=status.HTTP_200_OK)
             all_files=user.files.all()
             d={}
             total=user.storage_amount_used
@@ -1321,8 +1327,8 @@ class Storage_Share(APIView):
             d['total_gb']=total
             d['available_gb']=user.total_available_space()
 
-
-            return Response(data=d,status=status.HTTP_200_OK)
+            cache.set(cache_key, d, timeout=self.cache_timeout)
+            return Response(data=d, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(data={'message':f'{e}'},status=status.HTTP_400_BAD_REQUEST)
