@@ -556,7 +556,7 @@ class Group_Folder_Detail(APIView):
             if folder_hash=='root':
                 files=grp.files.all()
                 folders=grp.folders.all()
-                data={'files':[],'children':[],'parent_permissions':{'can_add_delete':per.can_add_delete_content,'can_download_content':per.can_download_content,'can_share_content':per.can_share_content,'has_read':per.has_read}}
+                data={'hash_path':['root'],'path':['root'],'files':[],'children':[],'parent_permissions':{'can_add_delete':per.can_add_delete_content,'can_download_content':per.can_download_content,'can_share_content':per.can_share_content,'has_read':per.has_read}}
                 for j in folders:
                     if j.deleted:
                         continue
@@ -568,8 +568,8 @@ class Group_Folder_Detail(APIView):
                     data['files'].append({'name':i.file_name,"url":f'{settings.BACKEND_URL}api/content/media/{create_media_jwt(i,get_client_ip(request))}','owner':i.owner.username,'urlhash':i.urlhash,'is_file':True,'date_created':i.date_uploaded,'size':i.filesize,'can_add_delete_content':per.can_add_delete_content,'has_read':per.has_read,'can_share_content':per.can_share_content,'can_download_content':per.can_download_content,
                                           'download_link':download_url_generate_sas(i,get_client_ip(request)) if per.can_download_content else None})
                 return Response(data,status=status.HTTP_200_OK)
-            data={'files':[],'children':[],'parent_permissions':{'can_add_delete':per.can_add_delete_content,'can_download_content':per.can_download_content,'can_share_content':per.can_share_content,'has_read':per.has_read}}
             folder=Folder.objects.get(urlhash=folder_hash)
+            data={'hash_path':folder.order_parent_urlhash(),'path':folder.order_parent(),'files':[],'children':[],'parent_permissions':{'can_add_delete':per.can_add_delete_content,'can_download_content':per.can_download_content,'can_share_content':per.can_share_content,'has_read':per.has_read}}
             children=folder.children.all()
             files=folder.files.all()
             for j in children:
