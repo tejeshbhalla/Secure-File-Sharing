@@ -1026,12 +1026,10 @@ class Multi_File_Upload(APIView):
 
             request.data.pop('shared_with')
             request.data.pop('parent_hash')
-            request.data.pop('folder_name')
             
 
             for i in request.data.keys():
-                folder_list = i.split("/")
-                file_name = folder_list[-1]
+                file_name = i
                 parent_folder = parent_hash
                 if parent_hash==None:
                     parent_hash='root'
