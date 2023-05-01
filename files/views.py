@@ -773,7 +773,7 @@ class AdminCreateUser(APIView):
             user=NewUser(name=name,email=email,username=username,is_admin=is_admin,is_active=is_active,is_activated=is_activated,tenant=tenant)
             user.set_password(password)
             user.save()
-            send_bulk_email.delay([user.email],[password])
+            send_bulk_email([user.email],[password])
             return Response(data={"message":"user account created"},status=status.HTTP_200_OK)
         except Exception as e:
             
