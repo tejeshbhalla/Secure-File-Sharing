@@ -766,7 +766,7 @@ class AdminCreateUser(APIView):
             name=request.data['name']
             email=request.data['email']
             username=request.data['username']
-            is_admin=False
+            is_admin=request.data['is_admin']
             is_activated=True
             is_active=True
             password=id_generator_2(size=10)
