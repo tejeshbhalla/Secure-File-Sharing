@@ -1005,6 +1005,78 @@ class Upload_Folder(APIView):
 
 
 
+class Multi_File_Upload(APIView):
+    authentication_classes = [JWTauthentication]
+    permissions = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
+
+    def post(self,request,*args,**kwargs):
+        try:
+            user=get_user_from_tenant(request)
+            parent_hash=get_object_or_None(Folder,urlhash=request.data['parent_hash'])
+            owner=user
+
+            if parent_hash:
+                per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
+                parent=Internal_Share_Folders.search_parent(user,parent_hash)
+                if per and per.can_add_delete_content:
+                    owner=per.owner
+                if parent and parent.can_add_delete_content:
+                    owner=parent.owner
+
+            request.data.pop('shared_with')
+            request.data.pop('parent_hash')
+            request.data.pop('folder_name')
+            
+
+            for i in request.data.keys():
+                folder_list = i.split("/")
+                file_name = folder_list[-1]
+                parent_folder = parent_hash
+                if parent_hash==None:
+                    parent_hash='root'
+                if type(parent_hash)==str:
+                    item_path=owner.username+'/'+parent_hash+'/'+i
+                else:
+                    item_path=owner.username+'/'+parent_hash.urlhash+'/'+i
+
+                blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+                blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=item_path)
+
+                try:
+                    blob_props = blob_client.get_blob_properties()
+                    # blob exists, append data to it
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
+                except ResourceNotFoundError:
+                    # blob does not exist, create a new one and append data to it
+                    blob_client.create_append_blob()
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
+                
+                file = request.data[i]
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
+                offset = 0
+                while True:
+                    chunk = file.read(chunk_size)
+                    if not chunk:
+                        break
+                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset += len(chunk)
+                # Save the file metadata in your Django model
+                obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
+                obj.content.name = item_path  # Save the URL of the uploaded blob
+                obj.save()
+                
+
+            return Response(data={"message":"folder created"})
+            
+        except Exception as e:
+            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
 class Get_Link_Logs(APIView):
     authentication_classes = [JWTauthentication]
     permissions = [IsAuthenticated]
