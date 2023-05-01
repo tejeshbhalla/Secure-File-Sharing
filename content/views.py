@@ -1308,7 +1308,7 @@ class Storage_Share(APIView):
             d={}
 
             d['total']=user.total_available_space()
-            d['available']=user.total_available_space()-d['total']
+            d['available']=user.total_available_space()-user.storage_amount_used
     
            
             cache.set(cache_key, d, timeout=self.cache_timeout)
