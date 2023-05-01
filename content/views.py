@@ -639,8 +639,8 @@ class Visit_File_Link_Client(APIView):
                 if not obj.expiry_date or timezone.now()<obj.expiry_date:
                     parents=obj.folder_hash.all()
                     if check_parent(parents,folder_hash):
-                        data={'owner':obj.owner.email,'files':[],'children':[]}
                         folder=Folder.objects.filter(urlhash=folder_hash).first()
+                        data={'owner':obj.owner.email,'files':[],'children':[],'hash_path':folder.order_parent_urlhash(),'path':folder.order_parent()}
                         for i in folder.children.all():
                             if i.deleted:
                                 continue
@@ -680,7 +680,7 @@ class Visit_File_Link_Client(APIView):
                 
                 if not obj.expiry_date or timezone.now()<obj.expiry_date:
 
-                    data={'owner':obj.owner.email,'files':[],'children':[]}
+                    data={'owner':obj.owner.email,'files':[],'children':[],'hash_path':['root'],'path':['root']}
                     for i in obj.folder_hash.all():
                         if i.deleted:
                             continue
