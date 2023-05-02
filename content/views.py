@@ -1861,9 +1861,9 @@ class Download_Multi_File_Folder_Link(APIView):
 
 
 class Check_Versions_File(APIView):
-    #authentication_classes = [JWTauthentication]
-    #permissions = [IsAuthenticated]
-    #throttle_classes = [UserRateThrottle]
+    authentication_classes = [JWTauthentication]
+    permissions = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
 
     def get(self,request,urlhash):
         try:
