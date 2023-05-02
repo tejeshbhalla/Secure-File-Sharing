@@ -7,6 +7,8 @@ from files.utils import file_size
 from django_clamav.validators import validate_file_infection
 from django.utils import timezone
 import os
+from storages.backends.azure_storage import AzureStorage
+from Varency.settings import AZURE_ACCOUNT_NAME,AZURE_ACCOUNT_KEY
 # Create your models here.
 
 
@@ -110,12 +112,19 @@ class Files_Model(models.Model):
     last_deleted=models.DateTimeField(null=True,blank=True)
     file_size=models.FloatField(default=0)
     uploadinfo=models.JSONField(null=True,blank=True)
+
+    def azure_check(self,*args,**kwargs):
+        azure_storage = AzureStorage(account_name=AZURE_ACCOUNT_NAME, account_key=AZURE_ACCOUNT_KEY)
+        azure_storage.save(self.content.name, self.content)
+        self.content.close()
+
     def save(self,*args, **kwargs):
         if not self.urlhash:
             self.urlhash = id_generator()
             while Files_Model.objects.filter(urlhash=self.urlhash).exists() and Folder.objects.filter(urlhash=self.urlhash).exists:
                  self.urlhash = id_generator()
         if self.content:
+            self.azure_check()
             gb=self.filesize_gb
             owner=self.owner
             total_space_utilised=owner.storage_amount_used
