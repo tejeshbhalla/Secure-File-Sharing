@@ -206,7 +206,7 @@ def fetch_versions(file):
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
 
     # Get a list of all versions of the blob
-    versions = container_client.list_blobs(name=file.content.name, include=["versions"])
+    versions = container_client.list_blobs(name_starts_with=file.content.name, include=["versions"])
 
 
     d={}
