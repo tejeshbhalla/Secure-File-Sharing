@@ -8,7 +8,7 @@ from files.jwt_utils import JWTauthentication
 from .serializers import DetailFileSerializer,FolderSerializer,DetailFolderSerializer,FileSerializer,Link_Serializer, Request_File_Serializer,Detail_Link_Serializer
 from files.models import NewUser,People_Groups,Group_Permissions
 from .models import Folder,Files_Model, Internal_Share_Folders,Link_Model,Internal_Share,Link_logs, Request_File
-from .utils import get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
+from .utils import fetch_versions,get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
 from Varency.settings import FRONT_END_URL,TIME_ZONE,BACKEND_URL
 import datetime 
 from django.utils import timezone
@@ -1858,3 +1858,22 @@ class Download_Multi_File_Folder_Link(APIView):
         except Exception as e:
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+
+
+class Check_Versions_File(APIView):
+    #authentication_classes = [JWTauthentication]
+    #permissions = [IsAuthenticated]
+    #throttle_classes = [UserRateThrottle]
+
+    def get(self,request,urlhash):
+        try:
+            file=Files_Model.objects.get(urlhash=urlhash)
+            d=fetch_versions(file)
+
+            return Response(data=d,status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)            
+            return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+        
+
+

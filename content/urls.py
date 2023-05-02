@@ -1,5 +1,5 @@
 from re import S
-from .views import Multi_File_Upload,Download_Multi_File_Folder_Link,Download_Multi_File_Folder,Download_Folder_View,Get_File_Link_Detail,Get_File_Detail,MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
+from .views import Check_Versions_File,Multi_File_Upload,Download_Multi_File_Folder_Link,Download_Multi_File_Folder,Download_Folder_View,Get_File_Link_Detail,Get_File_Detail,MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
 from django.urls import re_path as url
 from django.urls import include,path
 
@@ -53,5 +53,6 @@ urlpatterns = [
     path('folder_download/<str:token>',Download_Folder_View.as_view(),name='download folder'),
     path('download_multi_file_folder/<str:type>',Download_Multi_File_Folder.as_view(),name='download multi files and folders'),
     path('download_multi_file_folder/link',Download_Multi_File_Folder_Link.as_view(),name='download multi files and folders link'),
+    path('get_file_versions/<str:urlhash>',Check_Versions_File.as_view(),name='check file versions'),
     ]
 

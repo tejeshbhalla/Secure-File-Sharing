@@ -112,7 +112,7 @@ class Files_Model(models.Model):
     last_deleted=models.DateTimeField(null=True,blank=True)
     file_size=models.FloatField(default=0)
     uploadinfo=models.JSONField(null=True,blank=True)
-    
+
     def save(self,*args, **kwargs):
         if not self.urlhash:
             self.urlhash = id_generator()
