@@ -200,7 +200,7 @@ AZURE_CONTAINER='filesapp'
 AZURE_SSL=True
 AZURE_URL_EXPIRATION_SECS=timedelta(seconds=600).seconds
 AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=filesmodelapp;AccountKey=Z5GLgOxy6HsZtbtOlwHOet5r1aZjdjKPAGYAlaEq/1fm8hwhpMYktxqHxaaIJ9udewnlsLrZ2v2r+AStbrgpZA==;EndpointSuffix=core.windows.net'
-
+AZURE_OVERWRITE_FILES=True
 
 
 #url
