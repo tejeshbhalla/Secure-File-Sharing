@@ -176,8 +176,8 @@ class Files_Model(models.Model):
         return float(value)
         
     def resave(self,*args,**kwargs):
-        if self.urlhash:
-            super(Files_Model,self).save()
+        
+        self.save()
 
     def path(self,*args,**kwargs):
         if self.folder==None:
