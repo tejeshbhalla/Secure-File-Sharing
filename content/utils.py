@@ -210,9 +210,12 @@ def fetch_versions(file):
 
     # Get a ContainerClient object for the container
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
+    path=file.path().split('/')[-2:]
+    path=os.path.join(*path)
+    
 
     # List all blobs in the container and filter by the blob name and version ID
-    versions = [b for b in container_client.list_blobs() if b.name == file.content.name ]
+    versions = [b for b in container_client.list_blobs() if path in b.name ]
 
 
     d={}
