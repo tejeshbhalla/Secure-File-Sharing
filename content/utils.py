@@ -199,23 +199,14 @@ def link_auth_check(obj,password=''):
 
 def fetch_versions(file):
 
-        # Create a BlobServiceClient object using the connection string
+    # Create a BlobServiceClient object using the connection string
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-
-    # Get a BlobClient object for the file
-    blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
-
-    # Get the properties of the latest version of the blob
-    latest_version_id = blob_client.get_blob_properties().version_id
 
     # Get a ContainerClient object for the container
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-    path=file.path().split('/')[-2:]
-    path=os.path.join(*path)
-    
 
-    # List all blobs in the container and filter by the blob name and version ID
-    versions = [b for b in container_client.list_blobs() if path in b.name ]
+    # Get a list of all versions of the blob
+    versions = container_client.list_blobs(name=file.content.name, include=["versions"])
 
 
     d={}
