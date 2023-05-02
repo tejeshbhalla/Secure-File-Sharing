@@ -217,7 +217,7 @@ def fetch_versions(file):
 
     d={}
     for version in versions:
-        d[version.version_id]=[version.is_current_version,version.size,version.last_modified]
+        d[version.version_id]={'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified}
 
     return d
     
