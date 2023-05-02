@@ -116,7 +116,6 @@ class Files_Model(models.Model):
     def azure_check(self,*args,**kwargs):
         azure_storage = AzureStorage(account_name=AZURE_ACCOUNT_NAME, account_key=AZURE_ACCOUNT_KEY)
         azure_storage.save(self.content.name, self.content)
-        self.content.close()
 
     def save(self,*args, **kwargs):
         if not self.urlhash:
