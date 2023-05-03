@@ -221,13 +221,10 @@ def fetch_versions(file):
 
 
 def set_current_version(file, current_version_id, target_version_id):
-    # Create a BlobServiceClient object using the connection string
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
 
-    # Get a BlobClient object for the new blob
     new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
 
-    # Delete the new blob if it already exists
     try:
         new_blob.delete_blob()
     except ResourceNotFoundError:
@@ -238,13 +235,8 @@ def set_current_version(file, current_version_id, target_version_id):
         credential=AZURE_ACCOUNT_KEY
     )
 
-    # Copy the contents of the target version to the new blob
     new_blob.start_copy_from_url(target_blob.url)
-
-    # Wait for the copy operation to complete
     new_blob.wait_for_copy()
-
-    # Set the new blob as the current version
     properties = new_blob.get_blob_properties()
     new_blob.set_http_headers(
         content_type=properties.content_settings.content_type,
