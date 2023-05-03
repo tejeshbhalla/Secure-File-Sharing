@@ -222,7 +222,7 @@ def set_current_version(file, current_version_id, revert_to_version_id):
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
     old_blob = container_client.get_blob_client(file.content.name)
-    old_blob.start_copy_from_url(old_blob.url, source_version=revert_to_version_id)
+    old_blob.start_copy_from_url(old_blob.url, version_id=revert_to_version_id)
     old_blob_contents = old_blob.download_blob(version_id=revert_to_version_id).readall()
     new_blob = container_client.get_blob_client(file.content.name)
     new_blob.upload_blob(old_blob_contents)
