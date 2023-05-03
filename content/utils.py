@@ -220,47 +220,24 @@ def fetch_versions(file):
     return d
 
 def set_current_version(file, current_version, target_version_id):
-    
+
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
     properties = current_blob.get_blob_properties()
     current_version_id = properties.metadata.get('versionid')
-    target_blob = BlobClient.from_blob_url(
-        blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
+    target_blob_url = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}"
+    older_blob = BlobClient.from_blob_url(
+        blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': current_version_id})}",
         credential=AZURE_ACCOUNT_KEY
     )
+    content = older_blob.download_blob().content_as_bytes()
+    new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
+    new_blob.upload_blob(content, metadata={'versionid': target_version_id})
     try:
         current_blob.delete_blob()
     except ResourceNotFoundError:
         pass
-    current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
-    current_blob.start_copy_from_url(target_blob.url)
-    current_blob.wait_for_copy()
-    current_blob.set_blob_metadata(metadata={'versionid': target_version_id})
-    current_blob.set_http_headers(
-        content_type=properties.content_settings.content_type,
-        content_encoding=properties.content_settings.content_encoding,
-        content_language=properties.content_settings.content_language,
-        content_disposition=properties.content_settings.content_disposition,
-        cache_control=properties.content_settings.cache_control,
-        x_ms_blob_cache_control=properties.metadata.get('Cache-Control'),
-        x_ms_blob_content_md5=properties.content_settings.content_md5,
-        x_ms_blob_content_type=properties.content_settings.content_type,
-        x_ms_blob_content_encoding=properties.content_settings.content_encoding,
-        x_ms_blob_content_language=properties.content_settings.content_language,
-        x_ms_blob_content_disposition=properties.content_settings.content_disposition,
-        x_ms_meta_name_values=properties.metadata,
-        x_ms_lease_id=None,
-        x_ms_blob_tags=None,
-        x_ms_tier=None,
-        x_ms_access_tier=None,
-        x_ms_access_tier_inferred=None,
-        x_ms_archive_status=None,
-        x_ms_rehydrate_priority=None,
-        x_ms_sealed=None,
-        x_ms_server_encrypted=None,
-        x_ms_version_id=None
-    )
+    return True
 
 
 def download_url_generate_sas(obj,ip):
