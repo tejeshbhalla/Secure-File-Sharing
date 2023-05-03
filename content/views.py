@@ -1886,8 +1886,8 @@ class Revert_Versions_File(APIView):
             file=Files_Model.objects.get(urlhash=urlhash)
             current_version=request.data['current_version']
             revert_to=request.data['revert_version']
-            set_current_version(file,current_version,revert_to)
-            return Response(data=d,status=status.HTTP_200_OK)
+            resp=set_current_version(file,current_version,revert_to)
+            return Response(data=resp,status=status.HTTP_200_OK)
         except Exception as e:
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
