@@ -1554,6 +1554,7 @@ class Get_File_Detail(APIView):
                 if not grp:
                     grp=People_Groups.search_parent_file(obj_hash,obj)
                 grp_per=Group_Permissions.objects.filter(group=grp,user=user)[0]
+                print(grp_per)
                 if grp:
                     data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
