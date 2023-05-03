@@ -219,13 +219,12 @@ def fetch_versions(file):
 
     return d
 
-def set_current_version(file, current_version,target_version_id):
+def set_current_version(file, current_version, target_version_id):
     
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
     properties = current_blob.get_blob_properties()
     current_version_id = properties.metadata.get('versionid')
-
     target_blob = BlobClient.from_blob_url(
         blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
         credential=AZURE_ACCOUNT_KEY
@@ -233,8 +232,8 @@ def set_current_version(file, current_version,target_version_id):
     try:
         current_blob.delete_blob()
     except ResourceNotFoundError:
-        print(f"The blob {file.content.name} with version id {current_version_id} could not be found.")
-        
+        pass
+    current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
     current_blob.start_copy_from_url(target_blob.url)
     current_blob.wait_for_copy()
     current_blob.set_blob_metadata(metadata={'versionid': target_version_id})
