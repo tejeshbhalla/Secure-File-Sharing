@@ -13,10 +13,10 @@ from files.models import Notifications
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
-from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions
+from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions,BlobClient
 from Varency.settings import SECRET_KEY
 from datetime import datetime, timedelta
-from Varency.settings import CONVERTER_URL,LOCAL_STORAGE_PATH,FRONT_END_URL,EXPIRY_SAS_TIME,BACKEND_URL,EMAIL_HOST_USER,AZURE_CONNECTION_STRING,AZURE_CONTAINER,API_SECRET_KEY,UPLOAD_URL_VDOCIPHER
+from Varency.settings import AZURE_ACCOUNT_KEY,CONVERTER_URL,LOCAL_STORAGE_PATH,FRONT_END_URL,EXPIRY_SAS_TIME,BACKEND_URL,EMAIL_HOST_USER,AZURE_CONNECTION_STRING,AZURE_CONTAINER,API_SECRET_KEY,UPLOAD_URL_VDOCIPHER
 import base64
 import json
 import requests
@@ -221,15 +221,30 @@ def fetch_versions(file):
 
 
 def set_current_version(file, current_version_id, target_version_id):
+    # Create a BlobServiceClient object using the connection string
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+
+    # Get a BlobClient object for the new blob
     new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
+
+    # Delete the new blob if it already exists
     try:
         new_blob.delete_blob()
     except ResourceNotFoundError:
         pass
-    target_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name, version_id=target_version_id)
-    new_blob.start_copy_from_url(target_blob.url, source_version=target_version_id)
+
+    target_blob = BlobClient.from_blob_url(
+        blob_url=f"https://{AZURE_CONTAINER}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
+        credential=AZURE_ACCOUNT_KEY
+    )
+
+    # Copy the contents of the target version to the new blob
+    new_blob.start_copy_from_url(target_blob.url)
+
+    # Wait for the copy operation to complete
     new_blob.wait_for_copy()
+
+    # Set the new blob as the current version
     properties = new_blob.get_blob_properties()
     new_blob.set_http_headers(
         content_type=properties.content_settings.content_type,
@@ -255,6 +270,7 @@ def set_current_version(file, current_version_id, target_version_id):
         x_ms_server_encrypted=None,
         x_ms_version_id=target_version_id
     )
+
 
 
 def download_url_generate_sas(obj,ip):
