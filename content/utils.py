@@ -214,6 +214,21 @@ def fetch_versions(file):
         d[version.version_id]={'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified}
 
     return d
+
+
+def set_current_version(file, current_version_id, revert_to_version_id):
+    # Get the dictionary of all versions
+    versions_dict = fetch_versions(file)
+
+
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+    container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
+    old_blob_client = container_client.get_blob_client(file.content.name, version_id=revert_to_version_id)
+    new_blob_client = container_client.get_blob_client(file.content.name)
+    new_blob_client.start_copy_from_url(old_blob_client.url)
+
+    # Update the metadata of the new blob
+    new_blob_client.set_blob_metadata(metadata=versions_dict[revert_to_version_id])
     
 
 def download_url_generate_sas(obj,ip):
