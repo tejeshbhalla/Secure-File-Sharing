@@ -1558,7 +1558,7 @@ class Get_File_Detail(APIView):
                 if grp:
                     data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
-                    "date_created":str(obj.date_uploaded)[0:11],'is_file':True,
+                    "date_created":str(obj.date_uploaded),'is_file':True,
                     'can_add_delete_content':grp_per.can_add_delete_content,
                     'can_share_content':grp_per.can_share_content,
                     'can_download_content':grp_per.can_download_content,'is_proctored':grp_per.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if grp_per.can_download_content else None}
