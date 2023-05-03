@@ -224,9 +224,8 @@ def set_current_version(file, current_version, target_version_id):
     current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
     properties = current_blob.get_blob_properties()
     current_version_id = properties.metadata.get('versionid')
-    target_blob_url = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}"
     older_blob = BlobClient.from_blob_url(
-        blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': current_version_id})}",
+        blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
         credential=AZURE_ACCOUNT_KEY
     )
     content = older_blob.download_blob().content_as_bytes()
