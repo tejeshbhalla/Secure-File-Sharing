@@ -220,7 +220,6 @@ def fetch_versions(file):
     return d
 
 def set_current_version(file, current_version, target_version_id):
-
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
     properties = current_blob.get_blob_properties()
@@ -231,12 +230,10 @@ def set_current_version(file, current_version, target_version_id):
         credential=AZURE_ACCOUNT_KEY
     )
     content = older_blob.download_blob().content_as_bytes()
-    new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
-    new_blob.upload_blob(content, metadata={'versionid': target_version_id})
     try:
-        current_blob.delete_blob()
+        current_blob.upload_blob(content, overwrite=True, metadata={'versionid': target_version_id})
     except ResourceNotFoundError:
-        pass
+        return False
     return True
 
 
