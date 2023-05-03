@@ -14,7 +14,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions,BlobClient
-from Varency.settings import SECRET_KEY
+from Varency.settings import SECRET_KEY,AZURE_ACCOUNT_NAME
 from datetime import datetime, timedelta
 from Varency.settings import AZURE_ACCOUNT_KEY,CONVERTER_URL,LOCAL_STORAGE_PATH,FRONT_END_URL,EXPIRY_SAS_TIME,BACKEND_URL,EMAIL_HOST_USER,AZURE_CONNECTION_STRING,AZURE_CONTAINER,API_SECRET_KEY,UPLOAD_URL_VDOCIPHER
 import base64
@@ -219,26 +219,30 @@ def fetch_versions(file):
 
     return d
 
-
-def set_current_version(file, current_version_id, target_version_id):
+def set_current_version(file, current_version,target_version_id):
+    
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
 
-    new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
+    current_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
 
-    try:
-        new_blob.delete_blob()
-    except ResourceNotFoundError:
-        pass
+    properties = current_blob.get_blob_properties()
+
+    current_version_id = properties.metadata.get('versionid')
 
     target_blob = BlobClient.from_blob_url(
-        blob_url=f"https://{AZURE_CONTAINER}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
+        blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
         credential=AZURE_ACCOUNT_KEY
     )
 
-    new_blob.start_copy_from_url(target_blob.url)
-    new_blob.wait_for_copy()
-    properties = new_blob.get_blob_properties()
-    new_blob.set_http_headers(
+    current_blob.delete_blob()
+
+    current_blob.start_copy_from_url(target_blob.url)
+
+    current_blob.wait_for_copy()
+
+    current_blob.set_blob_metadata(metadata={'versionid': target_version_id})
+
+    current_blob.set_http_headers(
         content_type=properties.content_settings.content_type,
         content_encoding=properties.content_settings.content_encoding,
         content_language=properties.content_settings.content_language,
@@ -260,9 +264,8 @@ def set_current_version(file, current_version_id, target_version_id):
         x_ms_rehydrate_priority=None,
         x_ms_sealed=None,
         x_ms_server_encrypted=None,
-        x_ms_version_id=target_version_id
+        x_ms_version_id=None
     )
-
 
 
 def download_url_generate_sas(obj,ip):
