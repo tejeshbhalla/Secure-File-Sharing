@@ -26,6 +26,8 @@ import re
 from django.core.exceptions import ValidationError
 from time import sleep
 from urllib.parse import urlencode
+from azure.core.exceptions import ResourceNotFoundError
+
 
 
 
@@ -218,26 +220,42 @@ def fetch_versions(file):
     return d
 
 
-def set_current_version(file, current_version_id, revert_to_version_id):
-    versions_dict = fetch_versions(file)
-
+def set_current_version(file, current_version_id, target_version_id):
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-    container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-    old_blob = container_client.get_blob_client(file.content.name)
-    old_blob_url = old_blob.url + f"?{urlencode({'versionid': revert_to_version_id})}"
-    old_blob.start_copy_from_url(old_blob_url)
+    new_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name)
+    try:
+        new_blob.delete_blob()
+    except ResourceNotFoundError:
+        pass
+    target_blob = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=file.content.name, version_id=target_version_id)
+    new_blob.start_copy_from_url(target_blob.url, source_version=target_version_id)
+    new_blob.wait_for_copy()
+    properties = new_blob.get_blob_properties()
+    new_blob.set_http_headers(
+        content_type=properties.content_settings.content_type,
+        content_encoding=properties.content_settings.content_encoding,
+        content_language=properties.content_settings.content_language,
+        content_disposition=properties.content_settings.content_disposition,
+        cache_control=properties.content_settings.cache_control,
+        x_ms_blob_cache_control=properties.metadata.get('Cache-Control'),
+        x_ms_blob_content_md5=properties.content_settings.content_md5,
+        x_ms_blob_content_type=properties.content_settings.content_type,
+        x_ms_blob_content_encoding=properties.content_settings.content_encoding,
+        x_ms_blob_content_language=properties.content_settings.content_language,
+        x_ms_blob_content_disposition=properties.content_settings.content_disposition,
+        x_ms_meta_name_values=properties.metadata,
+        x_ms_lease_id=None,
+        x_ms_blob_tags=None,
+        x_ms_tier=None,
+        x_ms_access_tier=None,
+        x_ms_access_tier_inferred=None,
+        x_ms_archive_status=None,
+        x_ms_rehydrate_priority=None,
+        x_ms_sealed=None,
+        x_ms_server_encrypted=None,
+        x_ms_version_id=target_version_id
+    )
 
-
-    copy_props = old_blob.get_blob_properties().copy
-    while copy_props.status == 'pending':
-        sleep(1)
-        copy_props = old_blob.get_blob_properties().copy
-    new_blob = container_client.get_blob_client(file.content.name)
-    old_blob_contents = old_blob.download_blob(version_id=revert_to_version_id).readall()
-    new_blob.upload_blob(old_blob_contents)
-
-    new_blob.set_blob_metadata(metadata=versions_dict[revert_to_version_id])
-    
 
 def download_url_generate_sas(obj,ip):
     
