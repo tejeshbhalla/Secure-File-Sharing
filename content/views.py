@@ -8,7 +8,7 @@ from files.jwt_utils import JWTauthentication
 from .serializers import DetailFileSerializer,FolderSerializer,DetailFolderSerializer,FileSerializer,Link_Serializer, Request_File_Serializer,Detail_Link_Serializer
 from files.models import NewUser,People_Groups,Group_Permissions
 from .models import Folder,Files_Model, Internal_Share_Folders,Link_Model,Internal_Share,Link_logs, Request_File
-from .utils import set_current_version,fetch_versions,get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
+from .utils import copy_folder_with_contents,copy_files,set_current_version,fetch_versions,get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
 from Varency.settings import FRONT_END_URL,TIME_ZONE,BACKEND_URL
 import datetime 
 from django.utils import timezone
@@ -1895,5 +1895,31 @@ class Revert_Versions_File(APIView):
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
         
+
+
+class Copy_File_Folder(APIView):
+    authentication_classes = [JWTauthentication]
+    permissions = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
+
+    def post(self,request,urlhash):
+        try:
+            folders=request.data['folder_hash']
+            files=request.data['files_hash']
+            target=request.data['target_hash']
+            target=get_object_or_None(Folder,urlhash=i)
+            for i in folders:
+                folder=Folder.objects.get(urlhash=i)
+                if folder:
+                    copy_folder_with_contents(folder,target)
+            files=Files_Model.objects.get(urlhash__in=files)
+            copy_files(files,target)
+
+            return Response(data={'message':{'successfully copied contents'}},status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)            
+            return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
+        
+
 
 
