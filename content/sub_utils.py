@@ -58,7 +58,11 @@ def copy_folder_with_contents(folder, destination_folder):
     folder_copy.parent = destination_folder
     folder.urlhash=id_generator_2()
     folder_copy.save()
-    
+
     copy_files(folder.files.all(), folder_copy)
+
+    # Debugging print statement
+    print(f"Subfolders in folder {folder.name}: {folder.children.all()}")
+
     for subfolder in folder.children.all():
         copy_folder_with_contents(subfolder, folder_copy)
