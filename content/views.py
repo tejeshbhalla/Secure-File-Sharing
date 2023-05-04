@@ -1911,7 +1911,7 @@ class Copy_File_Folder(APIView):
             for i in folders:
                 folder=Folder.objects.get(urlhash=i)
                 if folder:
-                    copy_folder_with_contents(folder,target)
+                    copy=copy_folder_with_contents(folder,target)
             files=Files_Model.objects.filter(urlhash__in=files)
             copy_files(files,target)
 
