@@ -1907,7 +1907,7 @@ class Copy_File_Folder(APIView):
             folders=request.data['folder_hash']
             files=request.data['files_hash']
             target=request.data['target_hash']
-            target=get_object_or_None(Folder,urlhash=i)
+            target=get_object_or_None(Folder,urlhash=target)
             for i in folders:
                 folder=Folder.objects.get(urlhash=i)
                 if folder:
