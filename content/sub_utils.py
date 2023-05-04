@@ -49,16 +49,13 @@ def copy_folder_with_contents(folder, destination_folder):
     """
     Copies a folder and its contents into another folder.
     """
-    print(folder)
     # Create a copy of the folder object with a new primary key (to avoid conflicts)
     folder_copy = folder
     folder_copy.pk = None
     folder_copy.parent = destination_folder
     folder.urlhash=id_generator_2()
     folder_copy.save()
-    print(destination_folder.children.all())
-    for subfolder in destination_folder.children.all():
-        print(subfolder)
+    for subfolder in folder.children.all():
         copy_folder_with_contents(subfolder, folder_copy)
 
-    copy_files(destination_folder.files.all(), folder_copy)
+    copy_files(folder.files.all(), folder_copy)
