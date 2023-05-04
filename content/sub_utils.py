@@ -63,7 +63,7 @@ def copy_folder_with_contents(folder, destination_folder):
 
     copy_files(files, folder_copy)
 
-    # Debugging print statement
+    # Debugging prit statement
     print(f"Subfolders in folder {folder.name}: {folder.children.all()}")
 
     for subfolder in children:
