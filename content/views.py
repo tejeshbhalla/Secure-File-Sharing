@@ -1912,7 +1912,7 @@ class Copy_File_Folder(APIView):
                 folder=Folder.objects.get(urlhash=i)
                 if folder:
                     copy_folder_with_contents(folder,target)
-            files=Files_Model.objects.get(urlhash__in=files)
+            files=Files_Model.objects.filter(urlhash__in=files)
             copy_files(files,target)
 
             return Response(data={'message':{'successfully copied contents'}},status=status.HTTP_200_OK)
