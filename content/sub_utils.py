@@ -49,6 +49,7 @@ def copy_folder_with_contents(folder, destination_folder):
     """
     Copies a folder and its contents into another folder.
     """
+    print(folder)
     # Create a copy of the folder object with a new primary key (to avoid conflicts)
     folder_copy = folder
     folder_copy.pk = None
