@@ -29,7 +29,7 @@ def copy_files(files_list,target_folder):
         path=f'{files_list[0].owner.username}/root'
     else:
         path=target_folder.order_parent_urlhash()
-        path=os.path.join(path)
+        path=os.path.join(*path)
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     for i in files_list:
         name=i.file_name
