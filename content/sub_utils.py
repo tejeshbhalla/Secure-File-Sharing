@@ -1,7 +1,7 @@
-from content.models import Link_Model,Files_Model
+from content.models import Link_Model,Files_Model,Folder
 from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions,BlobClient
 from Varency.settings import AZURE_CONNECTION_STRING,AZURE_CONTAINER
-
+from .utils import id_generator
 
 def revoke_access(user,hash):
     name=hash.__class__.__name__
@@ -12,6 +12,13 @@ def revoke_access(user,hash):
     else:
         links=Link_Model.objects.filter(owner=user,folder_hash__in=[hash])
         links.delete()
+
+
+def id_generator_2():
+    id=id_generator()
+    while Folder.objects.filter(urlhash=id).exists():
+            id = id_generator()
+    return id
 
 
 
@@ -46,6 +53,7 @@ def copy_folder_with_contents(folder, destination_folder):
     folder_copy = folder
     folder_copy.pk = None
     folder_copy.parent = destination_folder
+    folder.urlhash=id_generator_2()
     folder_copy.save()
 
     copy_files(folder.files.all(),folder_copy)
