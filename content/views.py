@@ -1902,7 +1902,7 @@ class Copy_File_Folder(APIView):
     permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
 
-    def post(self,request,urlhash):
+    def post(self,request):
         try:
             folders=request.data['folder_hash']
             files=request.data['files_hash']
