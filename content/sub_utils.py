@@ -2,6 +2,7 @@ from content.models import Link_Model,Files_Model,Folder
 from azure.storage.blob import BlobServiceClient, ContainerClient,generate_blob_sas, BlobSasPermissions,BlobClient
 from Varency.settings import AZURE_CONNECTION_STRING,AZURE_CONTAINER
 from .utils import id_generator
+import os
 
 def revoke_access(user,hash):
     name=hash.__class__.__name__
@@ -26,7 +27,9 @@ def copy_files(files_list,target_folder):
     d={}
     if not target_folder:
         path=f'{files_list[0].owner.username}/root'
-    path=target_folder.order_parent_urlhash()
+    else:
+        path=target_folder.order_parent_urlhash()
+        path=os.path.join(path)
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
     for i in files_list:
         name=i.file_name
