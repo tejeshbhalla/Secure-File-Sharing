@@ -526,22 +526,16 @@ def generate_random_key(key_size):
 
 
 def encryptor(file_chunk_generator, key):
-    # Generate the initialization vector
-    iv = hashlib.sha256(key.encode()).digest()[:16]
-    # Create the AES cipher object
+    iv = os.urandom(16)
     cipher = AES.new(key.encode(), AES.MODE_CBC, iv)
 
-    # Encrypt the file chunk by chunk
     for chunk in file_chunk_generator:
-        # Pad the chunk so that it is a multiple of 16 bytes
         chunk = chunk + b' ' * (16 - (len(chunk) % 16))
-        # Encrypt the padded chunk
         encrypted_chunk = cipher.encrypt(chunk)
-        # Yield the encrypted chunk along with the initialization vector
         yield iv + encrypted_chunk
-        # Generate a new initialization vector for the next chunk
-        iv = hashlib.sha256(key.encode() + encrypted_chunk).digest()[:16]
+        iv = os.urandom(16)
         cipher = AES.new(key.encode(), AES.MODE_CBC, iv)
+
 
 
 
