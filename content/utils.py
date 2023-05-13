@@ -521,7 +521,7 @@ def validate_share(internal_share,data):
 
 #aes 256 random key giver 
 def generate_random_key(key_size):
-    return os.urandom(key_size)
+    return os.urandom(key_size//8)
 
 
 
