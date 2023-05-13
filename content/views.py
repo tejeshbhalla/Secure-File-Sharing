@@ -1055,7 +1055,7 @@ class Multi_File_Upload(APIView):
                 key = generate_random_key(key_size=16)  # Generate a random 256-bit key for AES encryption
                 encrypted_file_chunks = encryptor(file.chunks(chunk_size), key.hex())
                 for encrypted_chunk in encrypted_file_chunks:
-                    encoded_chunk = encrypted_chunk.hex()
+                    encoded_chunk = encrypted_chunk.hex().encode('utf-8')
                     blob_client.upload_blob(encoded_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
                 if parent_folder == 'root':
                     parent_folder = None
