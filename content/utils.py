@@ -527,9 +527,9 @@ def generate_random_key(key_size=16):
 
 def encryptor(file_chunk_generator, key):
     # Generate the initialization vector
-    iv = hashlib.sha256(key).digest()[:16]
+    iv = hashlib.sha256(key.encode('utf-8')).digest()[:16]
     # Create the AES cipher object
-    cipher = AES.new(key, AES.MODE_CBC, iv)
+    cipher = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
 
     # Encrypt the file chunk by chunk
     for chunk in file_chunk_generator:
@@ -540,8 +540,8 @@ def encryptor(file_chunk_generator, key):
         # Yield the encrypted chunk along with the initialization vector
         yield iv + encrypted_chunk
         # Generate a new initialization vector for the next chunk
-        iv = hashlib.sha256(key + encrypted_chunk).digest()[:16]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
+        iv = hashlib.sha256(key.encode('utf-8') + encrypted_chunk).digest()[:16]
+        cipher = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
 
 
 
