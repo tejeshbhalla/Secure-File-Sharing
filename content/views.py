@@ -1052,7 +1052,7 @@ class Multi_File_Upload(APIView):
                 file = request.data[i]
                 chunk_size = 100 * 1024 * 1024  # 100 MB chunks
                 offset = 0
-                key = generate_random_key(32)  # Generate a random 256-bit key for AES encryption
+                key = generate_random_key(key_size=16)  # Generate a random 256-bit key for AES encryption
                 encrypted_file_chunks = encryptor(file.chunks(chunk_size), key.hex())
                 for encrypted_chunk in encrypted_file_chunks:
                     blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
