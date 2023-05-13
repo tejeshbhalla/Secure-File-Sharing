@@ -258,7 +258,7 @@ AWS_HEADERS = {
 
 
 #drm info
-API_SECRET_KEY = "9WZ5eJyoIW0oHVvTIs8h0VPrm8eVsuU5lck77l47dHnV3AnaPwyK8EEDc41t8VoC"
+API_SECRET_KEY = "yAJt9O7hdgk6fLb9XhjDTRGzzGjjDxP5JEO5dnwlgQNtq6253JQYbpaUn8gjVz30"
 UPLOAD_URL_VDOCIPHER='https://dev.vdocipher.com/api/videos'
 VIDEO_STATUS_URL_VDOCIPHER='https://dev.vdocipher.com/api/videos/'
 CONVERTER_URL='http://127.0.0.1:5000/convert'
