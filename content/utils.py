@@ -530,9 +530,11 @@ def encryptor(file_chunk_generator, key):
     iv = os.urandom(16)
     # Create the AES cipher object
     cipher = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
-
+    i=0
     # Encrypt the file chunk by chunk
     for chunk in file_chunk_generator:
+        print(chunk,f'chunk_{i}')
+        i+=1
         # Pad the chunk so that it is a multiple of 16 bytes
         chunk = chunk + b' ' * (16 - (len(chunk) % 16))
         # Encrypt the padded chunk
