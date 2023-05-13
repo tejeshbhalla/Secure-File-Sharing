@@ -1529,9 +1529,17 @@ class MediaStreamView(APIView):
                 resp = StreamingHttpResponse(self._stream_blob(blob_client, start, length), status=206, content_type=content_type)
                 resp['Content-Length'] = str(length)
                 resp['Content-Range'] = 'bytes %s-%s/%s' % (start, end, content_length)
+                resp['Accept-Ranges'] = 'bytes'
+                resp['Content-Disposition'] = 'inline'
+                resp['Cache-Control'] = 'no-cache'
+                resp['X-Accel-Buffering'] = 'no'
             else:
                 resp = StreamingHttpResponse(self._stream_blob(blob_client), status=206, content_type=content_type)
                 resp['Content-Length'] = content_length
+                resp['Accept-Ranges'] = 'bytes'
+                resp['Content-Disposition'] = 'inline'
+                resp['Cache-Control'] = 'no-cache'
+                resp['X-Accel-Buffering'] = 'no'
             return resp
         except Exception as e:
             return Response(data={'message': 'Invalid Request'}, status=status.HTTP_400_BAD_REQUEST)
