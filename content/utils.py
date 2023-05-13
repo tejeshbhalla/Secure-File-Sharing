@@ -526,7 +526,7 @@ def generate_random_key(key_size=16):
 
 
 def encryptor(file_chunk_generator, key):
-    # Generate the initialization vector
+    # Generate a random initialization vector (IV)
     iv = os.urandom(16)
     # Create the AES cipher object
     cipher = AES.new(key.encode(), AES.MODE_CBC, iv)
@@ -540,7 +540,7 @@ def encryptor(file_chunk_generator, key):
         # Yield the encrypted chunk along with the initialization vector
         yield iv + encrypted_chunk
         # Generate a new initialization vector for the next chunk
-        iv = encrypted_chunk
+        iv = os.urandom(16)
         cipher = AES.new(key.encode(), AES.MODE_CBC, iv)
 
 
