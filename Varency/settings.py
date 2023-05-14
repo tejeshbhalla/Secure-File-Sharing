@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+)0aq35x-7qx!-7d%0cb*z227f+%yd3df4-8l*$i4h02t8(9^2'
+SECRET_KEY = '2A9BD4EDE4BF28AD3F7C492CF22BC-tejeshisdaddyofthisuniverse'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -194,12 +194,12 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
 
 #azure settings 
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-AZURE_ACCOUNT_NAME = "filesmodelapp"
-AZURE_ACCOUNT_KEY='Z5GLgOxy6HsZtbtOlwHOet5r1aZjdjKPAGYAlaEq/1fm8hwhpMYktxqHxaaIJ9udewnlsLrZ2v2r+AStbrgpZA=='
+AZURE_ACCOUNT_NAME = "varencydrivestorage"
+AZURE_ACCOUNT_KEY='nJSFPx8AAQt8LD9Wt+jhjakHxLG/7ZzVuN3I9X4aLjosuAuBkhZAplPT27y3FLfzoNZnIvmPIMTE+AStn4gGiA=='
 AZURE_CONTAINER='filesapp'
 AZURE_SSL=True
 AZURE_URL_EXPIRATION_SECS=timedelta(seconds=600).seconds
-AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=filesmodelapp;AccountKey=Z5GLgOxy6HsZtbtOlwHOet5r1aZjdjKPAGYAlaEq/1fm8hwhpMYktxqHxaaIJ9udewnlsLrZ2v2r+AStbrgpZA==;EndpointSuffix=core.windows.net'
+AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=varencydrivestorage;AccountKey=nJSFPx8AAQt8LD9Wt+jhjakHxLG/7ZzVuN3I9X4aLjosuAuBkhZAplPT27y3FLfzoNZnIvmPIMTE+AStn4gGiA==;EndpointSuffix=core.windows.net'
 AZURE_OVERWRITE_FILES=True
 
 
