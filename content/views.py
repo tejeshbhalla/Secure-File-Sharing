@@ -1490,11 +1490,13 @@ class Add_Link_Favourite(APIView):
 
         
 class MediaStreamView(APIView):
-    CHUNK_SIZE = 1024 * 1024  # 1 MB
-    def _stream_blob(self, blob_client, start=0, length=None):
+    CHUNK_SIZE = 40*1024 * 1024  # 40 MB
+    def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
+        cypher_suite=Fernet(obj.key)
         while True:
             data = stream.read(self.CHUNK_SIZE)
+            decrypted_chunk = cypher_suite.decrypt(data)
             if not data:
                 break
             yield data
@@ -1528,7 +1530,7 @@ class MediaStreamView(APIView):
                 end = int(end)
                 length = end - start + 1
                 blob_range = 'bytes={}-{}'.format(start, end)
-                resp = StreamingHttpResponse(self._stream_blob(blob_client, start, length), status=206, content_type=content_type)
+                resp = StreamingHttpResponse(self._stream_blob(blob_client, start, length,obj=obj), status=206, content_type=content_type)
                 resp['Content-Length'] = str(length)
                 resp['Content-Range'] = 'bytes %s-%s/%s' % (start, end, content_length)
                 resp['Accept-Ranges'] = 'bytes'
@@ -1536,7 +1538,7 @@ class MediaStreamView(APIView):
                 resp['Cache-Control'] = 'no-cache'
                 resp['X-Accel-Buffering'] = 'no'
             else:
-                resp = StreamingHttpResponse(self._stream_blob(blob_client), status=206, content_type=content_type)
+                resp = StreamingHttpResponse(self._stream_blob(blob_client,obj=obj), status=206, content_type=content_type)
                 resp['Content-Length'] = content_length
                 resp['Accept-Ranges'] = 'bytes'
                 resp['Content-Disposition'] = 'inline'
