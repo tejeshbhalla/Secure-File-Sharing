@@ -1495,7 +1495,8 @@ class MediaStreamView(APIView):
     def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
         key=key_decode(obj)
-        cypher_suite=Fernet(bytes(key))
+        print(key)
+        cypher_suite=Fernet(key)
         while True:
             data = stream.read(self.CHUNK_SIZE)
             data = cypher_suite.decrypt(data)

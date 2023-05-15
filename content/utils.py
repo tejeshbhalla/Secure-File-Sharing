@@ -543,6 +543,6 @@ def key_decode(obj):
     key_value = ast.literal_eval(key_str)
 
     # Create a new bytes object from the inner byte string
-    key_bytes = bytes(key_value.encode('utf-8'))
+    key_bytes = bytes(key_value)
 
     return key_bytes
