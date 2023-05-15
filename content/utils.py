@@ -32,7 +32,7 @@ import hashlib
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
-
+import ast
 
 
 
@@ -531,3 +531,17 @@ def encrypt_with_aes(data, key):
     ciphertext = encryptor.update(data) + encryptor.finalize()
     return iv + ciphertext
 
+
+
+
+def key_decode(obj):
+    # Convert the key value from a byte string to a string
+    key_str = obj.key.decode('utf-8')
+
+    # Use the ast.literal_eval() function to safely evaluate the string
+    key_value = ast.literal_eval(key_str)
+
+    # Create a new bytes object from the inner byte string
+    key_bytes = bytes(key_value.encode('utf-8'))
+
+    return key_bytes

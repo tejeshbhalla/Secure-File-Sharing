@@ -34,7 +34,7 @@ from .tasks import upload_video_to_vdocipher
 from django.core.cache import cache
 from django.db.models import Q
 import gevent
-from .utils import validate_share,encrypt_with_aes
+from .utils import validate_share,encrypt_with_aes,key_decode
 from .extra_utils import validate_share_already_exist
 from .sub_utils import copy_folder_with_contents,copy_files
 from cryptography.fernet import Fernet
@@ -1494,8 +1494,8 @@ class MediaStreamView(APIView):
     CHUNK_SIZE = 40*1024 * 1024  # 40 MB
     def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
-        print(bytes(obj.key))
-        cypher_suite=Fernet(bytes(obj.key))
+        key=key_decode(obj)
+        cypher_suite=Fernet(bytes(key))
         while True:
             data = stream.read(self.CHUNK_SIZE)
             data = cypher_suite.decrypt(data)
