@@ -1,4 +1,5 @@
 crypto
+cryptography
 pycrypto
 pycryptodome
 amqp==5.1.1

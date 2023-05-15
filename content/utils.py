@@ -29,6 +29,9 @@ from urllib.parse import urlencode
 from azure.core.exceptions import ResourceNotFoundError
 from Crypto.Cipher import AES
 import hashlib
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 
 
@@ -519,31 +522,12 @@ def validate_share(internal_share,data):
         raise ValidationError('Invalid privelages cant have permission you dont own')
     
 
-#aes 256 random key giver 
-def generate_random_key(key_size=16):
-    return os.urandom(key_size)
 
 
-
-def encryptor(file_chunk_generator, key):
-    # Generate the initialization vector
+def encrypt_with_aes(data, key):
     iv = os.urandom(16)
-    # Create the AES cipher object
-    cipher = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
-    i=0
-    # Encrypt the file chunk by chunk
-    for chunk in file_chunk_generator:
-        print(chunk,f'chunk_{i}')
-        i+=1
-        # Pad the chunk so that it is a multiple of 16 bytes
-        chunk = chunk + b' ' * (16 - (len(chunk) % 16))
-        # Encrypt the padded chunk
-        encrypted_chunk = cipher.encrypt(chunk)
-        # Yield the encrypted chunk along with the initialization vector
-        yield iv + encrypted_chunk
-        # Generate a new initialization vector for the next chunk
-        iv = encrypted_chunk[-16:]
-        cipher = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
-
-
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+    ciphertext = encryptor.update(data) + encryptor.finalize()
+    return iv + ciphertext
 
