@@ -1066,6 +1066,7 @@ class Multi_File_Upload(APIView):
                 # Save the file metadata in your Django model
                 if parent_folder=='root':
                     parent_folder=None
+                print(key)
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder,key=key)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
@@ -1493,6 +1494,7 @@ class MediaStreamView(APIView):
     CHUNK_SIZE = 40*1024 * 1024  # 40 MB
     def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
+        print(obj.key)
         cypher_suite=Fernet(obj.key)
         while True:
             data = stream.read(self.CHUNK_SIZE)
