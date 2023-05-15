@@ -535,8 +535,9 @@ def encrypt_with_aes(data, key):
 
 
 def key_decode(obj):
+    key_bytes = bytes(obj.key)
     # Convert the key value from a byte string to a string
-    key_str = obj.key.decode('utf-8')
+    key_str = key_bytes.decode('utf-8')
 
     # Use the ast.literal_eval() function to safely evaluate the string
     key_value = ast.literal_eval(key_str)
