@@ -1494,7 +1494,7 @@ class MediaStreamView(APIView):
     CHUNK_SIZE = 40*1024 * 1024  # 40 MB
     def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
-        
+        print(bytes(obj.key))
         cypher_suite=Fernet(bytes(obj.key))
         while True:
             data = stream.read(self.CHUNK_SIZE)
