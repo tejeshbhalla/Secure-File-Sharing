@@ -418,9 +418,11 @@ def convert_file_to_mp4(obj_link,obj_file):
 
 
 def set_poster(videoid):
+    from django.templatetags.static import static
+    static_file_url=static('Backend/static/images/thumbnail.png')
     url = f"https://dev.vdocipher.com/api/videos/{videoid}/files"
 
-    with open('Backend/content/thumbnail.png', 'rb') as f:
+    with open(static_file_url, 'rb') as f:
         file_contents = f.read()
 
     payload = {
