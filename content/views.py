@@ -38,7 +38,7 @@ from .utils import validate_share,encrypt_with_aes,key_decode
 from .extra_utils import validate_share_already_exist
 from .sub_utils import copy_folder_with_contents,copy_files
 from cryptography.fernet import Fernet
-
+from .signals import create_logs
 
 class CreateFolderView(APIView):
     authentication_classes = [JWTauthentication]
@@ -1176,6 +1176,7 @@ class Request_File_Create(APIView):
             sz=Request_File_Serializer(data=request.data)
             if sz.is_valid():
                 obj=sz.save()
+                create_logs(user,f"{user.username} requested file {obj.file_name} from {request.data['user_to']}")
                 return Response(data={"message":'request created'},status=status.HTTP_200_OK)
             return Response(data=sz.errors,status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -1205,7 +1206,9 @@ class Request_File_Upload(APIView):
             serializer=FileSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.validated_data['folder']=None
-                serializer.validated_data['owner']=NewUser.objects.get(username=r.user_from,tenant=tenant)
+                obj=NewUser.objects.get(username=r.user_from,tenant=tenant)
+                serializer.validated_data['owner']=obj
+                create_logs(obj,f"Requestd file uploaded from {r.user_to} to {r.user_from}")
                 obj=serializer.save()
                 r.delete()
                 return Response('successfully uploaded file',status=status.HTTP_200_OK)
@@ -1228,6 +1231,7 @@ class Internal_File_Notification(APIView):
             owner=file.owner
             time=timezone.now()
             create_notifications(owner,extras=f'suspicious activity detected on file-{file.file_name} on {time}')
+            create_logs(owner,f"Suspicious activity on file {file.file_name} by {owner.username}")
             return Response('successfully got data',status=status.HTTP_200_OK)
         except Exception as e:
             
@@ -1397,6 +1401,7 @@ class Remove_Shared(APIView):
             user=get_user_from_tenant(request)
             if 'folder_hash' not in request.data or 'file_hash' not in request.data:
                 return Response(data={"message":"folder_hash or file_hash not in request"})
+            message=f'deleted internal shares for :'
             for urlhash in request.data['folder_hash']:
                 folder=get_object_or_None(Folder,urlhash=urlhash)
                 if not folder :
@@ -1405,7 +1410,9 @@ class Remove_Shared(APIView):
                 all_shares=Internal_Share_Folders.objects.get(shared_with=user,folder_hash=folder)
                 print(all_shares)
                 all_shares.delete()
-            
+                message+=str(folder.name)
+            create_logs(user,message)
+            message=f'deleted internal shares for :'
             for urlhash in request.data['file_hash']:
                 file=get_object_or_None(Files_Model,urlhash=urlhash)
                 print(file)
@@ -1414,6 +1421,8 @@ class Remove_Shared(APIView):
                 all_shares=Internal_Share.objects.get(shared_with=user,file_hash=file)
                 print(all_shares)
                 all_shares.delete()
+                message+=str(file.file_name)
+            create_logs(user,message)
     
             return Response(data={"message":"success"},status=status.HTTP_200_OK)
         except Exception as e:
@@ -1486,7 +1495,7 @@ class Add_Link_Favourite(APIView):
             return Response(data={"message":"success"},status=status.HTTP_200_OK)
         except Exception as e:
             
-            return Response(data={"message":{e}},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"mssage":{e}},status=status.HTTP_400_BAD_REQUEST)
         
 
         
@@ -1573,6 +1582,7 @@ class Get_File_Detail(APIView):
                     'can_add_delete_content':grp_per.can_add_delete_content,
                     'can_share_content':grp_per.can_share_content,
                     'can_download_content':grp_per.can_download_content,'is_proctored':grp_per.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if grp_per.can_download_content else None}
+                create_logs(user,'{user.username} accessed file {obj.file_name} from {grp.name}')
                 return Response(data=data,status=status.HTTP_200_OK)
 
             if type=='internal_share':
@@ -1586,11 +1596,13 @@ class Get_File_Detail(APIView):
                     'can_add_delete_content':internal_share.can_add_delete_content,
                     'can_share_content':internal_share.can_share_content,
                     'can_download_content':internal_share.can_download_content,'is_proctored':internal_share.is_proctored,'download_link':download_url_generate_sas(obj,get_client_ip(request)) if internal_share.can_download_content else None}
+                create_logs(user,'{user.username} accessed file {obj.file_name} from internal share by {obj.owner.username}')
                 return Response(data=data,status=status.HTTP_200_OK)
             if type=='home':
                 obj=Files_Model.objects.get(owner=user,urlhash=file_hash)
                 data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',"size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,"date_created":str(obj.date_uploaded)[0:11],'is_file':True,
                     'download_link':download_url_generate_sas(obj,get_client_ip(request))}
+                create_logs(user,'{user.username} accessed file {obj.file_name} from home')
                 return Response(data=data,status=status.HTTP_200_OK)
             return Response(data={'message':'Invalid Request'},status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -1604,6 +1616,8 @@ class Get_File_Link_Detail(APIView):
             if type=='link':
                 link=Link_Model.objects.get(link_hash=obj_hash)
                 obj=Files_Model.objects.get(urlhash=file_hash)
+                create_logs(obj.owner,'link {link.name} was used to access {obj.file_name}')
+                create_notifications(obj.owner,extras='link {link.name} was used to access {obj.file_name}')
                 if link.is_drm:
                     key=f'{obj.urlhash}_{link.link_hash}_video'
                     if cache.get(key):
@@ -1630,7 +1644,8 @@ class Get_File_Link_Detail(APIView):
 
 
                 else:
-
+                    create_logs(obj.owner,'link {link.name} was used to access {obj.file_name}')
+                    create_notifications(obj.owner,extras='link {link.name} was used to access {obj.file_name}')
                     data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                         "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                         "date_created":str(obj.date_uploaded)[0:11],'is_file':True,'can_download_content':link.is_downloadable,
@@ -1846,7 +1861,8 @@ class Download_Multi_File_Folder_Link(APIView):
             link_hash=request.data['link_hash']
             files_hash=request.data['file_hash']
             folders_hash=request.data['folder_hash']
-            
+            user=get_user(request)
+            message='user downloaded multiple things :'
             for i in files_hash:
                 obj=Files_Model.objects.get(urlhash=i)
                 link=Link_Model.objects.filter(file_hash__in=[obj],link_hash=link_hash).first()
@@ -1854,6 +1870,7 @@ class Download_Multi_File_Folder_Link(APIView):
                     link=Link_Model.search_parent_file(link_hash,obj)
                 if link and link.is_downloadable:
                     blob_names.append((obj.content.name,obj.order_path()))
+                    message+='file:'+obj.file_name
             for j in folders_hash:
                 obj=Folder.objects.get(urlhash=j)
                 link=Link_Model.objects.filter(folder_hash__in=[obj],link_hash=link_hash).first()
@@ -1862,12 +1879,13 @@ class Download_Multi_File_Folder_Link(APIView):
                 if link and link.is_downloadable:
                     _,files=obj.get_subfolders_and_files()
                     blob_names.extend([(i.content.name,i.order_path()) for i in files])
-
+                    message+='folder:'+obj.name
             blob_service_client = BlobServiceClient.from_connection_string(conn_str=AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
             name=f'{timezone.now()}'
             response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
+            create_logs(user,message)
             return response
         except Exception as e:
             print(e)            

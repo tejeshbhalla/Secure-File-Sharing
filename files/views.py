@@ -21,6 +21,7 @@ from django.http import HttpResponse
 from django.core.files.base import ContentFile
 from django.utils import timezone
 import gevent
+from content.signals import create_logs
 
 # Create your views here.
 class UserView(APIView):
@@ -1059,6 +1060,7 @@ class GetFile(APIView):
 
                 file.content=file_content
                 file.resave()
+                create_logs(user,'{user.username} edited a file {file.file_name}')
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
             share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
             if not share:
@@ -1069,6 +1071,7 @@ class GetFile(APIView):
 
                 file.content=file_content
                 file.resave()
+                create_logs(user,'{user.username} edited a internally shared file from {share.owner.username} {file.file_name}')
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(message=f'{e}',status=status.HTTP_400_BAD_REQUEST)
@@ -1152,6 +1155,7 @@ class GetFileGroup(APIView):
 
                 file.content=file_content
                 file.resave()
+                create_logs(user,f'{user.username} edited a file shared in group {group.name}')
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(message=f'{e}',status=status.HTTP_400_BAD_REQUEST)

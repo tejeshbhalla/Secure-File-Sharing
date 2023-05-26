@@ -29,7 +29,6 @@ class FolderSerializer(serializers.ModelSerializer):
                 validated_data['parent'] = get_object_or_None(Folder,urlhash=validated_data['parent'])
                 if validated_data['parent'].owner!=validated_data['owner']:
                     per=Internal_Share_Folders.objects.get(shared_with=validated_data['owner'],folder_hash=validated_data['parent'])
-                    print(per)
                     if  per.can_add_delete_content:
                         validated_data['owner']=per.owner
                     else:
