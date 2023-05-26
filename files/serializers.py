@@ -133,3 +133,10 @@ class Notification_Serializer(serializers.ModelSerializer):
      class Meta:
          model=Notifications
          fields=['text','user','read','date','type']
+
+
+
+class SupportRequestSerializer(serializers.Serializer):
+    message = serializers.CharField()
+    additional_thoughts = serializers.CharField(required=False)
+    file = serializers.FileField(required=False)

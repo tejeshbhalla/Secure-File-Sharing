@@ -1500,7 +1500,7 @@ class Add_Link_Favourite(APIView):
 
         
 class MediaStreamView(APIView):
-    CHUNK_SIZE = 40*1024 * 1024  # 40 MB
+    CHUNK_SIZE = 1*1024 * 1024  # 40 MB
     def _stream_blob(self, blob_client, start=0, length=None,obj=None):
         stream = blob_client.download_blob(offset=start, length=length)
         while True:

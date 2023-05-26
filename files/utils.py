@@ -41,19 +41,21 @@ def file_size(tenant,file):
 
 def send_email(email,token,request,type,message=None):
     if type=='activate':     
-         link=f'http://{message}.{FRONT_END_URL}Authentication/activation/{token}'
+         link=f'https://{message}.{FRONT_END_URL}Authentication/activation/{token}'
          message=f'Please click/open the following link in your browser to activate your account {link}'
          html_content=render_to_string(r"activate.html",{"link":link,'title':'activate account','message':message})
 
     if type=='reset':
-         link=f'http://{message}.{FRONT_END_URL}Authentication/resetpassword/{token}'
+         link=f'https://{message}.{FRONT_END_URL}Authentication/resetpassword/{token}'
          message=f'Please click/open the following link in your browser to reset your account {link}'
          html_content=render_to_string(r"activate.html",{'link':link,'title':'reset account','message':message})
     if type=='otp':
         message=f"Your verification code for logging in is {token}"
         code=token
         html_content=render_to_string(r"2fa.html",{'otp':code,'name':email.split('@')[0]})
-
+    if type=='support':
+        link='varency.com'
+        html_content=render_to_string(r"activate.html",{'link':link,'title':'Support Query','message':message})
     text_content=strip_tags(html_content)
     email=EmailMultiAlternatives('Mail from Varency',text_content,EMAIL_HOST_USER,[email])
     email.attach_alternative(html_content,'text/html')

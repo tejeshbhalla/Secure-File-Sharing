@@ -2,7 +2,7 @@ from content.utils import get_client_ip,download_url_generate_sas,create_media_j
 from files.sub_utils import get_tenant, get_user_from_tenant
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers import CreateGroupSerializer, DetailGroupSerializer, Logs_Serializer, Notification_Serializer, RegisterUser, TenantSerializer, UserSerializer, WorkSerializer
+from .serializers import SupportRequestSerializer,CreateGroupSerializer, DetailGroupSerializer, Logs_Serializer, Notification_Serializer, RegisterUser, TenantSerializer, UserSerializer, WorkSerializer
 from rest_framework import status
 from .models import Group_Permissions, NewUser,BlacklistedToken, Notifications,Otp_Token, People_Groups, User_logs,Tenant
 from rest_framework.permissions import IsAuthenticated
@@ -22,6 +22,8 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 import gevent
 from content.signals import create_logs
+from django.core.mail import send_mail
+
 
 # Create your views here.
 class UserView(APIView):
@@ -1193,3 +1195,27 @@ class Query_Subuser_Email(APIView):
             return Response(data=f'{e}',status=status.HTTP_400_BAD_REQUEST)
 
 
+class Help_Support(APIView):
+    def post(self, request):
+        serializer = SupportRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            message = serializer.validated_data['message']
+            additional_thoughts = serializer.validated_data.get('additional_thoughts', '')
+            uploaded_file = request.FILES.get('file')
+
+            # Prepare the email content
+            subject = 'Support Request'
+            email_body = f"Message: {message}\nAdditional Thoughts: {additional_thoughts}"
+            
+            if uploaded_file:
+                # Attach the file to the email
+                attachment = (uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)
+            else:
+                attachment = None
+
+            # Send the email
+            send_mail(subject, email_body, 'noreply@varency.com', ['info@varency.com'], fail_silently=True, attachment=attachment)
+            
+            return Response("Support request sent successfully.")
+        else:
+            return Response(serializer.errors, status=400)

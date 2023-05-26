@@ -1,6 +1,6 @@
 from django.urls import re_path as url
 from django.urls import include,path
-from .views import Query_Subuser_Email,Add_Favourite, Add_Files_Folder_Group, CheckFileInfo, CheckFileInfo_Link, CheckFileInfoGroup,Clear_Notifications, Admin_Delete_User, Admin_Edit_User_Details, AdminCreateUsers, Create_Tenant, Detail_User_Groups, Forgot_Subdomain, Get_All_Logs, Get_User_Logs, GetFile, GetFileGroup, GetFileLink, Group_Folder_Detail, Notification_System, Notification_System_Old, RegisterView,LoginView, Resend_otp, TokenVerifyView, Update_User_Permissions, Update_Users_In_Group,UserView,ForgotPassword,ResetPassword,LogoutView,ResendActivation,Otp_verify_view,People_Group_Create,Change_Password, View_Users,AdminCreateUser,Admin_Delete_All_Users,User_to_Group,Leave_Group,VerifyTenant,Forgot_Subdomain
+from .views import Help_Support,Query_Subuser_Email,Add_Favourite, Add_Files_Folder_Group, CheckFileInfo, CheckFileInfo_Link, CheckFileInfoGroup,Clear_Notifications, Admin_Delete_User, Admin_Edit_User_Details, AdminCreateUsers, Create_Tenant, Detail_User_Groups, Forgot_Subdomain, Get_All_Logs, Get_User_Logs, GetFile, GetFileGroup, GetFileLink, Group_Folder_Detail, Notification_System, Notification_System_Old, RegisterView,LoginView, Resend_otp, TokenVerifyView, Update_User_Permissions, Update_Users_In_Group,UserView,ForgotPassword,ResetPassword,LogoutView,ResendActivation,Otp_verify_view,People_Group_Create,Change_Password, View_Users,AdminCreateUser,Admin_Delete_All_Users,User_to_Group,Leave_Group,VerifyTenant,Forgot_Subdomain
 app_name='files_app'
 urlpatterns = [
     path("register",RegisterView.as_view()),
@@ -49,7 +49,8 @@ urlpatterns = [
     path('group/wopi/files/<str:file_id>/contents',GetFileGroup.as_view(),name='get file content group'),
     path('link/wopi/files/<str:file_id>/contents',GetFileLink.as_view(),name='get file content link'),
     path('link/wopi/files/<str:file_id>',CheckFileInfo_Link.as_view(),name='check file info link'),
-    path("user/query_email/<str:query>",Query_Subuser_Email.as_view(),name='get_user_email')
+    path("user/query_email/<str:query>",Query_Subuser_Email.as_view(),name='get_user_email'),
+    path('help/support',Help_Support.as_view(),name='help and support')
 
 ]
 
