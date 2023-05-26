@@ -13,7 +13,7 @@ from files.jwt_utils import JWTauthentication
 from content.models import Folder
 from .serializers import ServerSerializer,SyncDirectionSerializer,SyncDirectionSerializer2
 from files.models import NewUser
-from .utils import get_user_email,check_and_refresh_googledrive,get_access_token_from_code_googledrive,check_and_refresh_token_onedrive,get_authorize_url,get_authorize_url_onedrive,get_access_token_from_code
+from .utils import revoke_access,get_permission_id,get_user_email,check_and_refresh_googledrive,get_access_token_from_code_googledrive,check_and_refresh_token_onedrive,get_authorize_url,get_authorize_url_onedrive,get_access_token_from_code
 from oauth2client.client import  OAuth2WebServerFlow
 import requests
 import json
@@ -190,7 +190,16 @@ class Delete_Server(APIView):
     def delete(self,request,server_name):
         try:
             obj=Server_Connection.objects.filter(server_name=server_name).first()
-            
+            if obj.type=='googledrive':
+                token=obj.user_token
+                if type(token)==str:
+                    token=json.loads(token)
+                else:
+                    access_token=token['access_token']
+                    refreshToken=token['refresh_token']
+                    token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
+                    permission_id=get_permission_id(token['access_token'])
+                    revoke_access(token['access_token'],permission_id)
             obj.delete()
             return Response(data={'message':'deleted server'},status=status.HTTP_200_OK)
         except Exception as e:

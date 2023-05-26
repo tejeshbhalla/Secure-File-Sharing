@@ -207,3 +207,38 @@ def get_user_email(access_token):
         return data.get("email")
     else:
         raise Exception(f"Error: {response.text}")
+    
+
+
+
+def revoke_access(token, permission_id):
+    try:
+        url = f"https://www.googleapis.com/drive/v3/permissions/{permission_id}/revoke"
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+        response = requests.post(url, headers=headers)
+        response.raise_for_status()  # Raise an exception for non-2xx status codes
+
+        print("Access revoked successfully.")
+    except requests.exceptions.RequestException as e:
+        print(f"Error revoking access: {e}")
+
+def get_permission_id(token):
+    try:
+        # Make a request to list permissions
+        url = "https://www.googleapis.com/drive/v3/files/{fileId}/permissions"  # Replace {fileId} with the actual file ID
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an exception for non-2xx status codes
+
+        permissions = response.json().get("permissions", [])
+        for permission in permissions:
+            print(f"Permission ID: {permission['id']}")
+            print(f"Email: {permission['emailAddress']}")
+            print("---")
+    except requests.exceptions.RequestException as e:
+        print(f"Error retrieving permissions: {e}")
