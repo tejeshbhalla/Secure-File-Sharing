@@ -1062,7 +1062,7 @@ class GetFile(APIView):
 
                 file.content=file_content
                 file.resave()
-                create_logs(user,'{user.username} edited a file {file.file_name}')
+                create_logs(user,f'{user.username} edited a file {file.file_name}')
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
             share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
             if not share:
@@ -1073,7 +1073,7 @@ class GetFile(APIView):
 
                 file.content=file_content
                 file.resave()
-                create_logs(user,'{user.username} edited a internally shared file from {share.owner.username} {file.file_name}')
+                create_logs(user,f'{user.username} edited a internally shared file from {share.owner.username} {file.file_name}')
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(message=f'{e}',status=status.HTTP_400_BAD_REQUEST)
@@ -1196,7 +1196,11 @@ class Query_Subuser_Email(APIView):
 
 
 class Help_Support(APIView):
+    authentication_classes = [JWTauthentication]
+    permissions = [IsAuthenticated]
     def post(self, request):
+        user=get_user_from_tenant(request)
+        tenant=get_tenant(request)
         serializer = SupportRequestSerializer(data=request.data)
         if serializer.is_valid():
             message = serializer.validated_data['message']
@@ -1205,7 +1209,7 @@ class Help_Support(APIView):
 
             # Prepare the email content
             subject = 'Support Request'
-            email_body = f"Message: {message}\nAdditional Thoughts: {additional_thoughts}"
+            email_body = f"Message: {message}\nAdditional Thoughts: {additional_thoughts} \n From : {user.username} Tenant: {tenant.subdomain}"
             
             if uploaded_file:
                 # Attach the file to the email
