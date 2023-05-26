@@ -22,7 +22,8 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 import gevent
 from content.signals import create_logs
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
+
 
 
 # Create your views here.
@@ -1198,10 +1199,12 @@ class Query_Subuser_Email(APIView):
 class Help_Support(APIView):
     authentication_classes = [JWTauthentication]
     permissions = [IsAuthenticated]
+    
     def post(self, request):
-        user=get_user_from_tenant(request)
-        tenant=get_tenant(request)
+        user = get_user_from_tenant(request)
+        tenant = get_tenant(request)
         serializer = SupportRequestSerializer(data=request.data)
+        
         if serializer.is_valid():
             message = serializer.validated_data['message']
             additional_thoughts = serializer.validated_data.get('additional_thoughts', '')
@@ -1209,16 +1212,22 @@ class Help_Support(APIView):
 
             # Prepare the email content
             subject = 'Support Request'
-            email_body = f"Message: {message}\nAdditional Thoughts: {additional_thoughts} \n From : {user.username} Tenant: {tenant.subdomain}"
+            email_body = f"Message: {message}\nAdditional Thoughts: {additional_thoughts} \nFrom: {user.username} Tenant: {tenant.subdomain}"
+            
+            # Create the EmailMessage object
+            email = EmailMessage(
+                subject=subject,
+                body=email_body,
+                from_email='noreply@varency.com',
+                to=['info@varency.com'],
+            )
             
             if uploaded_file:
                 # Attach the file to the email
-                attachment = (uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)
-            else:
-                attachment = None
-
+                email.attach(uploaded_file.name, uploaded_file.read(), uploaded_file.content_type)
+            
             # Send the email
-            send_mail(subject, email_body, 'noreply@varency.com', ['info@varency.com'], fail_silently=True, attachment=attachment)
+            email.send(fail_silently=True)
             
             return Response("Support request sent successfully.")
         else:
