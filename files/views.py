@@ -283,7 +283,7 @@ class Otp_verify_view(APIView):
                 if otp_model.time_expired<now:
                    
                     return Response(data={"message":"otp expired"},status=status.HTTP_400_BAD_REQUEST)
-                d={'username':user.username, 'token':user.token('login')}
+                d={'username':user.username, 'token':user.token('login'),'is_admin':user.is_admin}
             
                 #here
                 return Response(data=d, status=status.HTTP_202_ACCEPTED)
