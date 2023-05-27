@@ -991,13 +991,10 @@ class Upload_Folder(APIView):
                 chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
                 key='12345'
-                flag1=0
-                a=''
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
-                    b=open(chunk,'rb')
                     fIn = BytesIO(chunk)
                     fOut = BytesIO()
                     pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
