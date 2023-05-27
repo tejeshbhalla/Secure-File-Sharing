@@ -1720,7 +1720,7 @@ class Download_Folder_View(APIView):
             fDec = io.BytesIO()
             ctlen = len(fCiph.getvalue())
             fCiph.seek(0)
-            
+            print(ctlen)
             # Decrypt stream
             pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
             decrypted_chunk = fDec.getvalue()
