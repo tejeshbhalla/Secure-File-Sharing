@@ -198,8 +198,8 @@ class Delete_Server(APIView):
                     access_token=token['access_token']
                     refreshToken=token['refresh_token']
                     token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
-                    permission_id=get_permission_id(token['access_token'])
-                    revoke_access(token['access_token'],permission_id)
+                    permission_id=get_permission_id(token)
+                    revoke_access(token,permission_id)
             obj.delete()
             return Response(data={'message':'deleted server'},status=status.HTTP_200_OK)
         except Exception as e:
