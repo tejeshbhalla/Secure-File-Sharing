@@ -992,7 +992,7 @@ class Upload_Folder(APIView):
                 while True:
                     chunk = file.read(chunk_size)
                     chunk1=str(chunk)+'.aes'
-                    pyAesCrypt.encryptFile(chunk,chunk1,password=key)
+                    pyAesCrypt.encryptFile(chunk,chunk1,key)
                     if not chunk:
                         break
                     blob_client.upload_blob(chunk1, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
