@@ -1708,30 +1708,32 @@ class Download_Folder_View(APIView):
         total_chunks = int(blob_size / chunk_size)
         input_length = 1 * chunk_size
         key = '12345'
-        
-        while offset < blob_size:
-            data = blob_client.download_blob(offset=offset, length=chunk_size)
-            chunk = data.readall()
-            
-            if not chunk:
-                break
-            
-            fCiph = io.BytesIO(chunk)
-            fDec = io.BytesIO()
-            ctlen = len(fCiph.getvalue())
-            fCiph.seek(0)
-            # Decrypt stream
-            pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
-            decrypted_chunk = fDec.getvalue()
-            print(decrypted_chunk,'hi this is decrypted')
-            chunk = decrypted_chunk
-            
-            offset += len(chunk)
-            
-            try:
-                yield chunk
-            except UnicodeDecodeError:
-                yield chunk
+        try:
+            while offset < blob_size:
+                data = blob_client.download_blob(offset=offset, length=chunk_size)
+                chunk = data.readall()
+                
+                if not chunk:
+                    break
+                
+                fCiph = io.BytesIO(chunk)
+                fDec = io.BytesIO()
+                ctlen = len(fCiph.getvalue())
+                fCiph.seek(0)
+                # Decrypt stream
+                pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
+                decrypted_chunk = fDec.getvalue()
+                print(decrypted_chunk,'hi this is decrypted')
+                chunk = decrypted_chunk
+                
+                offset += len(chunk)
+                
+                try:
+                    yield chunk
+                except UnicodeDecodeError:
+                    yield chunk
+        except Exception as e:
+            pass
 
     def get(self,request,token):
         try:
