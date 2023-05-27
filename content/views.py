@@ -1697,7 +1697,8 @@ class Download_Folder_View(APIView):
         offset = 0
         chunk_size = 1024*1024*100 #100 mb chunk
         total_chunks = int(blob_size / chunk_size)
-        input_length = int(chunk_size * total_chunks)+1
+        #input_length = int(chunk_size * total_chunks)+1
+        input_length=None
         key='12345'
         while True:
             if offset >= blob_size:
