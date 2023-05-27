@@ -1703,7 +1703,7 @@ class Download_Folder_View(APIView):
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
-            chunk=pyAescrdecryptStream(chunk,key,chunk_size)
+            chunk=pyAesCrypt.decryptStream(chunk,key,chunk_size)
             if not chunk:
                 break
             offset += len(chunk)
