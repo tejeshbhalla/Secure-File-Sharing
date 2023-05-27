@@ -1695,7 +1695,9 @@ class Download_Folder_View(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*10
+        chunk_size = 1024*1024*100 #100 mb chunk
+        total_chunks = blob_size / chunk_size
+        input_length = chunk_size * total_chunks
         key='12345'
         while True:
             if offset >= blob_size:
@@ -1704,7 +1706,7 @@ class Download_Folder_View(APIView):
             chunk = data.readall()
             fIn = BytesIO(chunk)
             fOut = BytesIO()
-            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size)
+            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,input_length)
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
             if not chunk:
