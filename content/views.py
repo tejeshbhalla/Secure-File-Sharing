@@ -41,7 +41,7 @@ from cryptography.fernet import Fernet
 from .signals import create_logs
 import pyAesCrypt
 from io import BytesIO
-
+from os import stat, remove
 
 
 class CreateFolderView(APIView):
@@ -988,13 +988,16 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 1* 1024 * 1024  # 100 MB chunks
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
                 key='12345'
+                flag1=0
+                a=''
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
+                    b=open(chunk,'rb')
                     fIn = BytesIO(chunk)
                     fOut = BytesIO()
                     pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
@@ -1696,23 +1699,25 @@ class Download_Folder_View(APIView):
         blob_size = blob_client.get_blob_properties().size
         print(blob_size)
         offset = 0
-        chunk_size = 1024*1024*1 #1 mb chunk
+        chunk_size = 1024*1024*100 #1 mb chunk
         total_chunks = int(blob_size / chunk_size)
         input_length = 130
         #input_length=blob_size
+        
         key='12345'
         while True:
             if offset >= blob_size:
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
+            encFileSize = stat(chunk).st_size
             print(chunk)
             if not chunk:
                 break
             fIn = BytesIO(chunk)
             fOut = BytesIO()
             print('hi')
-            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,input_length)
+            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,encFileSize)
             print('bye')
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
@@ -1735,7 +1740,7 @@ class Download_Folder_View(APIView):
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
             blob_names = [(i.content.name,i.order_path()) for i in files]
             name=blob_path.split('/')[-2]
-            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*1),content_type='application/zip')
+            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*100),content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
             return response
         except Exception as e:
