@@ -1706,6 +1706,7 @@ class Download_Folder_View(APIView):
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
+            print(chunk)
             if not chunk:
                 break
             fIn = BytesIO(chunk)
