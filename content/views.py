@@ -40,6 +40,8 @@ from .sub_utils import copy_folder_with_contents,copy_files
 from cryptography.fernet import Fernet
 from .signals import create_logs
 import pyAesCrypt
+from io import BytesIO
+
 
 
 class CreateFolderView(APIView):
@@ -991,12 +993,14 @@ class Upload_Folder(APIView):
                 key='12345'
                 while True:
                     chunk = file.read(chunk_size)
-                    chunk1=str(chunk)+'.aes'
-                    pyAesCrypt.encryptFile(chunk,chunk1,key)
                     if not chunk:
                         break
-                    blob_client.upload_blob(chunk1, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-                    offset += len(chunk1)
+                    fIn = BytesIO(chunk)
+                    fOut = BytesIO()
+                    pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
+                    encrypted_chunk = fOut.getvalue()
+                    blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset+=len(encrypted_chunk)
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
