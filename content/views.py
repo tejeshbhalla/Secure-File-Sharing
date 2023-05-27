@@ -1015,7 +1015,7 @@ class Upload_Folder(APIView):
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
 
-                return Response(data={"message": "folder created"})
+            return Response(data={"message": "folder created"})
 
         except Exception as e:
             return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
