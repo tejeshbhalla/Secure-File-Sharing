@@ -990,7 +990,8 @@ class Upload_Folder(APIView):
                 key='12345'
                 while True:
                     chunk = file.read(chunk_size)
-                    ec = encryptStream(chunk, key, chunk_size)
+                    ec=bytearray()
+                    ec = encryptStream(chunk,ec,key)
                     if not chunk:
                         break
                     blob_client.upload_blob(ec, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
