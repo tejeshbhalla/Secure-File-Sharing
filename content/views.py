@@ -1708,8 +1708,8 @@ class Download_Folder_View(APIView):
         total_chunks = int(blob_size / chunk_size)
         input_length = 1 * chunk_size
         key = '12345'
-        try:
-            while offset < blob_size:
+    
+        while offset < blob_size:
                 data = blob_client.download_blob(offset=offset, length=chunk_size)
                 chunk = data.readall()
                 
@@ -1732,8 +1732,6 @@ class Download_Folder_View(APIView):
                     yield chunk
                 except UnicodeDecodeError:
                     yield chunk
-        except Exception as e:
-            pass
 
     def get(self,request,token):
         try:
