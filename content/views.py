@@ -1692,31 +1692,34 @@ class Download_Folder_View(APIView):
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name[0])
                 yield (blob_name[1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
-    def blob_chunk_generator(self,blob_client):
+    def blob_chunk_generator(self, blob_client):
         blob_size = blob_client.get_blob_properties().size
         print(blob_size)
         offset = 0
-        chunk_size = 1024*1024*100 #1 mb chunk
+        chunk_size = 1024 * 1024 * 100  # 1 MB chunk
         total_chunks = int(blob_size / chunk_size)
-        input_length = 1*chunk_size
-        #input_length=blob_size
-        key='12345'
-        while True:
-            if offset >= blob_size:
-                break
+        input_length = 1 * chunk_size
+        key = '12345'
+        
+        while offset < blob_size:
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
+            
             if not chunk:
                 break
+            
             fCiph = io.BytesIO(chunk)
             fDec = io.BytesIO()
             ctlen = len(fCiph.getvalue())
             fCiph.seek(0)
-    # Decrypt stream
+            
+            # Decrypt stream
             pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
             decrypted_chunk = fDec.getvalue()
-            chunk=decrypted_chunk
+            chunk = decrypted_chunk
+            
             offset += len(chunk)
+            
             try:
                 yield chunk
             except UnicodeDecodeError:
