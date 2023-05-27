@@ -1698,7 +1698,7 @@ class Download_Folder_View(APIView):
         chunk_size = 1024*1024*1 #1 mb chunk
         total_chunks = int(blob_size / chunk_size)
         #input_length = int(chunk_size * total_chunks)+1
-        input_length=None
+        input_length=1*chunk_size
         key='12345'
         while True:
             if offset >= blob_size:
@@ -1707,7 +1707,9 @@ class Download_Folder_View(APIView):
             chunk = data.readall()
             fIn = BytesIO(chunk)
             fOut = BytesIO()
+            print('hi')
             pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,input_length)
+            print('bye')
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
             print(chunk)
