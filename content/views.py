@@ -1709,8 +1709,8 @@ class Download_Folder_View(APIView):
             if offset >= blob_size:
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
+            encFileSize = stat(data).st_size
             chunk = data.readall()
-            encFileSize = stat(chunk).st_size
             print(chunk)
             if not chunk:
                 break
