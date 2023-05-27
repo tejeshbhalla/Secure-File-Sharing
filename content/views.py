@@ -1695,7 +1695,7 @@ class Download_Folder_View(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*1 #100 mb chunk
+        chunk_size = 1024*1024*1 #1 mb chunk
         total_chunks = int(blob_size / chunk_size)
         #input_length = int(chunk_size * total_chunks)+1
         input_length=1*chunk_size
@@ -1732,7 +1732,7 @@ class Download_Folder_View(APIView):
             blob_client = blob_service_client.get_container_client(AZURE_CONTAINER)
             blob_names = [(i.content.name,i.order_path()) for i in files]
             name=blob_path.split('/')[-2]
-            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*10),content_type='application/zip')
+            response = StreamingHttpResponse(stream_zip(self.member_files(blob_names,blob_service_client),chunk_size=1024*1024*1),content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{name}.zip"'
             return response
         except Exception as e:
