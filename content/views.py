@@ -991,6 +991,11 @@ class Upload_Folder(APIView):
                 chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
                 key='12345'
+                chunk_size = 100 * 1024 * 1024
+                file_size=file.size  # 100 MB chunks
+                if file_size < chunk_size:
+                    chunk_size = file_size
+                    print(chunk_size)
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
@@ -1698,7 +1703,7 @@ class Download_Folder_View(APIView):
         offset = 0
         chunk_size = 1024*1024*100 #1 mb chunk
         total_chunks = int(blob_size / chunk_size)
-        input_length = 130
+        input_length = 1*chunk_size
         #input_length=blob_size
         
         key='12345'
