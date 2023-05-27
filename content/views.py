@@ -991,11 +991,12 @@ class Upload_Folder(APIView):
                 key='12345'
                 while True:
                     chunk = file.read(chunk_size)
-                    ec = pyAesCrypt.encryptStream(chunk,key,bufferSize=chunk_size)
+                    chunk1=str(chunk)+'.aes'
+                    pyAesCrypt.encryptFile(chunk,chunk1,password=key)
                     if not chunk:
                         break
-                    blob_client.upload_blob(ec, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-                    offset += len(ec)
+                    blob_client.upload_blob(chunk1, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset += len(chunk1)
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
