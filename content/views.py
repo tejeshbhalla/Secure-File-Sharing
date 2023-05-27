@@ -39,7 +39,7 @@ from .extra_utils import validate_share_already_exist
 from .sub_utils import copy_folder_with_contents,copy_files
 from cryptography.fernet import Fernet
 from .signals import create_logs
-from pyAesCrypt import encryptStream,decryptStream
+from pyAesCrypt import encryptStream,decryptStream,encrypt
 
 class CreateFolderView(APIView):
     authentication_classes = [JWTauthentication]
@@ -990,8 +990,7 @@ class Upload_Folder(APIView):
                 key='12345'
                 while True:
                     chunk = file.read(chunk_size)
-                    ec=bytearray()
-                    ec = encryptStream(chunk,ec,key,bufferSize=chunk_size)
+                    ec = encrypt(chunk,key,bufferSize=chunk_size)
                     if not chunk:
                         break
                     blob_client.upload_blob(ec, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
