@@ -1694,11 +1694,12 @@ class Download_Folder_View(APIView):
 
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
+        print(blob_size)
         offset = 0
         chunk_size = 1024*1024*1 #1 mb chunk
         total_chunks = int(blob_size / chunk_size)
         #input_length = int(chunk_size * total_chunks)+1
-        input_length=1*chunk_size
+        input_length=blob_size
         key='12345'
         while True:
             if offset >= blob_size:
