@@ -988,7 +988,7 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 100* 1024 * 1024  # 100 MB chunks
+                chunk_size = 1* 1024 * 1024  # 100 MB chunks
                 offset = 0
                 key='12345'
                 while True:
@@ -1695,7 +1695,7 @@ class Download_Folder_View(APIView):
     def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
         offset = 0
-        chunk_size = 1024*1024*100 #100 mb chunk
+        chunk_size = 1024*1024*1 #100 mb chunk
         total_chunks = int(blob_size / chunk_size)
         #input_length = int(chunk_size * total_chunks)+1
         input_length=1*chunk_size
