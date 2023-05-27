@@ -1706,6 +1706,8 @@ class Download_Folder_View(APIView):
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
+            if not chunk:
+                break
             fIn = BytesIO(chunk)
             fOut = BytesIO()
             print('hi')
@@ -1713,9 +1715,6 @@ class Download_Folder_View(APIView):
             print('bye')
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
-            print(chunk)
-            if not chunk:
-                break
             offset += len(chunk)
             try:
                 yield chunk
