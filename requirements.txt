@@ -79,3 +79,4 @@ vine==5.0.0
 wcwidth==0.2.6
 yarg==0.1.9
 zipp==3.12.1
+pyAesCrypt
