@@ -1712,7 +1712,7 @@ class Download_Folder_View(APIView):
             fIn = BytesIO(chunk)
             fOut = BytesIO()
             print('hi')
-            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,input_length)
+            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,None)
             print('bye')
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
