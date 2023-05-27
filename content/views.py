@@ -42,7 +42,8 @@ from .signals import create_logs
 import pyAesCrypt
 from io import BytesIO
 from os import stat, remove
-import os,tempfile
+import io
+
 
 class CreateFolderView(APIView):
     authentication_classes = [JWTauthentication]
@@ -987,35 +988,20 @@ class Upload_Folder(APIView):
                     blob_client.upload_blob(b'', blob_type="AppendBlob")
                 
                 # Upload the file in chunks to Azure Blob Storage
-                # Encrypt the file and save it as a temporary file
                 file = request.data[i]
-                with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-                    temp_file_path = temp_file.name
-                    with open(temp_file_path, 'wb') as temp_file:
-                        for chunk in file.chunks():
-                            temp_file.write(chunk)
-                    
-                encrypted_temp_file_path = temp_file_path + '.aes'
-                key = '12345'
-                pyAesCrypt.encryptFile(temp_file_path, encrypted_temp_file_path, key)
-
-              # Delete the temporary file
-                os.remove(temp_file_path)
-
-                    # Upload the encrypted file in chunks to Azure Blob Storage
-                with open(encrypted_temp_file_path, 'rb') as encrypted_file:
-                        chunk_size = 100 * 1024 * 1024  # 100 MB chunks
-                        offset = 0
-                        while True:
-                            chunk = encrypted_file.read(chunk_size)
-                            if not chunk:
-                                break
-                            blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-                            offset += len(chunk)
-                    
-                    # Delete the encrypted temporary file
-                os.remove(encrypted_temp_file_path)
-                
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
+                offset = 0
+                key='12345'
+                while True:
+                    chunk = file.read(chunk_size)
+                    if not chunk:
+                        break
+                    fIn = BytesIO(chunk)
+                    fOut = BytesIO()
+                    pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
+                    encrypted_chunk = fOut.getvalue()
+                    blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset+=len(encrypted_chunk)
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
@@ -1722,9 +1708,14 @@ class Download_Folder_View(APIView):
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             encFileSize = stat(data).st_size
             chunk = data.readall()
-            print(chunk)
             if not chunk:
                 break
+            fCiph = io.BytesIO(chunk)
+            fDec = io.BytesIO()
+            ctlen = len(fCiph.getvalue())
+            fCiph.seek(0)
+    # Decrypt stream
+            pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
             fIn = BytesIO(chunk)
             fOut = BytesIO()
             print('hi')
