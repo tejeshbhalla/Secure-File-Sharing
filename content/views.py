@@ -999,7 +999,6 @@ class Upload_Folder(APIView):
                     fOut = BytesIO()
                     pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
                     encrypted_chunk = fOut.getvalue()
-                    print(encrypted_chunk)
                     blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
                     offset+=len(encrypted_chunk)
                 # Save the file metadata in your Django model
@@ -1703,7 +1702,11 @@ class Download_Folder_View(APIView):
                 break
             data = blob_client.download_blob(offset=offset, length=chunk_size)
             chunk = data.readall()
-            chunk=pyAesCrypt.decryptStream(chunk,key,chunk_size)
+            fIn = BytesIO(chunk)
+            fOut = BytesIO()
+            pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size)
+            decrypted_chunk = fOut.getvalue()
+            chunk=decrypted_chunk
             if not chunk:
                 break
             offset += len(chunk)
