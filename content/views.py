@@ -989,28 +989,36 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 100* 1024 * 1024  # 100 MB chunks
+                chunk_size = 100 * 1024 * 1024  # 100 MB chunks
                 offset = 0
-                key='12345'
+                key = '12345'
+                encrypted_chunks = []
+
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
+
                     fIn = BytesIO(chunk)
                     fOut = BytesIO()
                     pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
                     encrypted_chunk = fOut.getvalue()
+                    encrypted_chunks.append(encrypted_chunk)
+                    offset += len(encrypted_chunk)
+
+                # Upload the encrypted chunks to the blob storage
+                for encrypted_chunk in encrypted_chunks:
                     blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-                    offset+=len(encrypted_chunk)
+
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
-        
-            return Response(data={"message":"folder created"})
-            
+
+                return Response(data={"message": "folder created"})
+
         except Exception as e:
-            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
