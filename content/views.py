@@ -1710,6 +1710,7 @@ class Download_Folder_View(APIView):
             pyAesCrypt.decryptStream(fIn, fOut, key, chunk_size,input_length)
             decrypted_chunk = fOut.getvalue()
             chunk=decrypted_chunk
+            print(chunk)
             if not chunk:
                 break
             offset += len(chunk)
