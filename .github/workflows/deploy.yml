@@ -36,10 +36,10 @@ jobs:
 
     - name: Deploy to server
       env:
-        PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
-        HOST: ${{ secrets.HOST }}
-        USER: ${{ secrets.USER }}
-        APP_DIR: ${{ secrets.APP_DIR }}
+        PRIVATE_KEY: ${{ secrets.DEPLOY_KEY_2 }}
+        HOST: ${{ secrets.HOST_2 }}
+        USER: ${{ secrets.USER_2 }}
+        APP_DIR: ${{ secrets.APP_DIR_2 }}
       run: |
         echo "$PRIVATE_KEY" > private_key.pem
         chmod 600 private_key.pem
