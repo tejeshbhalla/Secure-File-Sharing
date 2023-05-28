@@ -3,7 +3,7 @@ name: Deploy to Django server
 on:
   push:
     branches:
-      - dev
+      - dev2
 
 jobs:
   deploy:
