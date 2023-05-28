@@ -58,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'Varency.rate_limit.RateLimitMiddleware',
     'Varency.ip_check.IPCheckMiddleware',
-    #'Varency.referer_middleware.RefererMiddleware',
+    'Varency.referer_middleware.RefererMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -92,7 +92,7 @@ TEMPLATES = [
 ]
 TEMPLATES_DIR = os.path.join(BASE_DIR,'templates')
 
-
+USE_X_FORWARDED_HOST = True
 WSGI_APPLICATION = 'Varency.wsgi.application'
 
 
@@ -102,9 +102,9 @@ WSGI_APPLICATION = 'Varency.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
-        'USER':'myprojectuser',
-        'PASSWORD':'password',
+        'NAME': 'varencymarvel',
+        'USER':'tejeshdon',
+        'PASSWORD':'8130173515',
         'HOST':'localhost',
         'PORT':'',
     }
@@ -171,8 +171,16 @@ STATIC_ROOT='/home/rsa-key-20230412/static'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-#CORS_ALLOWED_ORIGINS = ['*']
-CORS_ORIGIN_ALLOW_ALL=True
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://\w+\.varency\.com$",
+     r"^https://varency\.com$",
+     r"^https://mail.google\.com$",
+     r"^https://outlook.office\.com$",
+      r"^https://outlook.office365\.com$",
+      r"^http://varency\.localhost:3000$",
+
+]
+#CORS_ORIGIN_ALLOW_ALL=True
 
 
 
@@ -186,7 +194,7 @@ EMAIL_USE_SSL=False
 EMAIL_HOST_PASSWORD='Tejesh@2001'
 
 
-EXPIRY_SAS_TIME=15
+EXPIRY_SAS_TIME=20
 
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
@@ -226,19 +234,21 @@ client_secret = "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"
 CLIENT_ID = '439305909942-2u20aq9v6jsn2okfpjd3tu5rhmdt991u.apps.googleusercontent.com'
 CLIENT_SECRET_GOOGLE_DRIVE = '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'
 OAUTH_SCOPE = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/userinfo.email'
-REDIRECT_URI = 'https://api.dev.varency.com/api/sync/google_drive/get_token'
+#REDIRECT_URI = 'https://api.dev.varency.com/api/sync/google_drive/get_token'
+REDIRECT_URI = 'https://api.varency.com/api/sync/google_drive/get_token'
+
 TOKEN_URL_GOOGLE_DRIVE='https://accounts.google.com/o/oauth2/token'
 
 #onedrive
 CLIENT_ID_ONEDRIVE="c440bdf8-ff79-483e-be61-e653fbdb511b"
 SCOPES_ONEDRIVE='files.read.all offline_access  files.readwrite.all sites.read.all sites.readwrite.all'
-#REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
-REDIRECT_URI_ONEDRIVE="https://api.dev.varency.com/api/sync/get_token"
+REDIRECT_URI_ONEDRIVE="https://api.varency.com/api/sync/get_token"
+#REDIRECT_URI_ONEDRIVE="https://api.dev.varency.com/api/sync/get_token"
 TOKEN_URL = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
 CLIENT_SECRET='eBA8Q~qUzW5kPTiMHUCowR1LG2zM1MYZcjZgXdya'
 
 
-CSRF_TRUSTED_ORIGINS=["https://api.dev.varency.com"]
+CSRF_TRUSTED_ORIGINS=["https://api.varency.com"]
 #clam av
 CLAMAV_UNIX_SOCKET = '/var/run/clamav/clamd.ctl'
 CLAMAV_USE_TCP = False
@@ -246,10 +256,10 @@ CLAMAV_TCP_PORT = 3310
 CLAMAV_TCP_ADDR = '127.0.0.1'
 CLAMAV_ENABLED = False
 
-BACKEND_URL='https://api.dev.varency.com/'
+BACKEND_URL='https://api.varency.com/'
 
 
-#ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
+ALLOWED_REFERERS = ['http://*.localhost:3000/', 'https://*.varency.com/','https://mail.google.com/','https://outlook.office.com/','https://outlook.office365.com/','https://login.microsoftonline.com/','https://varency.com/']
 
 AWS_HEADERS = {
     'x-amz-server-side-encryption': 'aws:kms',
