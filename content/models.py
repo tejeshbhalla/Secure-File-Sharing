@@ -12,6 +12,11 @@ from Varency.settings import AZURE_ACCOUNT_NAME,AZURE_ACCOUNT_KEY
 # Create your models here.
 
 
+
+class FolderManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by('date_created')
+
 #files_app
 class Folder(models.Model):
     name=models.CharField(max_length=500)
@@ -24,6 +29,7 @@ class Folder(models.Model):
     date_modified=models.DateTimeField(default=timezone.now())
     deleted=models.BooleanField(default=False)
     last_deleted=models.DateTimeField(null=True,blank=True)
+    objects = FolderManager()
     def __str__(self):
         return f'{self.name}'
 
@@ -95,6 +101,10 @@ class Folder(models.Model):
         return subfolders, files
 
 
+class FilesManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by('date_uploaded')
+
 class Files_Model(models.Model):
     file_name=models.CharField(max_length=500)
     owner=models.ForeignKey(NewUser,related_name="files",on_delete=models.CASCADE,null=True,blank=True)
@@ -108,6 +118,7 @@ class Files_Model(models.Model):
     file_size=models.FloatField(default=0)
     uploadinfo=models.JSONField(null=True,blank=True)
     key = models.BinaryField(max_length=32,null=True,blank=True)
+    objects=FilesManager()
 
     def save(self,*args, **kwargs):
         if not self.urlhash:

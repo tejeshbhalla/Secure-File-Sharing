@@ -137,7 +137,6 @@ def delete_keys(obj):
     for blob in blob_client.list_blobs(name_starts_with=path_str):
     	blob_client.delete_blob(blob.name)
     #container_client.delete_blob(blob=path_str)
-    return True
 
 def get_all_versions(obj):
     path_of_file=upload_path(obj,obj.file_name)

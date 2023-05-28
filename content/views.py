@@ -271,11 +271,25 @@ class CreateFilesView(APIView):
                 if folder and folder.owner!=user:
                     per=Internal_Share_Folders.objects.filter(folder_hash=folder,shared_with=user).first()
                     parent=Internal_Share_Folders.search_parent(user,folder)
+                    found=False
                     if parent and parent.can_add_delete_content:
                         serializer.validated_data['owner']=folder.owner
+                        found=True
                     elif per and per.can_add_delete_content:
                         serializer.validated_data['owner']=per.owner
-                    else:
+                        found=True
+                    elif not found:
+                        groups = Group_Permissions.objects.filter(user=user).values_list('group', flat=True)
+                        group = People_Groups.objects.filter(folders__in=[folder],pk__in=groups).first()
+                        perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                        if not perms:
+                            group=People_Groups.search_parent_2(groups,folder)
+                            perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                        if perms:
+                            if perms.can_add_delete_content:
+                                serializer.validated_data['owner']=folder.owner
+                                found=True            
+                    if not found:
                         return Response({'message':"Don't have privelage to share"},status=status.HTTP_400_BAD_REQUEST)
                 serializer.validated_data['folder']=folder
                 obj=serializer.save()
@@ -989,36 +1003,24 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 100 * 1024 * 1024  # 100 MB chunks
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
-                key = '12345'
-                encrypted_chunks = []
-
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
-
-                    fIn = BytesIO(chunk)
-                    fOut = BytesIO()
-                    pyAesCrypt.encryptStream(fIn, fOut, key, chunk_size)
-                    encrypted_chunk = fOut.getvalue()
-                    encrypted_chunks.append(encrypted_chunk)
-                    offset += len(encrypted_chunk)
-
-                # Upload the encrypted chunks to the blob storage
-                for encrypted_chunk in encrypted_chunks:
-                    blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-
+                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset += len(chunk)
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
+                
 
-            return Response(data={"message": "folder created"})
-
+            return Response(data={"message":"folder created"})
+            
         except Exception as e:
-            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -1034,12 +1036,26 @@ class Multi_File_Upload(APIView):
             owner=user
 
             if parent_hash:
+                found=False
                 per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
                 parent=Internal_Share_Folders.search_parent(user,parent_hash)
                 if per and per.can_add_delete_content:
                     owner=per.owner
+                    found=True
                 if parent and parent.can_add_delete_content:
                     owner=parent.owner
+                    found=True
+                if not found:
+                    groups = Group_Permissions.objects.filter(user=user).values_list('group', flat=True)
+                    group = People_Groups.objects.filter(folders__in=[parent_hash],pk__in=groups).first()
+                    perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                    if not perms:
+                     group=People_Groups.search_parent_2(groups,parent_hash)
+                     perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                     if perms:
+                        if perms.can_add_delete_content:
+                            owner=parent_hash.owner
+                            found=True   
 
             request.data.pop('shared_with')
             request.data.pop('parent_hash')
@@ -1047,14 +1063,13 @@ class Multi_File_Upload(APIView):
 
             for i in request.data.keys():
                 file_name = i
-                encrypted_name=i.split('.')[0]+'.bin'
                 parent_folder = parent_hash
                 if parent_hash==None:
                     parent_hash='root'
                 if type(parent_hash)==str:
-                    item_path=owner.username+'/'+parent_hash+'/'+encrypted_name
+                    item_path=owner.username+'/'+parent_hash+'/'+i
                 else:
-                    item_path=owner.username+'/'+parent_hash.urlhash+'/'+encrypted_name
+                    item_path=owner.username+'/'+parent_hash.urlhash+'/'+i
 
                 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=item_path)
@@ -1069,27 +1084,21 @@ class Multi_File_Upload(APIView):
                     blob_client.upload_blob(b'', blob_type="AppendBlob")
                 
                 file = request.data[i]
-                chunk_size = 40* 1024 * 1024  # 100 MB chunks
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
-                key= Fernet.generate_key()
-                cipher_suite = Fernet(key)
                 while True:
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
-                    encrypted_chunk=cipher_suite.encrypt(chunk)
-                    blob_client.upload_blob(encrypted_chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
                     offset += len(chunk)
                 # Save the file metadata in your Django model
-                if parent_folder=='root':
-                    parent_folder=None
-                print(key)
-                obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder,key=key)
+                obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
                 
 
-            return Response(data={"message":"folder created"})
+            return Response(data={"message":"files created"})
             
         except Exception as e:
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
@@ -1700,38 +1709,22 @@ class Download_Folder_View(APIView):
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=blob_name[0])
                 yield (blob_name[1], modified_at, perms, ZIP_32, self.blob_chunk_generator(blob_client))
 
-    def blob_chunk_generator(self, blob_client):
+    def blob_chunk_generator(self,blob_client):
         blob_size = blob_client.get_blob_properties().size
-        print(blob_size)
         offset = 0
-        chunk_size = 1024 * 1024 * 100  # 1 MB chunk
-        total_chunks = int(blob_size / chunk_size)
-        input_length = 1 * chunk_size
-        key = '12345'
-    
-        while offset < blob_size:
-                data = blob_client.download_blob(offset=offset, length=chunk_size)
-                chunk = data.readall()
-                
-                if not chunk:
-                    break
-                
-                fCiph = io.BytesIO(chunk)
-                fDec = io.BytesIO()
-                ctlen = len(fCiph.getvalue())
-                fCiph.seek(0)
-                # Decrypt stream
-                pyAesCrypt.decryptStream(fCiph, fDec, key, chunk_size, ctlen)
-                decrypted_chunk = fDec.getvalue()
-                print(decrypted_chunk,'hi this is decrypted')
-                chunk = decrypted_chunk
-                
-                offset += len(chunk)
-                
-                try:
-                    yield chunk
-                except UnicodeDecodeError:
-                    yield chunk
+        chunk_size = 1024*1024*10
+        while True:
+            if offset >= blob_size:
+                break
+            data = blob_client.download_blob(offset=offset, length=chunk_size)
+            chunk = data.readall()
+            if not chunk:
+                break
+            offset += len(chunk)
+            try:
+                yield chunk
+            except UnicodeDecodeError:
+                yield chunk
 
     def get(self,request,token):
         try:
