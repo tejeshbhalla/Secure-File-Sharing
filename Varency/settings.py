@@ -189,8 +189,6 @@ EMAIL_HOST_PASSWORD='Tejesh@2001'
 EXPIRY_SAS_TIME=15
 
 
-FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880
-
 
 #azure settings 
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
