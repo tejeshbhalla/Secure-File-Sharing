@@ -234,9 +234,10 @@ def set_current_version(file, current_version, target_version_id):
         blob_url=f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/{file.content.name}?{urlencode({'versionid': target_version_id})}",
         credential=AZURE_ACCOUNT_KEY
     )
+    content = older_blob.download_blob().content_as_bytes()
     try:
-        file.content.name=older_blob.blob_name
-        print(older_blob.blob_name)
+        current_blob.upload_blob(content, overwrite=True, metadata={'versionid': target_version_id})
+        file.content.name=current_blob.blob_name
         file.save()
     except ResourceNotFoundError:
         return False
