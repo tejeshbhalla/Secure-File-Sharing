@@ -33,7 +33,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import ast
-
+from django.core.files.base import ContentFile
 
 
 
@@ -236,9 +236,9 @@ def set_current_version(file, current_version, target_version_id):
     )
     content = older_blob.download_blob().content_as_bytes()
     try:
-        current_blob.upload_blob(content, overwrite=True, metadata={'versionid': target_version_id})
-        file.content.name=current_blob.blob_name
-        file.save()
+        file_content=ContentFile(content,file.file_name)
+        file.content=file_content
+        file.resave()
     except ResourceNotFoundError:
         return False
     return True
