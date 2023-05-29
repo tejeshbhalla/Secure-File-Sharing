@@ -330,10 +330,13 @@ class Start_Sync(APIView):
                             obj.save()
                     else:
                         access_token=token_detail['access_token']
-                        token,changed=check_and_refresh_googledrive(request,token_detail['access_token'],token_detail['refresh_token'])
-                        if changed:
-                            access_token=token
-                    
+                        refresh_token=token_detail.get('refresh_token',None)
+                        if not refresh_token:
+                            pass
+                        else:
+                            token,changed=check_and_refresh_googledrive(request,token_detail['access_token'],token_detail['refresh_token'])
+                            if changed:
+                                access_token=token
                     command = ["python3", "ftp/sync.py",folder_id,folder_to_id,username,access_token,AZURE_CONNECTION_STRING,AZURE_CONTAINER,type_]
                     #hi
                     process = subprocess.Popen(command, stdout=subprocess.PIPE)
@@ -405,13 +408,17 @@ class List_Google_Drive_Folders(APIView):
             else:
                 token_detail=server.user_token
             access_token=token_detail['access_token']
-            refreshToken=token_detail['refresh_token']
-            token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
-            if changed:
-                token_detail['access_token']=json.loads(token)['access_token']
-                server.user_token=token_detail
-                server.save()
-            children,count = self.get_folder_children(id, token_detail['access_token'])
-            return Response(data={'children': children, 'parent': id,'file_count':count}, status=200)
+            refreshToken=token_detail.get('refresh_token',None)
+            if not refreshToken:
+                children,count = self.get_folder_children(id, token_detail['access_token'])
+                return Response(data={'children': children, 'parent': id,'file_count':count}, status=200)
+            else:
+                token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
+                if changed:
+                    token_detail['access_token']=json.loads(token)['access_token']
+                    server.user_token=token_detail
+                    server.save()
+                children,count = self.get_folder_children(id, token_detail['access_token'])
+                return Response(data={'children': children, 'parent': id,'file_count':count}, status=200)
         except Exception as e:
             return Response(data={'message': str(e)}, status=400)
