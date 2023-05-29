@@ -222,8 +222,7 @@ def fetch_versions(file):
             d[j]=i[j]
     data=[]
     for version in versions:
-        data.append({'metadata':d[version.version_id],'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified,'id':version.version_id})
-
+        data.append({'metadata':d[version.version_id] if version.version_id in d else None,'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified,'id':version.version_id})
     return data
 
 def set_current_version(file, current_version, target_version_id):
