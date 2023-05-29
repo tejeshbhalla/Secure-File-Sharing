@@ -205,20 +205,21 @@ def link_auth_check(obj,password=''):
     
 
 def fetch_versions(file):
-
+    
     # Create a BlobServiceClient object using the connection string
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-
     # Get a ContainerClient object for the container
     container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
-
     # Get a list of all versions of the blob
     versions = container_client.list_blobs(name_starts_with=file.content.name, include=["versions"])
-
-
+    metadata=json.loads(file.metadata)
+    d={}
+    for i in metadata:
+        for j in i:
+            d[j]=i[j]
     data=[]
     for version in versions:
-        data.append({'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified})
+        data.append({'metadata':d[version.version_id],'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified,'id':version.version_id})
 
     return data
 
@@ -551,3 +552,26 @@ def key_decode(obj):
 
 
 
+def get_current_version_id(file):
+    # Create a BlobServiceClient object using the connection string
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+    # Get a ContainerClient object for the container
+    container_client = blob_service_client.get_container_client(AZURE_CONTAINER)
+    # Get a list of all versions of the blob
+    versions = container_client.list_blobs(name_starts_with=file.content.name, include=["versions"])
+    for version in versions:
+        if version.is_current_version:
+            return version.version_id
+
+    return None
+
+def attach_file_metadata(message,file,version_id):
+    if not file.metadata:
+        metadata=[]
+    else:
+        metadata=json.loads(file.metadata)
+    metadata.append({version_id:message})
+    data=json.dumps(metadata)
+    file.metadata=data
+    file.save()
+    

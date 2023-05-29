@@ -119,7 +119,7 @@ class Files_Model(models.Model):
     uploadinfo=models.JSONField(null=True,blank=True)
     key = models.BinaryField(max_length=32,null=True,blank=True)
     objects=FilesManager()
-
+    metadata=models.JSONField(null=True,blank=True)
     def save(self,*args, **kwargs):
         if not self.urlhash:
             self.urlhash = id_generator()

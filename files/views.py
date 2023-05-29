@@ -1,4 +1,4 @@
-from content.utils import get_client_ip,download_url_generate_sas,create_media_jwt
+from content.utils import get_client_ip,download_url_generate_sas,create_media_jwt,get_current_version_id,attach_file_metadata
 from files.sub_utils import get_tenant, get_user_from_tenant
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1063,6 +1063,8 @@ class GetFile(APIView):
                 file.content=file_content
                 file.resave()
                 create_logs(user,f'{user.username} edited a file {file.file_name}')
+                version_id=get_current_version_id(file)
+                attach_file_metadata('{user.username} edited a file {file.file_name}',file,version_id)
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
             share=Internal_Share.objects.filter(owner=file.owner,shared_with=user,file_hash=file).first()
             if not share:
@@ -1074,6 +1076,8 @@ class GetFile(APIView):
                 file.content=file_content
                 file.resave()
                 create_logs(user,f'{user.username} edited a internally shared file from {share.owner.username} {file.file_name}')
+                version_id=get_current_version_id(file)
+                attach_file_metadata('{user.username} edited a internally shared file from {share.owner.username} {file.file_name}',file,version_id)
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(message=f'{e}',status=status.HTTP_400_BAD_REQUEST)
@@ -1158,6 +1162,8 @@ class GetFileGroup(APIView):
                 file.content=file_content
                 file.resave()
                 create_logs(user,f'{user.username} edited a file shared in group {group.name}')
+                version_id=get_current_version_id(file)
+                attach_file_metadata('{user.username} edited a file shared in group {group.name}',file,version_id)
                 return Response(data={'message':'successfully saved file'},status=status.HTTP_200_OK)
         except Exception as e:
             return Response(message=f'{e}',status=status.HTTP_400_BAD_REQUEST)

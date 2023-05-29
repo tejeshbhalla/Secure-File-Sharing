@@ -1631,7 +1631,7 @@ class Get_File_Detail(APIView):
                 grp_per=Group_Permissions.objects.filter(group=grp,user=user)[0]
                 print(grp_per)
                 if grp:
-                    data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
+                    data={'is_owner':obj.owner==user,"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                     "date_created":str(obj.date_uploaded),'is_file':True,
                     'can_add_delete_content':grp_per.can_add_delete_content,
@@ -1645,7 +1645,7 @@ class Get_File_Detail(APIView):
                 internal_share=Internal_Share.objects.filter(file_hash=obj,shared_with=user).first()
                 if not internal_share:
                     internal_share=Internal_Share_Folders.search_parent_file(user,obj)
-                data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
+                data={'is_owner':obj.owner==user,"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',
                     "size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,
                     "date_created":str(obj.date_uploaded)[0:11],'is_file':True,'is_downloadable':internal_share.is_downloadable,
                     'can_add_delete_content':internal_share.can_add_delete_content,
@@ -1655,7 +1655,7 @@ class Get_File_Detail(APIView):
                 return Response(data=data,status=status.HTTP_200_OK)
             if type=='home':
                 obj=Files_Model.objects.get(owner=user,urlhash=file_hash)
-                data={"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',"size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,"date_created":str(obj.date_uploaded)[0:11],'is_file':True,
+                data={'is_owner':obj.owner==user,"urlhash":obj.urlhash,"name":obj.file_name,"url":f'{BACKEND_URL}api/content/media/{create_media_jwt(obj,get_client_ip(request))}',"size":str(int(obj.content.size/1024))+" kb","owner":obj.owner.username,"date_created":str(obj.date_uploaded)[0:11],'is_file':True,
                     'download_link':download_url_generate_sas(obj,get_client_ip(request))}
                 create_logs(user,f'{user.username} accessed file {obj.file_name} from home')
                 return Response(data=data,status=status.HTTP_200_OK)
