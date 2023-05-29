@@ -238,6 +238,7 @@ def set_current_version(file, current_version, target_version_id):
     print(content)
     try:
         current_blob.upload_blob(content, overwrite=True, metadata={'versionid': target_version_id})
+        file.content.name=older_blob.blob_name
     except ResourceNotFoundError:
         return False
     return True
