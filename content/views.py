@@ -43,6 +43,8 @@ import pyAesCrypt
 from io import BytesIO
 from os import stat, remove
 import io
+import concurrent.futures
+
 
 
 class CreateFolderView(APIView):
@@ -942,7 +944,8 @@ class Upload_Folder(APIView):
     authentication_classes = [JWTauthentication]
     permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
-
+    
+    
     def post(self,request,*args,**kwargs):
         try:
             folders_dict={} #dict maintains all keys with urlhash
@@ -1003,24 +1006,36 @@ class Upload_Folder(APIView):
                 
                 # Upload the file in chunks to Azure Blob Storage
                 file = request.data[i]
-                chunk_size = 100* 1024 * 1024  # 100 MB chunks
-                offset = 0
-                while True:
-                    chunk = file.read(chunk_size)
-                    if not chunk:
-                        break
-                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
-                    offset += len(chunk)
-                # Save the file metadata in your Django model
-                obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
-                obj.content.name = item_path  # Save the URL of the uploaded blob
-                obj.save()
+                max_threads = 4
+                thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
+                futures = []
+                for i in request.data.keys():
+                    file = request.data[i]
+                    future = thread_pool.submit(self.upload_file, blob_client, file, parent_folder, file.content_type, item_path,file_name,owner)
+                    futures.append(future)
+                concurrent.futures.wait(futures)
                 
 
             return Response(data={"message":"folder created"})
             
         except Exception as e:
             return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
+        
+    def upload_file(blob_client, file, parent_folder, content_type, item_path,file_name,owner):
+        try:
+            chunk_size = 40 * 1024 * 1024  # 100 MB chunks
+            offset = 0
+            while True:
+                chunk = file.read(chunk_size)
+                if not chunk:
+                    break
+                blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=content_type))
+                offset += len(chunk)
+            obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
+            obj.content.name = item_path  # Save the URL of the uploaded blob
+            obj.save()
+        except Exception as e:
+            print(f"Error uploading file {item_path}: {str(e)}")
 
 
 
