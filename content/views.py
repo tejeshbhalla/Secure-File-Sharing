@@ -1955,9 +1955,9 @@ class Check_Versions_File(APIView):
     def get(self,request,urlhash):
         try:
             file=Files_Model.objects.get(urlhash=urlhash)
-            d=fetch_versions(file)
+            data=fetch_versions(file)
 
-            return Response(data=d,status=status.HTTP_200_OK)
+            return Response(data=data,status=status.HTTP_200_OK)
         except Exception as e:
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)

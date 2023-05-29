@@ -216,11 +216,11 @@ def fetch_versions(file):
     versions = container_client.list_blobs(name_starts_with=file.content.name, include=["versions"])
 
 
-    d={}
+    data=[]
     for version in versions:
-        d[version.version_id]={'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified}
+        data.append({'is_current_version':version.is_current_version,'size':version.size,'last_modified':version.last_modified})
 
-    return d
+    return data
 
 def set_current_version(file, current_version, target_version_id):
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
