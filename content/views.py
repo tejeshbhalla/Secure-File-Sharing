@@ -954,12 +954,26 @@ class Upload_Folder(APIView):
             owner=user
 
             if parent_hash:
+                found=False
                 per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
                 parent=Internal_Share_Folders.search_parent(user,parent_hash)
                 if per and per.can_add_delete_content:
                     owner=per.owner
+                    found=True
                 if parent and parent.can_add_delete_content:
                     owner=parent.owner
+                    found=True
+                if not found:
+                    groups = Group_Permissions.objects.filter(user=user).values_list('group', flat=True)
+                    group = People_Groups.objects.filter(folders__in=[parent_hash],pk__in=groups).first()
+                    perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                    if not perms:
+                     group=People_Groups.search_parent_2(groups,parent_hash)
+                     perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                     if perms:
+                        if perms.can_add_delete_content:
+                            owner=parent_hash.owner
+                            found=True   
 
             request.data.pop('shared_with')
             request.data.pop('parent_hash')
