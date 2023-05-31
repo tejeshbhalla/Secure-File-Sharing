@@ -1122,7 +1122,8 @@ class Multi_File_Upload(APIView):
                         chunk = file_stream.read(chunk_size)
                         if not chunk:
                             break
-
+                        
+                        
                         # Encrypt the chunk using AES
                         encrypted_chunk = encrypt_chunk(chunk,chunk_size)
 

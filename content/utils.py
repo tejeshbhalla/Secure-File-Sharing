@@ -35,6 +35,8 @@ from cryptography.hazmat.backends import default_backend
 import ast
 from django.core.files.base import ContentFile
 import pyAesCrypt
+from io import BytesIO
+
 
 
 def recursive_move_folder(folder):
@@ -580,17 +582,30 @@ def attach_file_metadata(message,file,version_id):
     file.save()
     
 
-    
+def convert_to_file(chunk):
+    in_memory_file = BytesIO()
+    in_memory_file.write(chunk)
+    in_memory_file.seek(0)
+    django_file = ContentFile(in_memory_file.read())
+    in_memory_file.close()
+    return django_file
+
+
 def encrypt_chunk(chunk,buffer_size):
         # Set encryption parameters
         buffer_size = 64 * 1024  # 64KB buffer size (can be adjusted)
         password = "your_password_here"  # Set your own password
-
-        # Encrypt the chunk using pyAesCrypt
-        encrypted_data = pyAesCrypt.encryptData(chunk, password, buffer_size)
-        return encrypted_data
+        file_in=convert_to_file(chunk)
+        flag1=0
+        with file_in:
+            flag1=flag1+1
+            flag2=str(flag1)+'.aes'
+            with open(flag2, "wb") as file_out:
+                pyAesCrypt.encryptStream(file_in, file_out, password, buffer_size)
+        
 
 def decrypt_file(data,key):
     cipher_suite = Fernet(key)
     decrypted_data=cipher_suite.decrypt(data)
     return decrypted_data
+
