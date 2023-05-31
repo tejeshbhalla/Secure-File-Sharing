@@ -611,7 +611,10 @@ def encrypt_chunk(chunk,buffer_size):
             encrypted_file.close()
 
             # Return the encrypted chunk or the path of the encrypted file
-            return encrypted_chunk  # or return encrypted_file_path
+        os.remove(flag2)
+        return encrypted_chunk  # or return encrypted_file_path
+    
+    
     
         
 
