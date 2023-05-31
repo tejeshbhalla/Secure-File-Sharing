@@ -263,7 +263,7 @@ class ResendActivation(APIView):
             tenant=get_tenant(request)
             user=NewUser.objects.filter(tenant=tenant).filter(email=email).first()
             send_email(user.email,user.token('activate'),request,type='activate',message=tenant.subdomain)
-            return Response(data={"message":"link sent"}, status=status.HTTP_201_CREATED)
+            return Response(data={"message":"link sent"}, status=status.HTTP_200_OK)
         except Exception as e:
 
             return Response(data={"message":f'{e}'}, status=status.HTTP_400_BAD_REQUEST)

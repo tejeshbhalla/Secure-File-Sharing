@@ -14,11 +14,6 @@ class Server_Connection(models.Model):
     user_token=models.JSONField(null=True,blank=True)
     user_email=models.EmailField(blank=True,null=True)
 
-    def save(self,*args, **kwargs):
-        server=Server_Connection.objects.filter(server_name=self.server_name).first()
-        if server:
-            raise ValidationError(f"Server with this name already exists")
-        super(Server_Connection, self).save(*args, **kwargs)
 
 
 class Sync_Direction(models.Model):

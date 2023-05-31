@@ -579,3 +579,15 @@ def attach_file_metadata(message,file,version_id):
     file.metadata=data
     file.save()
     
+
+    
+def encrypt_file(data,key):
+    cipher_suite = Fernet(key)
+    encrypted_data = cipher_suite.encrypt(data)
+    
+    return encrypted_data
+
+def decrypt_file(data,key):
+    cipher_suite = Fernet(key)
+    decrypted_data=cipher_suite.decrypt(data)
+    return decrypted_data

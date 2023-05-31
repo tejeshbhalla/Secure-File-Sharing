@@ -8,7 +8,7 @@ from files.jwt_utils import JWTauthentication
 from .serializers import DetailFileSerializer,FolderSerializer,DetailFolderSerializer,FileSerializer,Link_Serializer, Request_File_Serializer,Detail_Link_Serializer
 from files.models import NewUser,People_Groups,Group_Permissions
 from .models import Folder,Files_Model, Internal_Share_Folders,Link_Model,Internal_Share,Link_logs, Request_File
-from .utils import set_current_version,fetch_versions,get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
+from .utils import decrypt_file,encrypt_file,set_current_version,fetch_versions,get_video_status,get_video_otp,create_media_jwt,RangeFileWrapper,download_url_generate_sas,create_notifications, get_client_ip, get_user,send_mail_helper,delete_keys,upload_path_folder
 from Varency.settings import FRONT_END_URL,TIME_ZONE,BACKEND_URL
 import datetime 
 from django.utils import timezone
@@ -1115,8 +1115,10 @@ class Multi_File_Upload(APIView):
                 file = request.data[i]
                 chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
+                key = b'YourSecretKeyHere'
                 while True:
                     chunk = file.read(chunk_size)
+                    chunk=encrypt_file(chunk,key)
                     if not chunk:
                         break
                     blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))

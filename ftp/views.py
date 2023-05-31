@@ -190,7 +190,7 @@ class Delete_Server(APIView):
     def delete(self,request,server_name):
         try:
             obj=Server_Connection.objects.filter(server_name=server_name).first()
-            if obj.type=='googledrive':
+            '''if obj.type=='googledrive':
                 token=obj.user_token
                 if type(token)==str:
                     token=json.loads(token)
@@ -199,7 +199,7 @@ class Delete_Server(APIView):
                     refreshToken=token['refresh_token']
                     token,changed=check_and_refresh_googledrive(request,access_token,refreshToken)
                     permission_id=get_permission_id(token)
-                    revoke_access(token,permission_id)
+                    revoke_access(token,permission_id)'''
             obj.delete()
             return Response(data={'message':'deleted server'},status=status.HTTP_200_OK)
         except Exception as e:
