@@ -1122,6 +1122,8 @@ class Multi_File_Upload(APIView):
                     blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
                     offset += len(chunk)
                 # Save the file metadata in your Django model
+                if parent_folder=='root':
+                    parent_folder=None
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
