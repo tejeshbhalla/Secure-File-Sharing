@@ -1115,7 +1115,7 @@ class Multi_File_Upload(APIView):
                 file = request.data[i]
                 chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
-                key = b'YourSecretKeyHere'
+                key = b'XQ9hI7Jn-6EkwJXzSl5NYUxfrIUKFrL1Ze9uCHCMYAk='
                 while True:
                     chunk = file.read(chunk_size)
                     chunk=encrypt_file(chunk,key)
