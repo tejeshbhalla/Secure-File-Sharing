@@ -607,7 +607,7 @@ def encrypt_chunk(chunk,buffer_size):
         with open(flag2, 'rb') as encrypted_file:
             encrypted_chunk = encrypted_file.read()
             # Clean up the temporary and encrypted files
-            temp_file.unlink()
+            #temp_file.unlink()
             encrypted_file.close()
 
             # Return the encrypted chunk or the path of the encrypted file
