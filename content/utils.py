@@ -596,7 +596,6 @@ def encrypt_chunk(chunk,buffer_size):
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         temp_file.write(chunk)
         temp_file.close()
-        buffer_size = 64 * 1024  # 64KB buffer size (can be adjusted)
         password = "your_password_here"  # Set your own password
         file_in=convert_to_file(chunk)
         flag1=0
