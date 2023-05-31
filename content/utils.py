@@ -34,7 +34,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 import ast
 from django.core.files.base import ContentFile
-
+import pyAesCrypt
 
 
 def recursive_move_folder(folder):
@@ -581,11 +581,14 @@ def attach_file_metadata(message,file,version_id):
     
 
     
-def encrypt_file(data,key):
-    cipher_suite = Fernet(key)
-    encrypted_data = cipher_suite.encrypt(data)
-    
-    return encrypted_data
+def encrypt_chunk(self, chunk,buffer_size):
+        # Set encryption parameters
+        buffer_size = 64 * 1024  # 64KB buffer size (can be adjusted)
+        password = "your_password_here"  # Set your own password
+
+        # Encrypt the chunk using pyAesCrypt
+        encrypted_data = pyAesCrypt.encryptData(chunk, password, buffer_size)
+        return encrypted_data
 
 def decrypt_file(data,key):
     cipher_suite = Fernet(key)
