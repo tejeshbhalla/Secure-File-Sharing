@@ -581,7 +581,7 @@ def attach_file_metadata(message,file,version_id):
     
 
     
-def encrypt_chunk(self, chunk,buffer_size):
+def encrypt_chunk(chunk,buffer_size):
         # Set encryption parameters
         buffer_size = 64 * 1024  # 64KB buffer size (can be adjusted)
         password = "your_password_here"  # Set your own password
