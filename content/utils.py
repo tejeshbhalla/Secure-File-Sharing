@@ -36,7 +36,7 @@ import ast
 from django.core.files.base import ContentFile
 import pyAesCrypt
 from io import BytesIO
-
+import tempfile
 
 
 def recursive_move_folder(folder):
@@ -593,6 +593,9 @@ def convert_to_file(chunk):
 
 def encrypt_chunk(chunk,buffer_size):
         # Set encryption parameters
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.write(chunk)
+        temp_file.close()
         buffer_size = 64 * 1024  # 64KB buffer size (can be adjusted)
         password = "your_password_here"  # Set your own password
         file_in=convert_to_file(chunk)
@@ -602,6 +605,15 @@ def encrypt_chunk(chunk,buffer_size):
             flag2=str(flag1)+'.aes'
             with open(flag2, "wb") as file_out:
                 pyAesCrypt.encryptStream(file_in, file_out, password, buffer_size)
+        with open(flag2, 'rb') as encrypted_file:
+            encrypted_chunk = encrypted_file.read()
+            # Clean up the temporary and encrypted files
+            temp_file.unlink()
+            encrypted_file.close()
+
+            # Return the encrypted chunk or the path of the encrypted file
+            return encrypted_chunk  # or return encrypted_file_path
+    
         
 
 def decrypt_file(data,key):
