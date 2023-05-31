@@ -25,7 +25,7 @@ from azure.storage.blob import BlobServiceClient
 from Varency.settings import AZURE_ACCOUNT_NAME,AZURE_CONTAINER,AZURE_CONNECTION_STRING,SECRET_KEY
 import jwt
 from zipfile import ZipFile
-from azure.storage.blob import BlobServiceClient,ContentSettings,BlobType
+from azure.storage.blob import BlobServiceClient,ContentSettings
 from django.http import StreamingHttpResponse
 from stream_zip import ZIP_32, stream_zip
 import uuid
@@ -1058,92 +1058,79 @@ class Multi_File_Upload(APIView):
     permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
 
-    def post(self, request, *args, **kwargs):
+    def post(self,request,*args,**kwargs):
         try:
-            user = get_user_from_tenant(request)
-            parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
-            owner = user
+            user=get_user_from_tenant(request)
+            parent_hash=get_object_or_None(Folder,urlhash=request.data['parent_hash'])
+            owner=user
 
             if parent_hash:
-                found = False
-                per = Internal_Share_Folders.objects.filter(folder_hash=parent_hash, shared_with=user).first()
-                parent = Internal_Share_Folders.search_parent(user, parent_hash)
+                found=False
+                per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
+                parent=Internal_Share_Folders.search_parent(user,parent_hash)
                 if per and per.can_add_delete_content:
-                    owner = per.owner
-                    found = True
+                    owner=per.owner
+                    found=True
                 if parent and parent.can_add_delete_content:
-                    owner = parent.owner
-                    found = True
+                    owner=parent.owner
+                    found=True
                 if not found:
                     groups = Group_Permissions.objects.filter(user=user).values_list('group', flat=True)
-                    group = People_Groups.objects.filter(folders__in=[parent_hash], pk__in=groups).first()
-                    perms = Group_Permissions.objects.filter(group=group, user=user).first()
+                    group = People_Groups.objects.filter(folders__in=[parent_hash],pk__in=groups).first()
+                    perms = Group_Permissions.objects.filter(group=group,user=user).first()
                     if not perms:
-                        group = People_Groups.search_parent_2(groups, parent_hash)
-                        perms = Group_Permissions.objects.filter(group=group, user=user).first()
-                        if perms and perms.can_add_delete_content:
-                            owner = parent_hash.owner
-                            found = True
+                     group=People_Groups.search_parent_2(groups,parent_hash)
+                     perms = Group_Permissions.objects.filter(group=group,user=user).first()
+                     if perms:
+                        if perms.can_add_delete_content:
+                            owner=parent_hash.owner
+                            found=True   
 
             request.data.pop('shared_with')
             request.data.pop('parent_hash')
+            
 
-            for file_field in request.FILES:
-                file = request.FILES[file_field]
-                file_name = file.name
+            for i in request.data.keys():
+                file_name = i
                 parent_folder = parent_hash
-
-                if parent_hash is None:
-                    parent_hash = 'root'
-
-                if isinstance(parent_hash, str):
-                    item_path = f"{owner.username}/{parent_hash}/{file_name}"
+                if parent_hash==None:
+                    parent_hash='root'
+                if type(parent_hash)==str:
+                    item_path=owner.username+'/'+parent_hash+'/'+i
                 else:
-                    item_path = f"{owner.username}/{parent_hash.urlhash}/{file_name}"
+                    item_path=owner.username+'/'+parent_hash.urlhash+'/'+i
 
                 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=item_path)
 
                 try:
                     blob_props = blob_client.get_blob_properties()
-                    # Blob exists, append data to it
-                    blob_client.upload_blob(b'', blob_type=BlobType.AppendBlob)
+                    # blob exists, append data to it
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
                 except ResourceNotFoundError:
-                    # Blob does not exist, create a new one and append data to it
+                    # blob does not exist, create a new one and append data to it
                     blob_client.create_append_blob()
-                    blob_client.upload_blob(b'', blob_type=BlobType.AppendBlob)
-
-                chunk_size = 100 * 1024 * 1024  # 100 MB chunks
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
+                
+                file = request.data[i]
+                chunk_size = 100* 1024 * 1024  # 100 MB chunks
                 offset = 0
-
-                # Encrypt and upload the file chunks
-                with file.open(mode='rb') as file_stream:
-                    while True:
-                        chunk = file_stream.read(chunk_size)
-                        if not chunk:
-                            break
-                        
-                        
-                        # Encrypt the chunk using AES
-                        encrypted_chunk = encrypt_chunk(chunk,chunk_size)
-
-                        # Upload the encrypted chunk to Azure Blob Storage
-                        blob_client.upload_blob(
-                            encrypted_chunk,
-                            blob_type=BlobType.AppendBlob,
-                            content_settings=ContentSettings(content_type=file.content_type)
-                        )
-                        offset += len(chunk)
-
+                while True:
+                    chunk = file.read(chunk_size)
+                    if not chunk:
+                        break
+                    blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
+                    offset += len(chunk)
                 # Save the file metadata in your Django model
                 obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
                 obj.content.name = item_path  # Save the URL of the uploaded blob
                 obj.save()
+                
 
-            return Response(data={"message": "Files created"})
-
+            return Response(data={"message":"files created"})
+            
         except Exception as e:
-            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
 
 
 
