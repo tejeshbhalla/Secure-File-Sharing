@@ -44,6 +44,9 @@ from io import BytesIO
 from os import stat, remove
 import io
 import concurrent.futures
+import pyAesCrypt
+import io
+
 
 
 
@@ -1119,6 +1122,18 @@ class Multi_File_Upload(APIView):
                     chunk = file.read(chunk_size)
                     if not chunk:
                         break
+                    bufferSize = 100 * 1024 * 1024
+                    password = "snkfjnsjfnlksnlkfnslkvcfnlksvflkslkmflksfnvlksmfsldfvmlksmfsvmfnlsnvflksflksdlkjkedjlqwijl.emdjl."
+                    ab=open(chunk,"rb")
+                    ba=str(ab.read())
+                    #ba=ab.read()
+                    ab.close()
+                    pbdata = ba
+                    fIn = io.BytesIO(pbdata)
+                    fCiph = io.BytesIO()
+                    fDec = io.BytesIO()
+                    pyAesCrypt.encryptStream(fIn, fCiph, password, bufferSize)
+                   
                     blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
                     offset += len(chunk)
                 # Save the file metadata in your Django model
