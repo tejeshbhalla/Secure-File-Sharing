@@ -1117,6 +1117,7 @@ class Multi_File_Upload(APIView):
                 offset = 0
                 while True:
                     chunk = file.read(chunk_size)
+                    chunk=encrypt_chunk(chunk,chunk_size)
                     if not chunk:
                         break
                     blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=file.content_type))
