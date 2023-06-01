@@ -1125,8 +1125,8 @@ class Multi_File_Upload(APIView):
                     bufferSize = 100 * 1024 * 1024
                     password = "snkfjnsjfnlksnlkfnslkvcfnlksvflkslkmflksfnvlksmfsldfvmlksmfsvmfnlsnvflksflksdlkjkedjlqwijl.emdjl."
                     ab=open(chunk,"rb")
-                    ba=str(ab.read())
-                    #ba=ab.read()
+                    #ba=str(ab.read())
+                    ba=ab.read()
                     ab.close()
                     pbdata = ba
                     fIn = io.BytesIO(pbdata)
