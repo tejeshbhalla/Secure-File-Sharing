@@ -2095,6 +2095,7 @@ class Upload_Folder_New(APIView):
             if chunk_data:
                 blob_client.upload_blob(chunk_data.read(), blob_type="AppendBlob",
                                         content_settings=ContentSettings(content_type='application/octet-stream'))
+            print(data_info)
             cache.set(uuid, data_info, timeout=10800)
 
 
