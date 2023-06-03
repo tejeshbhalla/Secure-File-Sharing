@@ -2032,6 +2032,7 @@ class Upload_Folder_New(APIView):
             parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
             owner = user
             formData = request.POST  # Get the form data
+            print(request.POST)
             file_index = int(formData.get('file_index'))
             chunk_index = int(formData.get('chunkIndex'))
             file_size = int(formData.get('file_size'))
