@@ -2031,6 +2031,7 @@ class Upload_Folder_New(APIView):
             user = get_user_from_tenant(request)
             parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
             owner = user
+            print(request.POST)
             file_index = int(request.POST.get('file_index'))
             chunk_index = int(request.POST.get('chunkIndex'))
             file_size = int(request.POST.get('file_size'))
