@@ -2054,6 +2054,8 @@ class Upload_Folder_New(APIView):
             curr_file = data_info.get('curr_file', None)
             changed = False
             if curr_file and curr_file != file_index:
+                print('hi')
+                print(data_info)
                 file_name = filepath.split('/')[-1]
                 folder = filepath.split('/')[-2]
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
