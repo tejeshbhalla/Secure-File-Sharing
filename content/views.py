@@ -2042,8 +2042,6 @@ class Upload_Folder_New(APIView):
             chunk_data = request.FILES.get('chunkData') # Check if the files are being received
             if not data_info:
                 data_info = {}
-            print(data_info,'sss')
-
             paths = filepath.split('/')[:-1]
             for i in paths:
                 if i not in data_info:
@@ -2051,7 +2049,7 @@ class Upload_Folder_New(APIView):
                     f.save()
                     parent_hash = f
                     data_info[i] = f.urlhash
-                    print(data_info)
+                    
 
             curr_file = data_info.get('curr_file', None)
             changed = False
@@ -2062,9 +2060,10 @@ class Upload_Folder_New(APIView):
                 obj = Files_Model(file_name=file_name, owner=owner, folder=f)
                 obj.content.name=data_info['curr_file_path']
                 obj.save()
+                print(obj,'file was created')
                 data_info['curr_file'] = file_index
                 changed = True
-                print(data_info)
+                
 
             if changed or not curr_file:
                 file_name = filepath.split('/')[-1]
@@ -2076,7 +2075,7 @@ class Upload_Folder_New(APIView):
             else:
                 filepath = data_info['curr_file_path']
                 
-            print(data_info)
+            
                 
 
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
@@ -2096,7 +2095,7 @@ class Upload_Folder_New(APIView):
             if chunk_data:
                 blob_client.upload_blob(chunk_data.read(), blob_type="AppendBlob",
                                         content_settings=ContentSettings(content_type='application/octet-stream'))
-            print(data_info)
+            
             cache.set(uuid, data_info, timeout=10800)
 
 
