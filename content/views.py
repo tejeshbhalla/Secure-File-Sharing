@@ -2051,12 +2051,11 @@ class Upload_Folder_New(APIView):
                     f.save()
                     parent_hash = f
                     data_info[i] = f.urlhash
+                    print(data_info)
 
             curr_file = data_info.get('curr_file', None)
             changed = False
             if curr_file and curr_file != file_index:
-                print('hi')
-                print(data_info)
                 file_name = filepath.split('/')[-1]
                 folder = filepath.split('/')[-2]
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
@@ -2065,18 +2064,19 @@ class Upload_Folder_New(APIView):
                 obj.save()
                 data_info['curr_file'] = file_index
                 changed = True
+                print(data_info)
 
             if changed or not curr_file:
                 file_name = filepath.split('/')[-1]
                 folder = filepath.split('/')[-2]
-                print(folder)
-                print('hi ')
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
                 if f:
                     filepath = f.give_string_path() + '/' + file_name
                     data_info['curr_file_path'] = filepath
             else:
                 filepath = data_info['curr_file_path']
+                
+            print(data_info)
                 
 
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
