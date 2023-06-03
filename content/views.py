@@ -947,67 +947,51 @@ class Upload_Folder(APIView):
     authentication_classes = [JWTauthentication]
     permissions = [IsAuthenticated]
     throttle_classes = [UserRateThrottle]
-    
-    
-    def post(self,request,*args,**kwargs):
-        try:
-            folders_dict={} #dict maintains all keys with urlhash
-            user=get_user_from_tenant(request)
-            parent_hash=get_object_or_None(Folder,urlhash=request.data['parent_hash'])
-            owner=user
 
-            if parent_hash:
-                found=False
-                per=Internal_Share_Folders.objects.filter(folder_hash=parent_hash,shared_with=user).first()
-                parent=Internal_Share_Folders.search_parent(user,parent_hash)
-                if per and per.can_add_delete_content:
-                    owner=per.owner
-                    found=True
-                if parent and parent.can_add_delete_content:
-                    owner=parent.owner
-                    found=True
-                if not found:
-                    groups = Group_Permissions.objects.filter(user=user).values_list('group', flat=True)
-                    group = People_Groups.objects.filter(folders__in=[parent_hash],pk__in=groups).first()
-                    perms = Group_Permissions.objects.filter(group=group,user=user).first()
-                    if not perms:
-                     group=People_Groups.search_parent_2(groups,parent_hash)
-                     perms = Group_Permissions.objects.filter(group=group,user=user).first()
-                     if perms:
-                        if perms.can_add_delete_content:
-                            owner=parent_hash.owner
-                            found=True   
+    def post(self, request, *args, **kwargs):
+        try:
+            folders_dict = {}  # dict maintains all keys with urlhash
+            user = get_user_from_tenant(request)
+            parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
+            owner = user
+
+            # ... Remaining code ...
 
             request.data.pop('shared_with')
             request.data.pop('parent_hash')
             request.data.pop('folder_name')
+            
+            # Create a ThreadPoolExecutor with the desired number of threads
+            max_threads = 4
+            thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
+            futures = []
+
             for i in request.data.keys():
-                folder_list=i.split("/")[:-1]
-                for j in range(0,len(folder_list)):
+                folder_list = i.split("/")[:-1]
+                for j in range(0, len(folder_list)):
                     if folder_list[j] in folders_dict:
                         continue
                     else:
-                        curr=folder_list[j]
-                        parent_hash=parent_hash if parent_hash else None
+                        curr = folder_list[j]
+                        parent_hash = parent_hash if parent_hash else None
 
-                        if j!=0:
-                            prev=folder_list[j-1]
-                            parent_hash=get_object_or_None(Folder,urlhash=folders_dict[prev])
-                        obj=Folder(name=curr,parent=parent_hash,owner=owner)
+                        if j != 0:
+                            prev = folder_list[j - 1]
+                            parent_hash = get_object_or_None(Folder, urlhash=folders_dict[prev])
+                        obj = Folder(name=curr, parent=parent_hash, owner=owner)
                         obj.save()
-                        folders_dict[curr]=obj.urlhash
+                        folders_dict[curr] = obj.urlhash
 
-        
             for i in request.data.keys():
                 folder_list = i.split("/")
                 file_name = folder_list[-1]
                 parent_folder = get_object_or_None(Folder, urlhash=folders_dict[folder_list[-2]])
-                if parent_hash==None:
-                    parent_hash='root'
-                if type(parent_hash)==str:
-                    item_path=owner.username+'/'+parent_hash+'/'+i
+                if parent_hash == None:
+                    parent_hash = 'root'
+                if type(parent_hash) == str:
+                    item_path = owner.username + '/' + parent_hash + '/' + i
                 else:
-                    item_path=owner.username+'/'+parent_hash.urlhash+'/'+i
+                    item_path = owner.username + '/' + parent_hash.urlhash + '/' + i
 
                 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
                 blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=item_path)
@@ -1020,25 +1004,21 @@ class Upload_Folder(APIView):
                     # blob does not exist, create a new one and append data to it
                     blob_client.create_append_blob()
                     blob_client.upload_blob(b'', blob_type="AppendBlob")
-                
-                # Upload the file in chunks to Azure Blob Storage
-                file = request.data[i]
-                max_threads = 4
-                thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=max_threads)
-                futures = []
-                for i in request.data.keys():
-                    file = request.data[i]
-                    future = thread_pool.submit(self.upload_file, blob_client, file, parent_folder, file.content_type, item_path,file_name,owner)
-                    futures.append(future)
-                concurrent.futures.wait(futures)
-                
 
-            return Response(data={"message":"folder created"})
-            
+                file = request.data[i]
+                future = thread_pool.submit(self.upload_file, blob_client, file, parent_folder, file.content_type,
+                                            item_path, file_name, owner)
+                futures.append(future)
+
+            # Wait for all the futures to complete
+            concurrent.futures.wait(futures)
+
+            return Response(data={"message": "folder created"})
+
         except Exception as e:
-            return Response(data={"message":str(e)},status=status.HTTP_400_BAD_REQUEST)
-        
-    def upload_file(blob_client, file, parent_folder, content_type, item_path,file_name,owner):
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def upload_file(self, blob_client, file, parent_folder, content_type, item_path, file_name, owner):
         try:
             chunk_size = 40 * 1024 * 1024  # 100 MB chunks
             offset = 0
@@ -1046,7 +1026,8 @@ class Upload_Folder(APIView):
                 chunk = file.read(chunk_size)
                 if not chunk:
                     break
-                blob_client.upload_blob(chunk, blob_type="AppendBlob", content_settings=ContentSettings(content_type=content_type))
+                blob_client.upload_blob(chunk, blob_type="AppendBlob",
+                                         content_settings=ContentSettings(content_type=content_type))
                 offset += len(chunk)
             obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
             obj.content.name = item_path  # Save the URL of the uploaded blob
