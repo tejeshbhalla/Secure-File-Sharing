@@ -2038,8 +2038,7 @@ class Upload_Folder_New(APIView):
             chunk_data = formData.get('chunkData')
             folder_size = int(formData.get('folderSize'))
             uuid = formData.get('uuid')
-            filepath = formData.get('filepath')
-            print(formData)
+            filepath = formData.get('file_path')
             data_info=cache.get(uuid,None)
             if not data_info:
                 data_info={}
