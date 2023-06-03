@@ -2042,6 +2042,7 @@ class Upload_Folder_New(APIView):
             chunk_data = request.FILES.get('chunkData') # Check if the files are being received
             if not data_info:
                 data_info = {}
+            print(data_info,'sss')
 
             paths = filepath.split('/')[:-1]
             for i in paths:
