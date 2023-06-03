@@ -2018,6 +2018,73 @@ class Copy_File_Folder(APIView):
             print(e)            
             return Response(data={"message":{str(e)}},status=status.HTTP_400_BAD_REQUEST)
         
+        
+        
+        
+class Upload_Folder_New(APIView):
+    authentication_classes = [JWTauthentication]
+    permissions = [IsAuthenticated]
+    throttle_classes = [UserRateThrottle]
 
+    def post(self, request, *args, **kwargs):
+        try:
+            user = get_user_from_tenant(request)
+            parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
+            owner = user
+            formData = request.POST  # Get the form data
+            file_index = int(formData.get('file_index'))
+            chunk_index = int(formData.get('chunkIndex'))
+            file_size = int(formData.get('file_size'))
+            chunk_data = formData.get('chunkData')
+            folder_size = int(formData.get('folderSize'))
+            uuid = formData.get('uuid')
+            filepath = formData.get('filepath')
+            data_info=cache.get(uuid,None)
+            if not data_info:
+                data_info={}
+            paths=filepath.split('/')[:-1]
+            for i in paths:
+                if i not in data_info:
+                    f=Folder(name=i, parent=parent_hash, owner=owner)
+                    f.save()
+                    parent_hash=f
+                    data_info[i]=f.urlhash
+            curr_file=data_info.get('curr_file',None)
+            changed=False
+            if curr_file and curr_file!=file_index:
+                 file_name=filepath.split('/')[-1]
+                 folder=filepath.split('/')[-2]
+                 Folder=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
+                 obj = Files_Model(file_name=file_name, owner=owner, folder=Folder)
+                 obj.save()
+                 data_info['curr_file']=file_index
+                 changed=True
+            
+            if changed or not curr_file:
+                file_name=filepath.split('/')[-1]
+                folder=filepath.split('/')[-2]
+                Folder=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
+                if Folder:
+                    file_path=Folder.give_string_path()+'/'+file_name
+                    data_info['curr_file_path']=filepath
+            else:
+                filepath=data_info['curr_file_path']
+            blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+            blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=filepath)
 
+            try:
+                    blob_props = blob_client.get_blob_properties()
+                    # blob exists, append data to it
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
+            except ResourceNotFoundError:
+                    # blob does not exist, create a new one and append data to it
+                    blob_client.create_append_blob()
+                    blob_client.upload_blob(b'', blob_type="AppendBlob")
+            blob_client.upload_blob(chunk_data, blob_type="AppendBlob",
+                        content_settings=ContentSettings(content_type='application/octet-stream'))
+                  
+            
+            return Response(data={"message": "folder created"})
 
+        except Exception as e:
+            return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

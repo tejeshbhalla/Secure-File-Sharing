@@ -1,4 +1,4 @@
-from .views import Copy_File_Folder,Revert_Versions_File,Check_Versions_File,Multi_File_Upload,Download_Multi_File_Folder_Link,Download_Multi_File_Folder,Download_Folder_View,Get_File_Link_Detail,Get_File_Detail,MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
+from .views import Upload_Folder_New,Copy_File_Folder,Revert_Versions_File,Check_Versions_File,Multi_File_Upload,Download_Multi_File_Folder_Link,Download_Multi_File_Folder,Download_Folder_View,Get_File_Link_Detail,Get_File_Detail,MediaStreamView,Add_Link_Favourite,SearchBar,Approve_Link, Check_Link_Exist, CreateFolderView, Deleted_Folder_Details_All,FolderDetailView,CreateFilesView, Internal_File_Notification, Internal_Folder_Detail, Link_Count_Dashboard, Links_By_Date, Permenently_Delete, Recently_Acessed, Recently_Acessed_Get, Recover_Files_Folders, Request_File_Create, Request_File_Upload, Sos_Link, Storage_Share, Upload_Folder,View_File,Share_File_Link,Visit_File_Link,Share_Folder,Visit_File_Link_Client,Remove_Shared,Shared_Links_Detail,Delete_Link,Share_File,MoveFolder,Delete_Multi_Files_Folders,Get_Link_Logs, send_file
 from django.urls import re_path as url
 from django.urls import include,path
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path("internalshare",Share_File.as_view(),name="internalshare"),
     path("move_folder",MoveFolder.as_view(),name='move_folder'),
     path("check_delete",Delete_Multi_Files_Folders.as_view(),name="delete multiple files and folders"),
-    path("upload_folder",Upload_Folder.as_view(),name='upload_folder'),
+    path("upload_folder",Upload_Folder_New.as_view(),name='upload_folder'),
     path("multi_file_upload",Multi_File_Upload.as_view(),name='upload_files'),
     path("link_logs/<str:link_hash>",Get_Link_Logs.as_view(),name="link_logs"),
     path("check/link/<str:link_hash>",Check_Link_Exist.as_view(),name='check link'),
