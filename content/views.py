@@ -950,6 +950,7 @@ class Upload_Folder(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
+            self.files_list=[]
             folders_dict = {}  # dict maintains all keys with urlhash
             user = get_user_from_tenant(request)
             parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
@@ -1007,18 +1008,19 @@ class Upload_Folder(APIView):
 
                 file = request.data[i]
                 future = thread_pool.submit(self.upload_file, blob_client, file, parent_folder, file.content_type,
-                                            item_path, file_name, owner)
+                                            item_path, file_name, owner,self.files_list)
                 futures.append(future)
 
             # Wait for all the futures to complete
             concurrent.futures.wait(futures)
+            Files_Model.objects.bulk_create(self.files_list)
 
             return Response(data={"message": "folder created"})
 
         except Exception as e:
             return Response(data={"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def upload_file(self, blob_client, file, parent_folder, content_type, item_path, file_name, owner):
+    def upload_file(self, blob_client, file, parent_folder, content_type, item_path, file_name, owner,files_list):
         try:
             chunk_size = 40 * 1024 * 1024  # 100 MB chunks
             offset = 0
@@ -1031,7 +1033,7 @@ class Upload_Folder(APIView):
                 offset += len(chunk)
             obj = Files_Model(file_name=file_name, owner=owner, folder=parent_folder)
             obj.content.name = item_path  # Save the URL of the uploaded blob
-            obj.save()
+            files_list.append(obj)
         except Exception as e:
             print(f"Error uploading file {item_path}: {str(e)}")
 
