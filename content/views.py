@@ -2040,6 +2040,7 @@ class Upload_Folder_New(APIView):
             uuid = formData.get('uuid')
             filepath = formData.get('file_path')
             data_info=cache.get(uuid,None)
+            print(chunk_data)
             if not data_info:
                 data_info={}
             paths=filepath.split('/')[:-1]
