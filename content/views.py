@@ -2038,34 +2038,32 @@ class Upload_Folder_New(APIView):
             folder_size = int(request.POST.get('folderSize'))
             uuid = request.POST.get('uuid')
             filepath = request.POST.get('file_path')
-            data_info = cache.get(uuid, None)
-            chunk_data = request.FILES.get('chunkData') # Check if the files are being received
-            if not data_info:
-                data_info = {}
+            data_info = cache.get(uuid, {})
+
             paths = filepath.split('/')[:-1]
             for i in paths:
                 if i not in data_info:
-                    f = Folder(name=i, parent=parent_hash, owner=owner)
-                    f.save()
-                    parent_hash = f
-                    data_info[i] = f.urlhash
-                    
+                    f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash, None)).first()
+                    new_folder = Folder(name=i, parent=f, owner=owner)
+                    new_folder.save()
+                    data_info[i] = new_folder.urlhash
+                    parent_hash = new_folder
 
             curr_file = data_info.get('curr_file', None)
             changed = False
-            if curr_file and curr_file != file_index:
+            if curr_file is not None and curr_file != file_index:
                 file_name = filepath.split('/')[-1]
                 folder = filepath.split('/')[-2]
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
-                obj = Files_Model(file_name=file_name, owner=owner, folder=f)
-                obj.content.name=data_info['curr_file_path']
-                obj.save()
-                print(obj,'file was created')
+                if f:
+                    obj = Files_Model(file_name=file_name, owner=owner, folder=f)
+                    obj.content.name = data_info['curr_file_path']
+                    obj.save()
+                    print(obj, 'file was created')
                 data_info['curr_file'] = file_index
                 changed = True
-                
 
-            if changed or not curr_file:
+            if changed or curr_file is None:
                 file_name = filepath.split('/')[-1]
                 folder = filepath.split('/')[-2]
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
@@ -2074,9 +2072,6 @@ class Upload_Folder_New(APIView):
                     data_info['curr_file_path'] = filepath
             else:
                 filepath = data_info['curr_file_path']
-                
-            
-                
 
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=filepath)
@@ -2095,9 +2090,8 @@ class Upload_Folder_New(APIView):
             if chunk_data:
                 blob_client.upload_blob(chunk_data.read(), blob_type="AppendBlob",
                                         content_settings=ContentSettings(content_type='application/octet-stream'))
-            
-            cache.set(uuid, data_info, timeout=10800)
 
+            cache.set(uuid, data_info, timeout=10800)
 
             return Response(data={"message": "folder created"})
 
