@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'django_clamav',
 
 ]
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
