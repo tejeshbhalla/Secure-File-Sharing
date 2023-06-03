@@ -2051,6 +2051,7 @@ class Upload_Folder_New(APIView):
                     data_info[i] = f.urlhash
 
             curr_file = data_info.get('curr_file', None)
+            print(curr_file)
             changed = False
             if curr_file and curr_file != file_index:
                 file_name = filepath.split('/')[-1]
@@ -2070,6 +2071,8 @@ class Upload_Folder_New(APIView):
                     data_info['curr_file_path'] = filepath
             else:
                 filepath = data_info['curr_file_path']
+                
+            print(filepath)
 
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=filepath)
