@@ -2038,8 +2038,7 @@ class Upload_Folder_New(APIView):
             uuid = request.POST.get('uuid')
             filepath = request.POST.get('file_path')
             data_info = cache.get(uuid, None)
-            chunk_data = request.FILES.get('chunkData')
-            print(request.FILES)  # Check if the files are being received
+            chunk_data = request.FILES.get('chunkData') # Check if the files are being received
             if not data_info:
                 data_info = {}
 
@@ -2089,6 +2088,8 @@ class Upload_Folder_New(APIView):
             if chunk_data:
                 blob_client.upload_blob(chunk_data.read(), blob_type="AppendBlob",
                                         content_settings=ContentSettings(content_type='application/octet-stream'))
+            cache.set(uuid, data_info, timeout=10800)
+
 
             return Response(data={"message": "folder created"})
 
