@@ -2054,8 +2054,8 @@ class Upload_Folder_New(APIView):
             if curr_file and curr_file!=file_index:
                  file_name=filepath.split('/')[-1]
                  folder=filepath.split('/')[-2]
-                 Folder=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
-                 obj = Files_Model(file_name=file_name, owner=owner, folder=Folder)
+                 f=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
+                 obj = Files_Model(file_name=file_name, owner=owner, folder=f)
                  obj.save()
                  data_info['curr_file']=file_index
                  changed=True
@@ -2063,9 +2063,9 @@ class Upload_Folder_New(APIView):
             if changed or not curr_file:
                 file_name=filepath.split('/')[-1]
                 folder=filepath.split('/')[-2]
-                Folder=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
-                if Folder:
-                    file_path=Folder.give_string_path()+'/'+file_name
+                f=Folder.objects.filter(urlhash=data_info.get(folder,None)).first()
+                if f:
+                    file_path=f.give_string_path()+'/'+file_name
                     data_info['curr_file_path']=filepath
             else:
                 filepath=data_info['curr_file_path']
