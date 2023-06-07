@@ -2031,7 +2031,6 @@ class Upload_Folder_New(APIView):
             user = get_user_from_tenant(request)
             parent_hash = get_object_or_None(Folder, urlhash=request.data['parent_hash'])
             owner = user
-            print(request.POST)
             file_index = int(request.POST.get('file_index'))
             chunk_index = int(request.POST.get('chunkIndex'))
             file_size = int(request.POST.get('file_size'))
@@ -2048,7 +2047,11 @@ class Upload_Folder_New(APIView):
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
                     parent_hash = new_folder
+            cache.set(uuid, data_info, timeout=10800)
+                    
+            return Response(data={"message": "folder created"})
 
+            
             curr_file = data_info.get('curr_file', None)
             changed = False
             if curr_file is not None and curr_file != file_index:
