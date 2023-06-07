@@ -2045,7 +2045,7 @@ class Upload_Folder_New(APIView):
                 if i not in data_info:
                     f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash if parent_hash else None, None)).first()
                     if not f:
-                        f=Folder.objects.filter(urlhash=data_info.get(parent None)).first()
+                        f=Folder.objects.filter(urlhash=data_info.get(parent,None)).first()
                     new_folder = Folder(name=i, parent=f, owner=owner)
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
