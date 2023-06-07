@@ -2047,6 +2047,7 @@ class Upload_Folder_New(APIView):
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
                     parent_hash = new_folder
+            print(data_info)
             cache.set(uuid, data_info, timeout=10800)
                     
             return Response(data={"message": "folder created"})
