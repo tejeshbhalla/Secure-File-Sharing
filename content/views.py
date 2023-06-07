@@ -2038,9 +2038,7 @@ class Upload_Folder_New(APIView):
             uuid = request.POST.get('uuid')
             filepath = request.POST.get('file_path')
             data_info = cache.get(uuid, {})
-
             paths = filepath.split('/')[:-1]
-            print('hi')
             for i in paths:
                 if i not in data_info:
                     f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash if parent_hash else None, None)).first()
@@ -2048,10 +2046,6 @@ class Upload_Folder_New(APIView):
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
                     parent_hash = new_folder
-            print(data_info)
-            cache.set(uuid, data_info, timeout=10800)
-                    
-            return Response(data={"message": "folder created"})
 
             
             curr_file = data_info.get('curr_file', None)
@@ -2077,7 +2071,10 @@ class Upload_Folder_New(APIView):
                     data_info['curr_file_path'] = filepath
             else:
                 filepath = data_info['curr_file_path']
-
+            print(filepath)
+            print(data_info)
+            cache.set(uuid, data_info, timeout=10800)      
+            return Response(data={"message": "folder created"})
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=filepath)
 
