@@ -2039,10 +2039,13 @@ class Upload_Folder_New(APIView):
             filepath = request.POST.get('file_path')
             data_info = cache.get(uuid, {})
             print(data_info)
-            paths = filepath.split('/')[:-1]
+            paths=filepath.split('/')[:-1]
+            parent=None if len(paths)==1 else paths[-2]
             for i in paths:
                 if i not in data_info:
                     f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash if parent_hash else None, None)).first()
+                    if not f:
+                        f=Folder.objects.filter(urlhash=data_info.get(parent None)).first()
                     new_folder = Folder(name=i, parent=f, owner=owner)
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
