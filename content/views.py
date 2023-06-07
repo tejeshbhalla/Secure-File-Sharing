@@ -2068,7 +2068,7 @@ class Upload_Folder_New(APIView):
                 folder = filepath.split('/')[-2]
                 f = Folder.objects.filter(urlhash=data_info.get(folder, None)).first()
                 if f:
-                    filepath = f.give_string_path() + '/' + file_name
+                    filepath = f.give_string_path()  + file_name
                     data_info['curr_file_path'] = filepath
             else:
                 filepath = data_info['curr_file_path']
