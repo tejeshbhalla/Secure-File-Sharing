@@ -2040,6 +2040,7 @@ class Upload_Folder_New(APIView):
             data_info = cache.get(uuid, {})
             paths=filepath.split('/')[:-1]
             parent=None if len(paths)==1 else paths[-2]
+            f=None
             for i in paths:
                 if i not in data_info:
                     if not f:
