@@ -2070,8 +2070,10 @@ class Upload_Folder_New(APIView):
                 if f:
                     filepath = f.give_string_path()  + file_name
                     data_info['curr_file_path'] = filepath
+                    data_info['curr_file'] = file_index
             else:
                 filepath = data_info['curr_file_path']
+                data_info['curr_file'] = file_index
             print(filepath)
             print(data_info)
             cache.set(uuid, data_info, timeout=10800)
