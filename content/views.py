@@ -2043,7 +2043,7 @@ class Upload_Folder_New(APIView):
             print('hi')
             for i in paths:
                 if i not in data_info:
-                    f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash, None)).first()
+                    f = Folder.objects.filter(urlhash=data_info.get(parent_hash.urlhash if parent_hash else None, None)).first()
                     new_folder = Folder(name=i, parent=f, owner=owner)
                     new_folder.save()
                     data_info[i] = new_folder.urlhash
