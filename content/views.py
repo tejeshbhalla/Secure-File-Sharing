@@ -2059,7 +2059,6 @@ class Upload_Folder_New(APIView):
                     obj = Files_Model(file_name=file_name, owner=owner, folder=f)
                     obj.content.name = data_info['curr_file_path']
                     obj.save()
-                    print(obj, 'file was created')
                 data_info['curr_file'] = file_index
                 changed = True
 
@@ -2074,11 +2073,6 @@ class Upload_Folder_New(APIView):
             else:
                 filepath = data_info['curr_file_path']
                 data_info['curr_file'] = file_index
-            print(filepath)
-            print(data_info)
-            cache.set(uuid, data_info, timeout=10800)
-                    
-            return Response(data={"message": "folder created"})
             blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
             blob_client = blob_service_client.get_blob_client(container=AZURE_CONTAINER, blob=filepath)
 
