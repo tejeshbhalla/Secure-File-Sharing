@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '2A9BD4EDE4BF28AD3F7C492CF22BC-tejeshisdaddyofthisuniverse'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -101,10 +101,10 @@ WSGI_APPLICATION = 'Varency.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'myproject',
-        'USER':'myprojectuser',
+        'NAME': 'add db name',
+        'USER':'username',
         'PASSWORD':'password',
-        'HOST':'localhost',
+        'HOST':'host info',
         'PORT':'',
     }
 }
@@ -177,12 +177,12 @@ CORS_ORIGIN_ALLOW_ALL=True
 
 #email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST_USER='noreply@varency.com'
-EMAIL_HOST='smtp.office365.com'
+EMAIL_HOST_USER=''
+EMAIL_HOST=''
 EMAIL_PORT=587
 EMAIL_USE_TLS=True
 EMAIL_USE_SSL=False
-EMAIL_HOST_PASSWORD='Tejesh@2001'
+EMAIL_HOST_PASSWORD=''
 
 
 EXPIRY_SAS_TIME=15
@@ -190,13 +190,13 @@ EXPIRY_SAS_TIME=15
 
 
 #azure settings 
-DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-AZURE_ACCOUNT_NAME = "varencydrivestorage"
-AZURE_ACCOUNT_KEY='nJSFPx8AAQt8LD9Wt+jhjakHxLG/7ZzVuN3I9X4aLjosuAuBkhZAplPT27y3FLfzoNZnIvmPIMTE+AStn4gGiA=='
-AZURE_CONTAINER='filesapp'
+DEFAULT_FILE_STORAGE = ''
+AZURE_ACCOUNT_NAME = ""
+AZURE_ACCOUNT_KEY=''
+AZURE_CONTAINER=''
 AZURE_SSL=True
 AZURE_URL_EXPIRATION_SECS=timedelta(seconds=600).seconds
-AZURE_CONNECTION_STRING='DefaultEndpointsProtocol=https;AccountName=varencydrivestorage;AccountKey=nJSFPx8AAQt8LD9Wt+jhjakHxLG/7ZzVuN3I9X4aLjosuAuBkhZAplPT27y3FLfzoNZnIvmPIMTE+AStn4gGiA==;EndpointSuffix=core.windows.net'
+AZURE_CONNECTION_STRING=''
 AZURE_OVERWRITE_FILES=True
 
 
